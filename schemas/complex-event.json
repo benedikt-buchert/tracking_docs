@@ -12,11 +12,17 @@
         "event": {
             "type": "string",
             "const": "user_update",
-            "description": "The event name."
+            "description": "The event name.",
+            "examples": [
+                "user_update"
+            ]
         },
         "timestamp": {
             "type": "integer",
-            "description": "Unix timestamp of the event."
+            "description": "Unix timestamp of the event.",
+            "examples": [
+                16788922
+            ]
         },
         "user_data": {
             "type": "object",
@@ -28,11 +34,17 @@
             "properties": {
                 "user_id": {
                     "type": "string",
-                    "description": "Unique User ID."
+                    "description": "Unique User ID.",
+                    "examples": [
+                        "U_999"
+                    ]
                 },
                 "is_active": {
                     "type": "boolean",
-                    "description": "Status of the user."
+                    "description": "Status of the user.",
+                    "examples": [
+                        true
+                    ]
                 },
                 "attributes": {
                     "type": "object",
@@ -40,11 +52,17 @@
                     "properties": {
                         "segment": {
                             "type": "string",
-                            "description": "Marketing segment."
+                            "description": "Marketing segment.",
+                            "examples": [
+                                "premium"
+                            ]
                         },
                         "score": {
                             "type": "number",
-                            "description": "Engagement score."
+                            "description": "Engagement score.",
+                            "examples": [
+                                95
+                            ]
                         }
                     }
                 },
@@ -59,39 +77,27 @@
                         ],
                         "properties": {
                             "street": {
-                                "type": "string"
+                                "type": "string",
+                                "examples": [
+                                    "123 Main St"
+                                ]
                             },
                             "city": {
-                                "type": "string"
+                                "type": "string",
+                                "examples": [
+                                    "New York"
+                                ]
                             },
                             "zip": {
-                                "type": "string"
+                                "type": "string",
+                                "examples": [
+                                    "10001"
+                                ]
                             }
                         }
                     }
                 }
             }
         }
-    },
-    "examples": [
-        {
-            "event": "user_update",
-            "timestamp": 16788922,
-            "user_data": {
-                "user_id": "U_999",
-                "is_active": true,
-                "attributes": {
-                    "segment": "premium",
-                    "score": 95
-                },
-                "addresses": [
-                    {
-                        "street": "123 Main St",
-                        "city": "New York",
-                        "zip": "10001"
-                    }
-                ]
-            }
-        }
-    ]
+    }
 }
