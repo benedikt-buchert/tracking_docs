@@ -95,7 +95,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/events/purchase',
+                to: '/docs/events/complex-event',
               },
             ],
           },
