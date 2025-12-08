@@ -1,0 +1,116 @@
+---
+title: Complex User Event
+description: A generic event demonstrating recursive documentation capabilities.
+sidebar_label: Complex User Event
+---
+
+import SchemaViewer from '@site/src/components/SchemaViewer';
+
+# Complex User Event
+
+A generic event demonstrating recursive documentation capabilities.
+
+<SchemaViewer schema={{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/schemas/complex-event.json",
+    "title": "Complex User Event",
+    "description": "A generic event demonstrating recursive documentation capabilities.",
+    "type": "object",
+    "required": [
+        "event",
+        "user_data"
+    ],
+    "properties": {
+        "event": {
+            "type": "string",
+            "const": "user_update",
+            "description": "The event name.",
+            "examples": [
+                "user_update"
+            ]
+        },
+        "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp of the event.",
+            "examples": [
+                16788922
+            ]
+        },
+        "user_data": {
+            "type": "object",
+            "description": "Container for user information.",
+            "required": [
+                "user_id",
+                "attributes"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "description": "Unique User ID.",
+                    "examples": [
+                        "U_999"
+                    ]
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "description": "Status of the user.",
+                    "examples": [
+                        true
+                    ]
+                },
+                "attributes": {
+                    "type": "object",
+                    "description": "Nested generic attributes.",
+                    "properties": {
+                        "segment": {
+                            "type": "string",
+                            "description": "Marketing segment.",
+                            "examples": [
+                                "premium"
+                            ]
+                        },
+                        "score": {
+                            "type": "number",
+                            "description": "Engagement score.",
+                            "examples": [
+                                95
+                            ]
+                        }
+                    }
+                },
+                "addresses": {
+                    "type": "array",
+                    "description": "List of user addresses.",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "city",
+                            "zip"
+                        ],
+                        "properties": {
+                            "street": {
+                                "type": "string",
+                                "examples": [
+                                    "123 Main St"
+                                ]
+                            },
+                            "city": {
+                                "type": "string",
+                                "examples": [
+                                    "New York"
+                                ]
+                            },
+                            "zip": {
+                                "type": "string",
+                                "examples": [
+                                    "10001"
+                                ]
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}} />
+
