@@ -1,0 +1,110 @@
+---
+title: Complex User Event
+description: A generic event demonstrating recursive documentation capabilities.
+sidebar_label: Complex User Event
+---
+
+import SchemaViewer from '@site/src/components/SchemaViewer';
+
+# Complex User Event
+
+A generic event demonstrating recursive documentation capabilities.
+
+<SchemaViewer schema={{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://example.com/schemas/complex-event.json",
+    "title": "Complex User Event",
+    "description": "A generic event demonstrating recursive documentation capabilities.",
+    "type": "object",
+    "required": [
+        "event",
+        "user_data"
+    ],
+    "properties": {
+        "event": {
+            "type": "string",
+            "const": "user_update",
+            "description": "The event name."
+        },
+        "timestamp": {
+            "type": "integer",
+            "description": "Unix timestamp of the event."
+        },
+        "user_data": {
+            "type": "object",
+            "description": "Container for user information.",
+            "required": [
+                "user_id",
+                "attributes"
+            ],
+            "properties": {
+                "user_id": {
+                    "type": "string",
+                    "description": "Unique User ID."
+                },
+                "is_active": {
+                    "type": "boolean",
+                    "description": "Status of the user."
+                },
+                "attributes": {
+                    "type": "object",
+                    "description": "Nested generic attributes.",
+                    "properties": {
+                        "segment": {
+                            "type": "string",
+                            "description": "Marketing segment."
+                        },
+                        "score": {
+                            "type": "number",
+                            "description": "Engagement score."
+                        }
+                    }
+                },
+                "addresses": {
+                    "type": "array",
+                    "description": "List of user addresses.",
+                    "items": {
+                        "type": "object",
+                        "required": [
+                            "city",
+                            "zip"
+                        ],
+                        "properties": {
+                            "street": {
+                                "type": "string"
+                            },
+                            "city": {
+                                "type": "string"
+                            },
+                            "zip": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "examples": [
+        {
+            "event": "user_update",
+            "timestamp": 16788922,
+            "user_data": {
+                "user_id": "U_999",
+                "is_active": true,
+                "attributes": {
+                    "segment": "premium",
+                    "score": 95
+                },
+                "addresses": [
+                    {
+                        "street": "123 Main St",
+                        "city": "New York",
+                        "zip": "10001"
+                    }
+                ]
+            }
+        }
+    ]
+}} />
+
