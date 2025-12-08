@@ -18,13 +18,14 @@ const SchemaRows = ({ properties, requiredList = [], level = 0 }) => {
                             </td>
                             <td><code>{Array.isArray(prop.type) ? prop.type.join('|') : prop.type}</code></td>
                             <td style={{ textAlign: 'center' }}>{isReq ? '✅' : ''}</td>
+                            <td>{prop.examples ? prop.examples.join(', ') : ''}</td>
                             <td>{prop.description || ''}</td>
                         </tr>
 
                         {/* Nested children rendered immediately after parent */}
                         {hasChildren && (
                             <tr>
-                                <td colSpan="4" style={{ paddingLeft: '20px', borderLeft: '4px solid #eee' }}>
+                                <td colSpan="5" style={{ paddingLeft: '20px', borderLeft: '4px solid #eee' }}>
                                     <strong>{prop.type === 'array' ? `${key} [ ]` : `${key} { }`}</strong>
                                     <table style={{ width: '100%', marginTop: '5px' }}>
                                         <thead>
@@ -32,6 +33,7 @@ const SchemaRows = ({ properties, requiredList = [], level = 0 }) => {
                                                 <th width="20%">Property</th>
                                                 <th width="15%">Type</th>
                                                 <th width="10%">Req</th>
+                                                <th width="15%">Examples</th>
                                                 <th>Description</th>
                                             </tr>
                                         </thead>
@@ -45,8 +47,9 @@ const SchemaRows = ({ properties, requiredList = [], level = 0 }) => {
                                     </table>
                                 </td>
                             </tr>
-                        )}
-                    </React.Fragment>
+                        )
+                        }
+                    </React.Fragment >
                 );
             })}
         </>

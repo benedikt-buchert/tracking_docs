@@ -8,6 +8,7 @@ export default function PropertiesTable({ schema }) {
                 <th width="20%">Property</th>
                 <th width="15%">Type</th>
                 <th width="10%">Req</th>
+                <th with="15%">Examples</th>
                 <th>Description</th>
             </tr>
         </thead>
