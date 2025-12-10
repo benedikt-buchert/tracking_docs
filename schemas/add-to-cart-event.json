@@ -1,0 +1,103 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/add-to-cart-event.json",
+  "title": "Add to Cart Event",
+  "description": "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
+  "type": "object",
+  "properties": {
+    "value": {
+      "type": "number",
+      "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
+      "examples": [
+        30.03,
+        99.99,
+        45.50
+      ]
+    },
+    "currency": {
+      "type": "string",
+      "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
+      "examples": [
+        "USD",
+        "EUR",
+        "GBP"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "The products added to the cart.",
+      "minItems": 1,
+      "items": {
+        "$ref": "schemas/components/product.json"
+      }
+    }
+  },
+  "required": [
+    "value",
+    "currency",
+    "items"
+  ],
+  "examples": [
+    {
+      "value": 30.03,
+      "currency": "USD",
+      "items": [
+        {
+          "item_id": "SKU_12345",
+          "item_name": "Stan and Friends Tee",
+          "affiliation": "Google Merchandise Store",
+          "coupon": "SUMMER_FUN",
+          "discount": 2.22,
+          "index": 0,
+          "item_brand": "Google",
+          "item_category": "Apparel",
+          "item_category2": "Adult",
+          "item_category3": "Shirts",
+          "item_category4": "Crew",
+          "item_category5": "Short sleeve",
+          "item_list_id": "related_products",
+          "item_list_name": "Related Products",
+          "item_variant": "green",
+          "location_id": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+          "price": 10.01,
+          "quantity": 3,
+          "google_business_vertical": "retail"
+        }
+      ]
+    },
+    {
+      "value": 89.99,
+      "currency": "USD",
+      "items": [
+        {
+          "item_name": "Blue Running Shoes",
+          "item_brand": "SportsBrand",
+          "item_category": "Footwear",
+          "item_category2": "Shoes",
+          "item_category3": "Running",
+          "price": 89.99,
+          "quantity": 1,
+          "item_variant": "Blue Size 10",
+          "google_business_vertical": "retail"
+        }
+      ]
+    },
+    {
+      "value": 45.50,
+      "currency": "EUR",
+      "items": [
+        {
+          "item_id": "SKU_67890",
+          "item_name": "Wireless Headphones",
+          "item_brand": "AudioTech",
+          "item_category": "Electronics",
+          "item_category2": "Audio",
+          "item_category3": "Headphones",
+          "price": 45.50,
+          "quantity": 1,
+          "item_variant": "Black"
+        }
+      ]
+    }
+  ]
+}

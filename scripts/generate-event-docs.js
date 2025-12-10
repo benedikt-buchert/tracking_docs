@@ -1,9 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+import $RefParser from "@apidevtools/json-schema-ref-parser";
+import fs from 'fs';
+import path from 'path';
 
 // CONFIGURATION
-const SCHEMA_DIR = path.join(__dirname, '..', 'schemas'); // Where your JSON files are
-const OUTPUT_DIR = path.join(__dirname, '..', 'docs', 'events'); // Where MDX goes
+const SCHEMA_DIR = 'schemas'; // Where your JSON files are
+const OUTPUT_DIR = 'docs/events'; // Where MDX goes
 
 // Ensure output dir exists
 if (!fs.existsSync(OUTPUT_DIR))
@@ -16,10 +17,11 @@ const files = fs.readdirSync(SCHEMA_DIR).filter(file => file.endsWith('.json'));
 
 console.log(`🚀 Generating documentation for ${files.length} schemas...`);
 
-files.forEach(file => {
+files.forEach(async file => {
     const filePath = path.join(SCHEMA_DIR, file);
     const rawContent = fs.readFileSync(filePath, 'utf-8');
     const schema = JSON.parse(rawContent);
+    const clonedSchema = await $RefParser.dereference(schema, { mutateInputSchema: false });
 
     // Define the MDX Content
     // We embed the JSON directly into the file to avoid Webpack import issues
@@ -35,7 +37,7 @@ import SchemaViewer from '@site/src/components/SchemaViewer';
 
 ${schema.description}
 
-<SchemaViewer schema={${rawContent}} />
+<SchemaViewer schema={${JSON.stringify(clonedSchema)}} />
 
 `;
 

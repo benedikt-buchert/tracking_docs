@@ -1,0 +1,157 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://example.com/schemas/purchase-event.json",
+  "title": "Purchase Event",
+  "description": "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
+  "type": "object",
+  "properties": {
+    "transaction_id": {
+      "type": "string",
+      "description": "The unique ID of a transaction. The transaction_id parameter helps avoid duplicate transaction recording.",
+      "examples": [
+        "T_12345",
+        "TXN_20231205_001"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
+      "examples": [
+        72.05,
+        99.99,
+        150.50
+      ]
+    },
+    "currency": {
+      "type": "string",
+      "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
+      "examples": [
+        "USD",
+        "EUR",
+        "GBP"
+      ]
+    },
+    "coupon": {
+      "type": "string",
+      "description": "The coupon/code associated with the event. Event-level and item-level coupon parameters are independent.",
+      "examples": [
+        "SUMMER_SALE",
+        "WELCOME15"
+      ]
+    },
+    "shipping": {
+      "type": "number",
+      "description": "The shipping cost associated with the transaction.",
+      "examples": [
+        5.99,
+        10.00,
+        0
+      ]
+    },
+    "tax": {
+      "type": "number",
+      "description": "The tax associated with the transaction.",
+      "examples": [
+        3.60,
+        7.50,
+        0
+      ]
+    },
+    "customer_type": {
+      "type": "string",
+      "enum": [
+        "new",
+        "returning"
+      ],
+      "description": "Whether this is from a new or returning customer. 'new' = customer with no purchase in the specified time window (default 540 days). 'returning' = customer with purchase in the specified time window.",
+      "examples": [
+        "new",
+        "returning"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "The products purchased in the transaction.",
+      "minItems": 1,
+      "items": {
+        "$ref": "schemas/components/product.json"
+      }
+    }
+  },
+  "required": [
+    "transaction_id",
+    "value",
+    "currency",
+    "items"
+  ],
+  "examples": [
+    {
+      "transaction_id": "T_12345",
+      "value": 72.05,
+      "tax": 3.60,
+      "shipping": 5.99,
+      "currency": "USD",
+      "coupon": "SUMMER_SALE",
+      "customer_type": "new",
+      "items": [
+        {
+          "item_id": "SKU_12345",
+          "item_name": "Stan and Friends Tee",
+          "affiliation": "Google Merchandise Store",
+          "coupon": "SUMMER_FUN",
+          "discount": 2.22,
+          "index": 0,
+          "item_brand": "Google",
+          "item_category": "Apparel",
+          "item_category2": "Adult",
+          "item_category3": "Shirts",
+          "item_category4": "Crew",
+          "item_category5": "Short sleeve",
+          "item_list_id": "related_products",
+          "item_list_name": "Related Products",
+          "item_variant": "green",
+          "location_id": "ChIJIQBpAG2ahYAR_6128GcTUEo",
+          "price": 10.01,
+          "quantity": 3,
+          "google_business_vertical": "retail"
+        },
+        {
+          "item_id": "SKU_12346",
+          "item_name": "Google Grey Women's Tee",
+          "affiliation": "Google Merchandise Store",
+          "coupon": "SUMMER_FUN",
+          "discount": 3.33,
+          "index": 1,
+          "item_brand": "Google",
+          "item_category": "Apparel",
+          "item_category2": "Women",
+          "item_category3": "Shirts",
+          "item_category4": "Crew",
+          "item_category5": "Short sleeve",
+          "price": 21.01,
+          "quantity": 2,
+          "item_variant": "gray",
+          "google_business_vertical": "retail"
+        }
+      ]
+    },
+    {
+      "transaction_id": "TXN_20231205_001",
+      "value": 89.99,
+      "currency": "USD",
+      "customer_type": "returning",
+      "items": [
+        {
+          "item_name": "Blue Running Shoes",
+          "item_brand": "SportsBrand",
+          "item_category": "Footwear",
+          "item_category2": "Shoes",
+          "item_category3": "Running",
+          "price": 89.99,
+          "quantity": 1,
+          "item_variant": "Blue Size 10"
+        }
+      ]
+    }
+  ]
+}
