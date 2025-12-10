@@ -124,6 +124,9 @@ const config = {
         darkTheme: prismThemes.dracula,
       },
     }),
+  plugins: [
+    './src/plugins/generate-schema-docs',
+  ],
 };
 
 export default config;
