@@ -26,7 +26,8 @@
   "devDependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.1.3",
     "@docusaurus/module-type-aliases": "3.9.2",
-    "@docusaurus/types": "3.9.2"
+    "@docusaurus/types": "3.9.2",
+    "json-schema-merge-allof": "^0.8.1"
   },
   "browserslist": {
     "production": [

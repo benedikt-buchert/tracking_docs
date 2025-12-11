@@ -8,6 +8,11 @@
         "event",
         "user_data"
     ],
+    "allOf": [
+        {
+            "$ref": "schemas/components/dataLayer.json"
+        }
+    ],
     "properties": {
         "event": {
             "type": "string",

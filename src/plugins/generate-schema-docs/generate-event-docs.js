@@ -1,4 +1,5 @@
 import $RefParser from "@apidevtools/json-schema-ref-parser";
+import mergeJsonSchema from "json-schema-merge-allof";
 import fs from 'fs';
 import path from 'path';
 
@@ -23,7 +24,16 @@ export default async function generateEventDocs() {
         const filePath = path.join(SCHEMA_DIR, file);
         const rawContent = fs.readFileSync(filePath, 'utf-8');
         const schema = JSON.parse(rawContent);
+
+        // First, dereference all $ref properties
         const clonedSchema = await $RefParser.dereference(schema, { mutateInputSchema: false });
+
+        // Then merge allOf properties
+        const mergedSchema = mergeJsonSchema(clonedSchema, {
+            resolvers: {
+                defaultResolver: mergeJsonSchema.options.resolvers.title
+            }
+        });
 
         // Define the MDX Content
         // We embed the JSON directly into the file to avoid Webpack import issues
@@ -34,13 +44,14 @@ sidebar_label: ${schema.title}
 ---
 
 import SchemaViewer from '@site/src/plugins/generate-schema-docs/components/SchemaViewer';
+import SchemaJsonViewer from '@site/src/plugins/generate-schema-docs/components/SchemaJsonViewer';
 
 # ${schema.title}
 
 ${schema.description}
 
-<SchemaViewer schema={${JSON.stringify(clonedSchema)}} />
-
+<SchemaViewer schema={${JSON.stringify(mergedSchema)}} />
+<SchemaJsonViewer schema={${JSON.stringify(schema)}} />
 `;
 
         // Write the .mdx file
