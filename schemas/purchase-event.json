@@ -42,6 +42,8 @@
         "currency": {
           "type": "string",
           "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
+          "minLength": 3,
+          "maxLength": 3,
           "examples": [
             "USD",
             "EUR",
