@@ -10,7 +10,7 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'My Site',
+  title: 'Event Tracking Specs',
   tagline: 'Dinosaurs are cool',
   favicon: 'img/favicon.ico',
 
@@ -68,9 +68,9 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'My Site',
+        title: 'Event Tracking Specs',
         logo: {
-          alt: 'My Site Logo',
+          alt: 'Event Tracking Specs Logo',
           src: 'img/logo.svg',
         },
         items: [
