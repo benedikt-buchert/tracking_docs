@@ -5,8 +5,24 @@ const SchemaRows = ({ properties, requiredList = [], level = 0 }) => {
         <>
             {Object.entries(properties).map(([key, prop]) => {
                 const isReq = requiredList.includes(key);
-                const hasChildren = (prop.type === 'object' && prop.properties) ||
-                    (prop.type === 'array' && prop.items && prop.items.properties);
+
+                // 1. Calculate if it has children (Same as before)
+                const hasChildren =
+                    (prop.type === 'object' &&
+                        prop.properties &&
+                        Object.keys(prop.properties).length > 0) ||
+                    (prop.type === 'array' &&
+                        prop.items &&
+                        prop.items.properties &&
+                        Object.keys(prop.items.properties).length > 0);
+
+                const isObject = prop.type === 'object';
+                const isArrayOfObjects = prop.type === 'array' && prop.items && prop.items.type === 'object';
+
+                if ((isObject || isArrayOfObjects) && !hasChildren)
+                {
+                    return null;
+                }
 
                 return (
                     <React.Fragment key={key}>
