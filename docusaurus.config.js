@@ -78,10 +78,10 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Tracking',
+            label: 'Docs',
           },
           {
-            href: 'https://github.com/facebook/docusaurus',
+            href: 'https://github.com/benedikt-buchert/tracking_docs',
             label: 'GitHub',
             position: 'right',
           },
