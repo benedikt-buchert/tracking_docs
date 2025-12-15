@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://example.com/schemas/purchase-event.json",
   "title": "Purchase Event",
   "description": "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
