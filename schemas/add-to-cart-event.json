@@ -1,5 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/2020-12/schema#",
   "$id": "https://example.com/schemas/add-to-cart-event.json",
   "title": "Add to Cart Event",
   "description": "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
