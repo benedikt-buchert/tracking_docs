@@ -1,4 +1,4 @@
-export default buildExampleFromSchema = (schema) => {
+const buildExampleFromSchema = (schema) => {
     const buildValue = (prop) => {
         if (!prop) return undefined;
 
@@ -80,3 +80,4 @@ export default buildExampleFromSchema = (schema) => {
 
     return {};
 }
+export default buildExampleFromSchema;
