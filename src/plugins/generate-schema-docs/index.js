@@ -36,5 +36,9 @@ export default function (context, options) {
                     await generateEventDocs();
                 });
         },
+
+        async loadContent() {
+            await generateEventDocs();
+        },
     };
 }
