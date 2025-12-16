@@ -13,10 +13,7 @@
     "event": {
       "type": "string",
       "const": "purchase",
-      "description": "The name of the event indicating a purchase has occurred.",
-      "examples": [
-        "purchase"
-      ]
+      "description": "The name of the event indicating a purchase has occurred."
     },
     "ecommerce": {
       "type": "object",
@@ -76,7 +73,7 @@
             0
           ]
         },
-        "customer_type": {
+        "customer_Type": {
           "type": "string",
           "enum": [
             "new",
