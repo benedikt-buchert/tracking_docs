@@ -6,7 +6,7 @@
     "type": "object",
     "propertyNames": {
         "maxLength": 40,
-        "pattern": "^[a-zA-Z0-9_]+$"
+        "pattern": "^[a-z0-9_]+$"
     },
     "properties": {
         "event": {
