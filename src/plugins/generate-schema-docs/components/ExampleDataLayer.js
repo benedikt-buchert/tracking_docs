@@ -1,4 +1,5 @@
-import CodeBlock from '@theme/CodeBlock'; t
+import React from 'react';
+import CodeBlock from '@theme/CodeBlock';
 import buildExampleFromSchema from '../helpers/buildExampleFromSchema';
 
 export default function ExampleDataLayer({ schema }) {

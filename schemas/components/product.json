@@ -1,6 +1,6 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/schemas/component/product.json",
+    "$id": "https://example.com/schemas/components/product.json",
     "title": "A Product",
     "description": "A product object representing an item for use within a purchase event, based on Google Analytics 4 ecommerce event specifications.",
     "type": "object",

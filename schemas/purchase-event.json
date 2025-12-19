@@ -6,7 +6,7 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "schemas/components/dataLayer.json"
+      "$ref": "./components/dataLayer.json"
     }
   ],
   "properties": {
@@ -73,7 +73,7 @@
             0
           ]
         },
-        "customer_Type": {
+        "customer_type": {
           "type": "string",
           "enum": [
             "new",
@@ -90,7 +90,7 @@
           "description": "The products purchased in the transaction.",
           "minItems": 1,
           "items": {
-            "$ref": "schemas/components/product.json"
+            "$ref": "./components/product.json"
           }
         }
       },

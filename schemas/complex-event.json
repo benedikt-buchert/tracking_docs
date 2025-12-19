@@ -10,7 +10,7 @@
     ],
     "allOf": [
         {
-            "$ref": "schemas/components/dataLayer.json"
+            "$ref": "./components/dataLayer.json"
         }
     ],
     "properties": {
