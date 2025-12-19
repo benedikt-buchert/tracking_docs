@@ -10,6 +10,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    defaults:
+      run:
+        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,8 +26,8 @@ jobs:
 
       - name: Install dependencies and build
         run: npm ci
-        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
 
       - name: Publish package
         run: npm publish --access public
-        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
+        env:
+          NPM_CONFIG_PROVENANCE: true
