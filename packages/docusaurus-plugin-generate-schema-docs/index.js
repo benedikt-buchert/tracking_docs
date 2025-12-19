@@ -1,12 +1,18 @@
-// src/index.ts
 import validateSchemas from './validateSchemas.js';
 import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default function (context, options) {
     return {
-        // I've updated the name to reflect that it now handles multiple tasks
-        name: 'docusaurus-plugin-schema-tools',
+        name: 'docusaurus-plugin-generate-schema-docs',
+
+        getThemePath() {
+            return path.resolve(__dirname, './components');
+        },
 
         extendCli(cli) {
             cli

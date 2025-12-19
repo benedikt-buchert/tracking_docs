@@ -47,8 +47,8 @@ description: ${schema.description}
 sidebar_label: ${schema.title}
 ---
 
-import SchemaViewer from '@site/src/plugins/generate-schema-docs/components/SchemaViewer';
-import SchemaJsonViewer from '@site/src/plugins/generate-schema-docs/components/SchemaJsonViewer';
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 
 # ${schema.title}
 

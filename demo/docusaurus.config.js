@@ -27,8 +27,8 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'facebook', // Usually your GitHub org/user name.
-  projectName: 'docusaurus', // Usually your repo name.
+  organizationName: 'benedikt-buchert', // Usually your GitHub org/user name.
+  projectName: 'tracking_docs', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -47,10 +47,6 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/benedikt-buchert/tracking_docs/blob/main',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -125,7 +121,7 @@ const config = {
       },
     }),
   plugins: [
-    './src/plugins/generate-schema-docs',
+    'docusaurus-plugin-generate-schema-docs',
   ],
 };
 
