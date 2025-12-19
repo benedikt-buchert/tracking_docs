@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://example.com/schemas/components/ga4.json",
+    "$defs": {
+        "mapStructure": {
+            "type": "object",
+            "maxProperties": 25
+        },
+        "valueLimits": {
+            "additionalProperties": {
+                "type": "string",
+                "maxLength": 100
+            }
+        }
+    }
+}

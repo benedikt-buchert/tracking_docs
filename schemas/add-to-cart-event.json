@@ -6,17 +6,14 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "schemas/components/dataLayer.json"
+      "$ref": "./components/dataLayer.json"
     }
   ],
   "properties": {
     "event": {
       "type": "string",
-      "const": "purchase",
-      "description": "The name of the event indicating a purchase has occurred.",
-      "examples": [
-        "purchase"
-      ]
+      "const": "add_to_cart",
+      "description": "The name of the event indicating a add_to_cart has occurred."
     },
     "ecommerce": {
       "type": "object",
@@ -45,7 +42,7 @@
           "description": "The products added to the cart.",
           "minItems": 1,
           "items": {
-            "$ref": "schemas/components/product.json"
+            "$ref": "./components/product.json"
           }
         }
       },

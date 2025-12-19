@@ -4,10 +4,11 @@
     "title": "dataLayer",
     "description": "Schema for the object structure pushed to the dataLayer.",
     "type": "object",
-    "propertyNames": {
-        "maxLength": 40,
-        "pattern": "^[a-zA-Z0-9_]+$"
-    },
+    "allOf": [
+        {
+            "$ref": "#/$defs/strictObject"
+        }
+    ],
     "properties": {
         "event": {
             "type": "string",
@@ -26,5 +27,32 @@
     },
     "required": [
         "event"
-    ]
+    ],
+    "$defs": {
+        "strictObject": {
+            "type": "object",
+            "propertyNames": {
+                "maxLength": 40,
+                "pattern": "^[a-z0-9_]+$"
+            },
+            "additionalProperties": {
+                "anyOf": [
+                    {
+                        "$ref": "#/$defs/strictObject"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/$defs/strictObject"
+                        }
+                    },
+                    {
+                        "not": {
+                            "type": "object"
+                        }
+                    }
+                ]
+            }
+        }
+    }
 }

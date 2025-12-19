@@ -26,7 +26,11 @@ export default async function generateEventDocs() {
         const schema = JSON.parse(rawContent);
 
         // First, dereference all $ref properties
-        const clonedSchema = await $RefParser.dereference(schema, { mutateInputSchema: false });
+        const clonedSchema = await $RefParser.dereference(filePath, {
+            mutateInputSchema: false, dereference: {
+                circular: 'ignore'
+            }
+        });
 
         // Then merge allOf properties
         const mergedSchema = mergeJsonSchema(clonedSchema, {
