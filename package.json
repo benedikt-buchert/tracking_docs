@@ -1,5 +1,5 @@
 {
-  "name": "tracking-docs-monorepo",
+  "name": "tracking-docs",
   "version": "1.1.0",
   "private": true,
   "workspaces": [
