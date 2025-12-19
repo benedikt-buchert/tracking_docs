@@ -13,8 +13,10 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+        working-directory: ./demo
       - run: npm run validate-schemas
+        working-directory: ./demo
       - name: Validate all json files using their own $schema properties
         uses: cardinalby/schema-validator-action@v3
         with:
-          file: 'schemas/**/*.json'
+          file: 'demo/schemas/**/*.json'
