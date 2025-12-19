@@ -26,13 +26,15 @@ jobs:
             - name: Install dependencies
               run: |
                   if [ -f package-lock.json ]; then npm ci; else npm install; fi
+              working-directory: ./demo
 
             - name: Build Docusaurus site
               run: npm run build
+              working-directory: ./demo
 
             - name: Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v3
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./build
+                  publish_dir: ./demo/build
                   publish_branch: gh-pages
