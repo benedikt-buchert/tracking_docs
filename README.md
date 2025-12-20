@@ -11,18 +11,10 @@ You can find a live demo of the site [here](https://benedikt-buchert.github.io/t
 Run the following to bootstrap a Docusaurus v3 site (classic theme) with docusaurus-plugin-generate-schema-docs:
 
 ```bash
-npx create-docusaurus@latest my-website --package-manager npm
+npx create-docusaurus@3.7.0 my-website https://github.com/benedikt-buchert/tracking_docs.git --git-strategy copy
 ```
 
-When prompted to select a template choose `Git repository`.
-
-Template Repository URL:
-
-```
-https://github.com/benedikt-buchert/tracking_docs.git
-```
-
-When asked how the template repo should be cloned choose "copy".
+See more info in the [docusaurus docs](https://docusaurus.io/docs/api/misc/create-docusaurus).
 
 ```bash
 cd my-website
