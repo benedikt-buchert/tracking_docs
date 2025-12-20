@@ -68,6 +68,7 @@ const config = {
         logo: {
           alt: 'Event Tracking Specs Logo',
           src: 'img/logo.svg',
+          srcDark: 'img/logo-dark.svg',
         },
         items: [
           {
