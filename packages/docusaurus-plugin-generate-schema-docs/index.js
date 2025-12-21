@@ -6,7 +6,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default function (context, options) {
+export default async function (context, options) {
+    const { siteDir } = context;
+    await generateEventDocs(siteDir);
+
     return {
         name: 'docusaurus-plugin-generate-schema-docs',
 
@@ -41,11 +44,6 @@ export default function (context, options) {
                     // e.g., await generateEventDocs(options.path || './static/schemas');
                     await generateEventDocs();
                 });
-        },
-
-        async loadContent() {
-            const { siteDir } = context;
-            await generateEventDocs(siteDir);
         },
     };
 }
