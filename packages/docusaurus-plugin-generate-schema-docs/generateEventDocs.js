@@ -3,10 +3,10 @@ import mergeJsonSchema from "json-schema-merge-allof";
 import fs from 'fs';
 import path from 'path';
 
-export default async function generateEventDocs() {
+export default async function generateEventDocs(siteDir) {
     // CONFIGURATION
-    const SCHEMA_DIR = 'schemas'; // Where your JSON files are
-    const OUTPUT_DIR = 'docs/events'; // Where MDX goes
+    const SCHEMA_DIR = path.join(siteDir, 'schemas'); // Where your JSON files are
+    const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
 
     // Ensure output dir exists
     if (!fs.existsSync(OUTPUT_DIR))

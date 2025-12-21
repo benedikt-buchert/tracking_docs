@@ -44,7 +44,8 @@ export default function (context, options) {
         },
 
         async loadContent() {
-            await generateEventDocs();
+            const { siteDir } = context;
+            await generateEventDocs(siteDir);
         },
     };
 }
