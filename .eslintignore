@@ -1,0 +1,5 @@
+build/
+demo/build/
+node_modules/
+.docusaurus/
+demo/.docusaurus/

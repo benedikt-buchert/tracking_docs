@@ -1,3 +1,4 @@
+import Heading from '@theme/Heading';
 import ExampleDataLayer from './ExampleDataLayer';
 import PropertiesTable from './PropertiesTable';
 
@@ -9,10 +10,10 @@ export default function SchemaViewer({ schema }) {
 
     return (
         <div>
-            <h2>DataLayer Example</h2>
+            <Heading as="h2">DataLayer Example</Heading>
             <ExampleDataLayer schema={schema} />
 
-            <h2>Event Properties</h2>
+            <Heading as="h2">Event Properties</Heading>
             <PropertiesTable schema={schema} />
         </div>
     );
