@@ -9,6 +9,14 @@
   "scripts": {
     "start": "npm run start -w demo",
     "build": "npm run build -w demo",
-    "gen-docs": "npm run gen-docs -w demo"
+    "gen-docs": "npm run gen-docs -w demo",
+    "lint": "eslint .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.28.5",
+    "@docusaurus/eslint-plugin": "^3.9.2",
+    "eslint": "^8.57.1",
+    "husky": "^9.0.0"
   }
 }

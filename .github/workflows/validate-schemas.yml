@@ -17,8 +17,7 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
-        working-directory: ./demo
+      - run: npm run lint
       - run: npm run build
-        working-directory: ./demo
       - run: npm run validate-schemas
         working-directory: ./demo

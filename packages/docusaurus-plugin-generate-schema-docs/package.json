@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@apidevtools/json-schema-ref-parser": "^15.1.3",
-    "fs-extra": "^11.2.0",
+    "fs-extra": "^11.3.3",
     "json-schema-merge-allof": "^0.8.1"
   },
   "publishConfig": {
