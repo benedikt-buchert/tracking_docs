@@ -19,6 +19,5 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
-        working-directory: ./demo
       - run: npm run validate-schemas
         working-directory: ./demo
