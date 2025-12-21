@@ -1,6 +1,23 @@
 import React from 'react';
 import clsx from 'clsx';
 
+// Helper to format the property type
+const getPropertyType = (type) => {
+    return Array.isArray(type) ? type.join(' | ') : type;
+};
+
+// Helper to format examples
+const formatExamples = (examples) => {
+    if (!examples) {
+        return '';
+    }
+    return examples
+        .map((example) =>
+            typeof example === 'object' ? JSON.stringify(example) : example
+        )
+        .join(', ');
+};
+
 const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
     const isReq = requiredList.includes(propertyKey);
     const constraints = getConstraints(prop, isReq);
@@ -16,6 +33,7 @@ const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
     }
 
     const numRows = Math.max(1, constraints.length);
+    const [firstConstraint, ...remainingConstraints] = constraints;
 
     return (
         <React.Fragment>
@@ -24,19 +42,21 @@ const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
                     <strong>{propertyKey}</strong>
                     {hasChildren && <span style={{ fontSize: '0.8em', marginLeft: '5px' }}>⤵</span>}
                 </td>
-                <td rowSpan={numRows}><code>{Array.isArray(prop.type) ? prop.type.join('|') : prop.type}</code></td>
+                <td rowSpan={numRows}><code>{getPropertyType(prop.type)}</code></td>
                 <td>
-                    {constraints.length > 0 && (
-                        <code className={clsx('constraint-code', constraints[0] === 'required' && 'required')}>
-                            {constraints[0]}
+                    {firstConstraint && (
+                        <code className={clsx('constraint-code', firstConstraint === 'required' && 'required')}>
+                            {firstConstraint}
                         </code>
                     )}
                 </td>
-                <td rowSpan={numRows}>{prop.examples ? prop.examples.join(', ') : ''}</td>
+                <td rowSpan={numRows}>
+                    {formatExamples(prop.examples)}
+                </td>
                 <td rowSpan={numRows}>{prop.description || ''}</td>
             </tr>
 
-            {constraints.slice(1).map((constraint, index) => (
+            {remainingConstraints.map((constraint, index) => (
                 <tr className={clsx(isReq && 'required-row')} key={`${propertyKey}-constraint-${index}`}>
                     <td>
                         <code className={clsx('constraint-code', constraint === 'required' && 'required')}>
