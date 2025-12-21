@@ -27,7 +27,6 @@
         "timestamp": {
             "type": "integer",
             "description": "Unix timestamp of the event.",
-            "format": "unix-time",
             "examples": [
                 16788922
             ]
@@ -176,20 +175,26 @@
             "maxProperties": 3,
             "additionalProperties": false,
             "propertyNames": {
-                "pattern": "^[A-Z_]+$"
+                "pattern": "^[a-z0-9_]+$"
             },
             "properties": {
-                "PROP_A": {
+                "prop_a": {
                     "type": "string",
                     "examples": [
                         "some_value"
+                    ]
+                },
+                "prop_b": {
+                    "type": "string",
+                    "examples": [
+                        "another_value"
                     ]
                 }
             },
             "examples": [
                 {
-                    "PROP_A": "some_value",
-                    "PROP_B": "another_value"
+                    "prop_a": "some_value",
+                    "prop_b": "another_value"
                 }
             ]
         },
