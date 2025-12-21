@@ -1,0 +1,24 @@
+.required-row {
+    background-color: rgba(255, 0, 0, 0.05);
+}
+
+.constraint-code {
+    white-space: pre-wrap;
+    margin-right: 4px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.constraint-code.required {
+    font-weight: bold;
+    color: #c7254e;
+    /* A reddish color */
+    background-color: #f9f2f4;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.nested-table-container {
+    padding-left: 20px;
+    border-left: 4px solid #eee;
+}

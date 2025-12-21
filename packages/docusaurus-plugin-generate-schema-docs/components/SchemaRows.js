@@ -1,71 +1,43 @@
 import React from 'react';
+import './SchemaRows.css';
+import PropertyRow from './PropertyRow';
+import TableHeader from './TableHeader';
 
-const SchemaRows = ({ properties, requiredList = [], level = 0 }) => {
+const SchemaRows = ({ properties, requiredList = [], level = 0, getConstraints }) => {
     return (
         <>
             {Object.entries(properties).map(([key, prop]) => {
-                const isReq = requiredList.includes(key);
-
-                // 1. Calculate if it has children (Same as before)
-                const hasChildren =
-                    (prop.type === 'object' &&
-                        prop.properties &&
-                        Object.keys(prop.properties).length > 0) ||
-                    (prop.type === 'array' &&
-                        prop.items &&
-                        prop.items.properties &&
-                        Object.keys(prop.items.properties).length > 0);
-
-                const isObject = prop.type === 'object';
-                const isArrayOfObjects = prop.type === 'array' && prop.items && prop.items.type === 'object';
-
-                if ((isObject || isArrayOfObjects) && !hasChildren)
-                {
-                    return null;
-                }
+                const childProperties = prop.properties || (prop.items && prop.items.properties);
+                const hasChildren = childProperties && Object.keys(childProperties).length > 0;
 
                 return (
                     <React.Fragment key={key}>
-                        {/* Main property row */}
-                        <tr style={{ backgroundColor: isReq ? 'rgba(255,0,0,0.05)' : 'transparent' }}>
-                            <td>
-                                <strong>{key}</strong>
-                                {hasChildren && <span style={{ fontSize: '0.8em', marginLeft: '5px' }}>⤵</span>}
-                            </td>
-                            <td><code>{Array.isArray(prop.type) ? prop.type.join('|') : prop.type}</code></td>
-                            <td style={{ textAlign: 'center' }}>{isReq ? '✅' : ''}</td>
-                            <td>{prop.examples ? prop.examples.join(', ') : ''}</td>
-                            <td>{prop.description || ''}</td>
-                        </tr>
-
-                        {/* Nested children rendered immediately after parent */}
+                        <PropertyRow
+                            propertyKey={key}
+                            prop={prop}
+                            requiredList={requiredList}
+                            level={level}
+                            getConstraints={getConstraints}
+                        />
                         {hasChildren && (
-                            <tr>
-                                <td colSpan="5" style={{ paddingLeft: '20px', borderLeft: '4px solid #eee' }}>
+                            <tr key={`${key}-nested`}>
+                                <td colSpan="5" className="nested-table-container">
                                     <strong>{prop.type === 'array' ? `${key} [ ]` : `${key} { }`}</strong>
                                     <table style={{ width: '100%', marginTop: '5px' }}>
-                                        <thead>
-                                            <tr>
-                                                <th width="20%">Property</th>
-                                                <th width="15%">Type</th>
-                                                <th width="10%">Req</th>
-                                                <th width="15%">Examples</th>
-                                                <th>Description</th>
-                                            </tr>
-                                        </thead>
+                                        <TableHeader />
                                         <tbody>
                                             <SchemaRows
                                                 properties={prop.type === 'object' ? prop.properties : prop.items.properties}
                                                 requiredList={prop.type === 'object' ? prop.required || [] : prop.items.required || []}
                                                 level={level + 1}
+                                                getConstraints={getConstraints}
                                             />
                                         </tbody>
                                     </table>
                                 </td>
                             </tr>
-                        )
-                        }
-                    </React.Fragment >
+                        )}
+                    </React.Fragment>
                 );
             })}
         </>
