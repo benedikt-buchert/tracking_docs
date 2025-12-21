@@ -47,7 +47,6 @@
         }
       },
       "required": [
-        "value",
         "currency",
         "items"
       ]
