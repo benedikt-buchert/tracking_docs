@@ -2,11 +2,13 @@ import fs from 'fs';
 import path from 'path';
 import buildExampleFromSchema from './helpers/buildExampleFromSchema';
 import Ajv2020 from 'ajv/dist/2020.js';
+import addFormats from 'ajv-formats';
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import mergeJsonSchema from "json-schema-merge-allof";
 
 const validateSchemas = async (schemaPath) => {
     const ajv = new Ajv2020();
+    addFormats(ajv);
     ajv.addKeyword('x-gtm-clear');
 
     const getAllFiles = (dir, allFiles = []) => {
@@ -41,7 +43,7 @@ const validateSchemas = async (schemaPath) => {
     for (const file of schemaFiles)
     {
         const filePath = path.join(schemaPath, file);
-        
+
         // Dereference and merge, same as in generateEventDocs.js
         const clonedSchema = await $RefParser.dereference(filePath, {
             mutateInputSchema: false, dereference: {
@@ -64,7 +66,8 @@ const validateSchemas = async (schemaPath) => {
         {
             const originalSchema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
             const validate = ajv.getSchema(originalSchema.$id);
-            if (!validate) {
+            if (!validate)
+            {
                 console.error(`❌ Could not find compiled schema for ${originalSchema.$id}`);
                 allValid = false;
                 continue;
