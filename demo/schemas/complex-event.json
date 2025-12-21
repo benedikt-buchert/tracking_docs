@@ -1,12 +1,14 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://example.com/schemas/complex-event.json",
-    "title": "Complex User Event",
-    "description": "A generic event demonstrating recursive documentation capabilities.",
+    "title": "Complex Event with Validation Constraints",
+    "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
     "type": "object",
     "required": [
         "event",
-        "user_data"
+        "user_data",
+        "string_constraints",
+        "number_constraints"
     ],
     "allOf": [
         {
@@ -25,6 +27,7 @@
         "timestamp": {
             "type": "integer",
             "description": "Unix timestamp of the event.",
+            "format": "unix-time",
             "examples": [
                 16788922
             ]
@@ -103,6 +106,141 @@
                     }
                 }
             }
+        },
+        "string_constraints": {
+            "type": "string",
+            "description": "A string with various constraints.",
+            "minLength": 2,
+            "maxLength": 10,
+            "pattern": "^[a-z]+$",
+            "format": "hostname",
+            "examples": [
+                "example"
+            ]
+        },
+        "number_constraints": {
+            "type": "number",
+            "description": "A number with various constraints.",
+            "minimum": 10,
+            "maximum": 100,
+            "multipleOf": 5,
+            "examples": [
+                50
+            ]
+        },
+        "exclusive_number_constraints": {
+            "type": "number",
+            "description": "A number with exclusive constraints.",
+            "exclusiveMinimum": 10,
+            "exclusiveMaximum": 100,
+            "examples": [
+                50
+            ]
+        },
+        "array_constraints": {
+            "type": "array",
+            "description": "An array with various constraints.",
+            "minItems": 1,
+            "maxItems": 5,
+            "uniqueItems": true,
+            "items": {
+                "type": "string"
+            },
+            "examples": [
+                [
+                    "a",
+                    "b"
+                ]
+            ]
+        },
+        "contains_array_constraints": {
+            "type": "array",
+            "description": "An array with contains constraints.",
+            "contains": {
+                "type": "integer"
+            },
+            "minContains": 1,
+            "maxContains": 2,
+            "examples": [
+                [
+                    1,
+                    "text",
+                    2
+                ]
+            ]
+        },
+        "object_constraints": {
+            "type": "object",
+            "description": "An object with various constraints.",
+            "minProperties": 1,
+            "maxProperties": 3,
+            "additionalProperties": false,
+            "propertyNames": {
+                "pattern": "^[A-Z_]+$"
+            },
+            "properties": {
+                "PROP_A": {
+                    "type": "string",
+                    "examples": [
+                        "some_value"
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "PROP_A": "some_value",
+                    "PROP_B": "another_value"
+                }
+            ]
+        },
+        "dependent_required_constraint": {
+            "type": "object",
+            "description": "An object with dependent required properties.",
+            "dependentRequired": {
+                "credit_card": [
+                    "billing_address"
+                ]
+            },
+            "properties": {
+                "credit_card": {
+                    "type": "number",
+                    "examples": [
+                        1234567890123456
+                    ]
+                },
+                "billing_address": {
+                    "type": "string",
+                    "examples": [
+                        "123 Billing Address, Anytown, USA"
+                    ]
+                }
+            },
+            "examples": [
+                {
+                    "credit_card": 1234567890123456,
+                    "billing_address": "123 Billing Address, Anytown, USA"
+                }
+            ]
+        },
+        "enum_constraint": {
+            "type": "string",
+            "description": "A property with an enum constraint.",
+            "enum": [
+                "admin",
+                "editor",
+                "viewer"
+            ],
+            "examples": [
+                "admin"
+            ]
+        },
+        "const_constraint": {
+            "type": "string",
+            "description": "A property that must have a constant value.",
+            "const": "must_be_this",
+            "examples": [
+                "must_be_this"
+            ]
         }
     }
 }
