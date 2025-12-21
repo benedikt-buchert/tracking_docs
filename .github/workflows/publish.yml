@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies and build
         run: |
           npm install -g npm@latest
-          npm ci
+          npm ci --ignore-scripts
 
       - name: Publish package
         run: npm publish --access public --provenance
