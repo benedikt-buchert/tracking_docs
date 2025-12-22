@@ -16,5 +16,8 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
+  },
+  "devDependencies": {
+    "jest": "^30.2.0"
   }
 }

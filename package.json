@@ -11,12 +11,20 @@
     "build": "npm run build -w demo",
     "gen-docs": "npm run gen-docs -w demo",
     "lint": "eslint .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test": "jest"
   },
   "devDependencies": {
+    "@babel/core": "^7.24.0",
     "@babel/eslint-parser": "^7.28.5",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-react": "^7.24.0",
     "@docusaurus/eslint-plugin": "^3.9.2",
+    "@testing-library/jest-dom": "^6.4.6",
+    "@testing-library/react": "^15.0.7",
+    "babel-jest": "^29.7.0",
     "eslint": "^8.57.1",
-    "husky": "^9.0.0"
+    "husky": "^9.0.0",
+    "jest-environment-jsdom": "^30.2.0"
   }
 }

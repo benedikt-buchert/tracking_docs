@@ -28,7 +28,7 @@ export default function ExampleDataLayer({ schema }) {
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>
 };
 
-const findComplexPropertiesToReset = (schema) => {
+export const findComplexPropertiesToReset = (schema) => {
     if (!schema || !schema.properties) return [];
 
     return Object.entries(schema.properties)
