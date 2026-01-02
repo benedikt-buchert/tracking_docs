@@ -5,7 +5,7 @@ import path from 'path';
 
 export default async function generateEventDocs(siteDir) {
     // CONFIGURATION
-    const SCHEMA_DIR = path.join(siteDir, 'schemas'); // Where your JSON files are
+    const SCHEMA_DIR = path.join(siteDir, 'static/schemas'); // Where your JSON files are
     const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
 
     // Ensure output dir exists

@@ -30,7 +30,7 @@ const validateSchemas = async (schemaPath) => {
         return allFiles;
     };
 
-    const allSchemaFiles = getAllFiles('schemas');
+    const allSchemaFiles = getAllFiles(schemaPath);
     for (const file of allSchemaFiles)
     {
         const schemaContent = fs.readFileSync(file, 'utf-8');

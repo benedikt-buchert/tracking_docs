@@ -24,7 +24,7 @@ export default async function (context, options) {
                 .action(async () => {
                     console.log('Validating GTM Schemas...');
                     // You might get the path from 'options' or assume a default
-                    const schemaPath = options?.path || path.join(context.siteDir, 'schemas');
+                    const schemaPath = options?.path || path.join(context.siteDir, 'static/schemas');
 
                     const success = await validateSchemas(schemaPath);
 

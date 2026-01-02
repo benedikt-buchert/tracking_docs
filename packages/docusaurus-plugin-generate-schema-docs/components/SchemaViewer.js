@@ -1,3 +1,4 @@
+import React from 'react';
 import Heading from '@theme/Heading';
 import ExampleDataLayer from './ExampleDataLayer';
 import PropertiesTable from './PropertiesTable';

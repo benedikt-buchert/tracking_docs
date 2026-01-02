@@ -8,7 +8,8 @@ const getPropertyType = (type) => {
 
 // Helper to format examples
 const formatExamples = (examples) => {
-    if (!examples) {
+    if (!examples)
+    {
         return '';
     }
     return examples
@@ -28,7 +29,8 @@ const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
     const isObject = prop.type === 'object';
     const isArrayOfObjects = prop.type === 'array' && prop.items && prop.items.type === 'object';
 
-    if ((isObject || isArrayOfObjects) && !hasChildren) {
+    if ((isObject || isArrayOfObjects) && !hasChildren)
+    {
         return null;
     }
 

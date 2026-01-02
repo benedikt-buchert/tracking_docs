@@ -11,7 +11,7 @@ jobs:
       - name: Validate all json files using their own $schema properties
         uses: cardinalby/schema-validator-action@v3
         with:
-          file: "demo/schemas/**/*.json"
+          file: "demo/static/schemas/**/*.json"
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
@@ -19,5 +19,6 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run build
+      - run: npm test
       - run: npm run validate-schemas
         working-directory: ./demo

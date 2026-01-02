@@ -1,0 +1,8 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "main-schema-with-missing-ref",
+    "title": "Main Schema with Missing Ref",
+    "type": "object",
+    "properties": { "component": { "$ref": "non-existent-component.json" } },
+    "required": ["component"]
+}
