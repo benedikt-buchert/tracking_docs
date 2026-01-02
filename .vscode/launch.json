@@ -10,6 +10,19 @@
         "validate-schemas"
       ],
       "console": "integratedTerminal"
+    },
+    {
+      "name": "Docusaurus Debug Start",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "start"
+      ],
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true,
+      "console": "integratedTerminal",
     }
   ]
 }
