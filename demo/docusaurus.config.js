@@ -20,10 +20,10 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: 'https://tracking-docs-demo.buchert.digital/',
+  url: 'https://tracking-docs-demo.buchert.digital/tracking_docs/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/',
+  baseUrl: '/tracking_docs/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
