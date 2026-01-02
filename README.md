@@ -4,7 +4,7 @@ This repository contains a Docusaurus v3 plugin for generating documentation fro
 
 ## Live Demo
 
-You can find a live demo of the site [here](https://benedikt-buchert.github.io/tracking_docs/).
+You can find a live demo of the site [here](https://tracking-docs-demo.buchert.digital/tracking_docs/).
 
 ## Bootstrapping from Template (new Docusaurus site)
 
