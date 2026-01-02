@@ -6,9 +6,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default async function (context, options) {
+export default async function (context) {
     const { siteDir } = context;
-    await generateEventDocs(siteDir);
+    const { organizationName, projectName } = context.siteConfig;
+    const options = { organizationName, projectName, siteDir };
+    await generateEventDocs(options);
 
     return {
         name: 'docusaurus-plugin-generate-schema-docs',

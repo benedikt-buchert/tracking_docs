@@ -3,7 +3,9 @@ import mergeJsonSchema from "json-schema-merge-allof";
 import fs from 'fs';
 import path from 'path';
 
-export default async function generateEventDocs(siteDir) {
+export default async function generateEventDocs(options) {
+    const { organizationName, projectName, siteDir } = options || {};
+    const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
     // CONFIGURATION
     const SCHEMA_DIR = path.join(siteDir, 'static/schemas'); // Where your JSON files are
     const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
@@ -45,6 +47,7 @@ export default async function generateEventDocs(siteDir) {
 title: ${schema.title}
 description: ${schema.description}
 sidebar_label: ${schema.title}
+custom_edit_url: ${baseEditUrl}/demo/static/schemas/${file}
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
