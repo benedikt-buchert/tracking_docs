@@ -10,6 +10,7 @@
     "start": "npm run start -w demo",
     "build": "npm run build -w demo",
     "gen-docs": "npm run gen-docs -w demo",
+    "validate-schemas": "npm run validate-schemas -w demo",
     "lint": "eslint .",
     "prepare": "husky",
     "test": "jest"

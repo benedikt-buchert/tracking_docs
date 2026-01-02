@@ -47,13 +47,13 @@ module.exports = {
 
 The project follows a schema-first approach.
 
-1. **Define a schema:** Create or update a `.json` file in the `schemas/` directory. You can create complex schemas by referencing reusable components from `schemas/components/`.
+1. **Define a schema:** Create or update a `.json` file in the `static/schemas/` directory. You can create complex schemas by referencing reusable components from `static/schemas/components/`.
 2. **Generate documentation:** The plugin reads the schemas, resolves any references, and generates corresponding `.mdx` documentation file in `docs/events/`.
 3. **View the documentation:** The website's sidebar is automatically updated to include the newly generated documentation.
 
-### The `schemas` Directory
+### The `static/schemas` Directory
 
-This is the single source of truth for all tracking events. Each `.json` file in this directory represents an event. You can use `$ref` to include shared definitions from the `schemas/components/` directory.
+This is the single source of truth for all tracking events. Each `.json` file in this directory represents an event. You can use `$ref` to include shared definitions from the `static/schemas/components/` directory.
 
 ### Manual Documentation Generation
 
