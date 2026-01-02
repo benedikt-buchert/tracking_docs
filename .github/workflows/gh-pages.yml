@@ -36,3 +36,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./demo/build
           publish_branch: gh-pages
+          cname: tracking-docs-demo.buchert.digital
