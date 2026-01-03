@@ -1,3 +1,4 @@
 
 
 npx eslint .
+npm run test

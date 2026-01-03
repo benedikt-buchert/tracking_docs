@@ -17,9 +17,14 @@ jest.mock('fs', () => {
 });
 
 describe('generateEventDocs', () => {
-    // Use the fixtures directory as the siteDir for tests
-    const siteDir = path.resolve(__dirname, '__fixtures__');
-    const outputDir = path.join(siteDir, 'docs/events');
+
+    const options = {
+        organizationName: 'test-org',
+        projectName: 'test-project',
+        // Use the fixtures directory as the siteDir for tests
+        siteDir: path.resolve(__dirname, '__fixtures__')
+    }
+    const outputDir = path.join(options.siteDir, 'docs/events');
 
     beforeEach(() => {
         // Clear all instances and calls to constructor and all methods:
@@ -32,7 +37,7 @@ describe('generateEventDocs', () => {
         console.log = jest.fn(); // suppress console.log
         fs.existsSync.mockReturnValue(false); // Simulate that the directory does not exist
 
-        await generateEventDocs(siteDir);
+        await generateEventDocs(options);
 
         // Expect mkdirSync to have been called to create the output directory
         expect(fs.mkdirSync).toHaveBeenCalledWith(outputDir, { recursive: true });
@@ -50,7 +55,7 @@ describe('generateEventDocs', () => {
         console.log = jest.fn(); // suppress console.log
         fs.existsSync.mockReturnValue(true); // Simulate that the directory exists
 
-        await generateEventDocs(siteDir);
+        await generateEventDocs(options);
 
         // Expect mkdirSync not to have been called
         expect(fs.mkdirSync).not.toHaveBeenCalled();

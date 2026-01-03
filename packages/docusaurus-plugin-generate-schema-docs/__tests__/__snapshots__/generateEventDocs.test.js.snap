@@ -5,6 +5,7 @@ exports[`generateEventDocs should generate documentation for schemas and create 
 title: Add to Cart Event
 description: An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.
 sidebar_label: Add to Cart Event
+custom_edit_url: https://github.com/test-org/test-project/edit/main/demo/static/schemas/add-to-cart-event.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
