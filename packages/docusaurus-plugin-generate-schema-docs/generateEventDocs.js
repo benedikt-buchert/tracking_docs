@@ -27,15 +27,20 @@ export default async function generateEventDocs(options) {
         const rawContent = fs.readFileSync(filePath, 'utf-8');
         const schema = JSON.parse(rawContent);
 
-        // First, dereference all $ref properties
-        const clonedSchema = await $RefParser.dereference(filePath, {
-            mutateInputSchema: false, dereference: {
-                circular: 'ignore'
+        // 1. Bundle all external references into a single, self-contained schema
+        const bundledSchema = await $RefParser.bundle(filePath, {
+            mutateInputSchema: false,
+        });
+
+        // 2. Dereference the bundled schema to resolve internal refs for allOf merging
+        const dereferencedSchema = await $RefParser.dereference(bundledSchema, {
+            dereference: {
+                circular: 'ignore', // Keep recursive parts as $refs
             }
         });
 
         // Then merge allOf properties
-        const mergedSchema = mergeJsonSchema(clonedSchema, {
+        const mergedSchema = mergeJsonSchema(dereferencedSchema, {
             resolvers: {
                 defaultResolver: mergeJsonSchema.options.resolvers.title
             }

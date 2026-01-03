@@ -22,7 +22,20 @@
       ],
       "cwd": "${workspaceFolder}",
       "sourceMaps": true,
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/.bin/jest",
+        "--runInBand",
+        "--watchAll=false"
+      ],
       "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
     }
   ]
 }

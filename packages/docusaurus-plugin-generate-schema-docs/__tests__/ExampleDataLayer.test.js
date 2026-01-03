@@ -21,7 +21,7 @@ describe('ExampleDataLayer', () => {
         const schema = {
             type: 'object',
             properties: {
-                event: { type: 'string', example: 'test_event' },
+                event: { type: 'string', examples: ['test_event'] },
             },
         };
         const example = { event: 'test_event' };
@@ -84,7 +84,7 @@ window.dataLayer.push({
         buildExampleFromSchema.mockReturnValue(example);
 
         const { container } = render(<ExampleDataLayer schema={schema} />);
-        
+
         expect(buildExampleFromSchema).toHaveBeenCalledWith(schema);
         const codeElement = container.querySelector('pre');
         expect(codeElement.textContent).toMatchInlineSnapshot(`"window.dataLayer.push({});"`);
