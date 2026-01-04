@@ -1,7 +1,7 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
-import mergeJsonSchema from "json-schema-merge-allof";
 import fs from 'fs';
 import path from 'path';
+import loadSchema from './helpers/loadSchema';
+import processSchema from './helpers/processSchema';
 
 export default async function generateEventDocs(options) {
     const { organizationName, projectName, siteDir } = options || {};
@@ -24,22 +24,8 @@ export default async function generateEventDocs(options) {
     for (const file of files)
     {
         const filePath = path.join(SCHEMA_DIR, file);
-        const rawContent = fs.readFileSync(filePath, 'utf-8');
-        const schema = JSON.parse(rawContent);
-
-        // First, dereference all $ref properties
-        const clonedSchema = await $RefParser.dereference(filePath, {
-            mutateInputSchema: false, dereference: {
-                circular: 'ignore'
-            }
-        });
-
-        // Then merge allOf properties
-        const mergedSchema = mergeJsonSchema(clonedSchema, {
-            resolvers: {
-                defaultResolver: mergeJsonSchema.options.resolvers.title
-            }
-        });
+        const schema = loadSchema(filePath);
+        const mergedSchema = await processSchema(filePath);
 
         // Define the MDX Content
         // We embed the JSON directly into the file to avoid Webpack import issues
