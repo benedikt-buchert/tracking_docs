@@ -4,7 +4,7 @@ import buildExampleFromSchema from '../helpers/buildExampleFromSchema';
 
 export default function ExampleDataLayer({ schema }) {
     // 1. Identify properties that need to be reset (cleared) first
-    const propertiesToReset = findComplexPropertiesToReset(schema || {});
+    const clearableProperties = findClearableProperties(schema || {});
 
     // 2. Build the main example data
     const example = buildExampleFromSchema(schema || {});
@@ -12,11 +12,14 @@ export default function ExampleDataLayer({ schema }) {
     // 3. Construct the code snippet
     let codeSnippet = '';
 
+    // Filter properties to reset to only those present in the example
+    const propertiesToClear = clearableProperties.filter(prop => prop in example);
+
     // If there are properties to reset, push them as null first
-    if (propertiesToReset.length > 0)
+    if (propertiesToClear.length > 0)
     {
         const resetObject = {};
-        propertiesToReset.forEach(prop => {
+        propertiesToClear.forEach(prop => {
             resetObject[prop] = null;
         });
         codeSnippet += `window.dataLayer.push(${JSON.stringify(resetObject, null, 2)});\n`;
@@ -28,11 +31,10 @@ export default function ExampleDataLayer({ schema }) {
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>
 };
 
-export const findComplexPropertiesToReset = (schema) => {
+export const findClearableProperties = (schema) => {
     if (!schema || !schema.properties) return [];
 
     return Object.entries(schema.properties)
         .filter(([key, definition]) => definition["x-gtm-clear"] === true)
         .map(([key]) => key);
 }
-
