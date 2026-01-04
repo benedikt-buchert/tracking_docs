@@ -143,4 +143,46 @@ describe('buildExampleFromSchema', () => {
             },
         });
     });
+    it('should not include empty objects for properties with no defined value', () => {
+        const schema = {
+            type: 'object',
+            properties: {
+                event: { type: 'string', examples: ['test_event'] },
+                user_data: {
+                    type: 'object'
+                },
+                ecommerce: {
+                    type: 'object',
+                    properties: {
+                        items: {
+                            type: 'array',
+                            items: {
+                                type: 'object',
+                                properties: {
+                                    item_id: { type: 'string', examples: ['SKU_123'] }
+                                }
+                            }
+                        }
+                    }
+                },
+                empty_object: {
+                    type: 'object',
+                    properties: {}
+                }
+            }
+        };
+
+        const example = buildExampleFromSchema(schema);
+
+        expect(example).toEqual({
+            event: 'test_event',
+            ecommerce: {
+                items: [
+                    {
+                        item_id: 'SKU_123',
+                    },
+                ],
+            },
+        });
+    });
 });

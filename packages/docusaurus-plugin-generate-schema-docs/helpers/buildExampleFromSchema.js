@@ -28,7 +28,7 @@ const buildExampleFromSchema = (schema) => {
                 return obj;
             }
             // Object with no properties defined
-            return {};
+            return undefined;
         }
 
         if (type === 'array')
@@ -43,7 +43,7 @@ const buildExampleFromSchema = (schema) => {
                 }
             }
             // Empty array or array of undefined items
-            return [];
+            return undefined;
         }
 
         switch (type)
