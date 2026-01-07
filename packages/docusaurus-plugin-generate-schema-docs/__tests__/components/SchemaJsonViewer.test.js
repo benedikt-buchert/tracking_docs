@@ -22,6 +22,8 @@ describe('SchemaJsonViewer', () => {
         const { getByText, container } = render(<SchemaJsonViewer schema={schema} />);
 
         expect(getByText('View Raw JSON Schema')).toBeInTheDocument();
+        const detailsElement = container.querySelector('details');
+        expect(detailsElement).toHaveClass('schema-json-viewer');
         const codeBlockElement = container.querySelector('pre');
         expect(codeBlockElement).toBeInTheDocument();
         expect(codeBlockElement).toHaveAttribute('data-language', 'json');
