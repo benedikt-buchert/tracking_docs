@@ -8,6 +8,9 @@ export default async function (context) {
     const options = { organizationName, projectName, siteDir };
     const schemasPath = path.join(siteDir, 'static/schemas');
 
+    // Generate docs on startup
+    await generateEventDocs(options);
+
     return {
         name: 'docusaurus-plugin-generate-schema-docs',
 
