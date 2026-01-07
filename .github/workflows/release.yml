@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       semver:
-        description: 'The semver bump type (patch, minor, major)'
+        description: "The semver bump type (patch, minor, major)"
         required: true
-        default: 'patch'
+        default: "patch"
 
 jobs:
   release:
@@ -14,9 +14,6 @@ jobs:
     permissions:
       id-token: write
       contents: write
-    defaults:
-      run:
-        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,16 +28,14 @@ jobs:
       - name: Install dependencies
         run: |
           npm install -g npm@latest
-          # Install dependencies in the root of the project
           npm ci --ignore-scripts
-        working-directory: ./
 
       - name: Run tests
         run: npm test
-        working-directory: ./
 
       - name: Bump version
         id: bump_version
+        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
@@ -57,6 +52,7 @@ jobs:
           generate_release_notes: true
 
       - name: Publish package
+        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
         run: npm publish --access public --provenance
         env:
           NPM_CONFIG_PROVENANCE: true
