@@ -5,6 +5,7 @@
   "scripts": {
     "gen-docs": "docusaurus generate schema-docs",
     "validate-schemas": "docusaurus validate-schemas",
+    "update-schema-ids": "docusaurus update-schema-ids",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",

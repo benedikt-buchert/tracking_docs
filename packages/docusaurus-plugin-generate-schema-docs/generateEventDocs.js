@@ -5,11 +5,29 @@ import processSchema from './helpers/processSchema';
 import MdxTemplate from './helpers/mdx-template.js';
 
 export default async function generateEventDocs(options) {
-    const { organizationName, projectName, siteDir } = options || {};
+    const { organizationName, projectName, siteDir, version, url } = options || {};
+
+    let schemaDir;
+    let outputDir;
+
+    if (version) {
+        if (version !== 'current') {
+            schemaDir = path.join(siteDir, 'static/schemas', version);
+            outputDir = path.join(siteDir, 'versioned_docs', `version-${version}`, 'events');
+        } else {
+            schemaDir = path.join(siteDir, 'static/schemas', 'next');
+            outputDir = path.join(siteDir, 'docs/events');
+        }
+    } else {
+        // Non-versioned
+        schemaDir = path.join(siteDir, 'static/schemas');
+        outputDir = path.join(siteDir, 'docs/events');
+    }
+
     const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
     // CONFIGURATION
-    const SCHEMA_DIR = path.join(siteDir, 'static/schemas'); // Where your JSON files are
-    const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
+    const SCHEMA_DIR = schemaDir; // Where your JSON files are
+    const OUTPUT_DIR = outputDir; // Where MDX goes
     const PARTIALS_DIR = path.join(siteDir, 'docs/partials'); // Where your partials are
 
     // Ensure output dir exists
@@ -27,6 +45,17 @@ export default async function generateEventDocs(options) {
     {
         const filePath = path.join(SCHEMA_DIR, file);
         const schema = loadSchema(filePath);
+
+        // Update the $id of the schema
+        if (version) {
+            if (version !== 'current') {
+                schema.$id = `${url}schemas/${version}/${file}`;
+            } else {
+                schema.$id = `${url}schemas/next/${file}`;
+            }
+        }
+        // For non-versioned, we don't touch the $id
+
         const mergedSchema = await processSchema(filePath);
         const eventName = file.replace('.json', '');
 

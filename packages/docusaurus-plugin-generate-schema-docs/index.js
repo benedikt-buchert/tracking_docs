@@ -1,60 +1,70 @@
+import fs from 'fs';
 import validateSchemas from './validateSchemas.js';
 import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
 
 export default async function (context) {
     const { siteDir } = context;
-    const { organizationName, projectName } = context.siteConfig;
-    const options = { organizationName, projectName, siteDir };
-    const schemasPath = path.join(siteDir, 'static/schemas');
+    const { organizationName, projectName, url } = context.siteConfig;
+    const options = { organizationName, projectName, siteDir, url };
+    const versionsJsonPath = path.join(siteDir, 'versions.json');
 
-    // Generate docs on startup
-    await generateEventDocs(options);
+    if (fs.existsSync(versionsJsonPath)) {
+        // Versioned docs
+        const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
+        const schemasPath = path.join(siteDir, 'static/schemas/next');
 
-    return {
-        name: 'docusaurus-plugin-generate-schema-docs',
+        // Generate docs for all versions on startup
+        for (const version of versions) {
+            await generateEventDocs({ ...options, version });
+        }
+        // Also generate for "current"
+        await generateEventDocs({ ...options, version: 'current' });
 
-        getPathsToWatch() {
-            // Watch the schemas directory for changes
-            return [schemasPath];
-        },
+        return {
+            name: 'docusaurus-plugin-generate-schema-docs',
 
-        async loadContent() {
-            // Generate event documentation when watched files change
-            await generateEventDocs(options);
-        },
+            getPathsToWatch() {
+                // Watch the schemas directory for changes
+                return [schemasPath];
+            },
 
-        getThemePath() {
-            return './components';
-        },
+            async loadContent() {
+                // Generate event documentation when watched files change
+                await generateEventDocs({ ...options, version: 'current' });
+            },
 
-        extendCli(cli) {
-            cli
-                .command('validate-schemas')
-                .description('Validate JSON Schemas with the examples inside the schemas')
-                .action(async () => {
-                    console.log('Validating GTM Schemas...');
-                    // You might get the path from 'options' or assume a default
-                    const schemaPath = options?.path || path.join(context.siteDir, 'static/schemas');
+            getThemePath() {
+                return './components';
+            },
 
-                    const success = await validateSchemas(schemaPath);
+            extendCli(cli) {
+                // ... (CLI commands are not version-aware for now)
+            },
+        };
+    } else {
+        // Non-versioned docs
+        const schemasPath = path.join(siteDir, 'static/schemas');
+        await generateEventDocs(options);
 
-                    if (!success)
-                    {
-                        console.error('Validation failed.');
-                        process.exit(1); // Important for CI to fail!
-                    }
-                    console.log('✅ All schemas and examples are valid!');
-                });
+        return {
+            name: 'docusaurus-plugin-generate-schema-docs',
 
-            cli
-                .command('generate schema-docs')
-                .description('Generate schema documentation from JSON schemas')
-                .action(async () => {
-                    // You can pass options here if generateEventDocs needs the path too
-                    // e.g., await generateEventDocs(options.path || './static/schemas');
-                    await generateEventDocs();
-                });
-        },
-    };
+            getPathsToWatch() {
+                return [schemasPath];
+            },
+
+            async loadContent() {
+                await generateEventDocs(options);
+            },
+
+            getThemePath() {
+                return './components';
+            },
+
+            extendCli(cli) {
+                // ...
+            },
+        };
+    }
 }

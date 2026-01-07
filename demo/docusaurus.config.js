@@ -47,6 +47,12 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          lastVersion: 'current',
+          versions: {
+            current: {
+              label: '1.1.1',
+            },
+          },
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -76,6 +82,10 @@ const config = {
             sidebarId: 'tutorialSidebar',
             position: 'left',
             label: 'Docs',
+          },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
           },
           {
             href: 'https://github.com/benedikt-buchert/tracking_docs',

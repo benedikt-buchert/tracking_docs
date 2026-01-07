@@ -1,12 +1,9 @@
 name: Create Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      semver:
-        description: "The semver bump type (patch, minor, major)"
-        required: true
-        default: "patch"
+  push:
+    tags:
+      - "v*"
 
 jobs:
   release:
@@ -38,19 +35,30 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Bump version and create tag
-        id: bump_version
+      - name: Create Docusaurus version
         run: |
-          (cd packages/docusaurus-plugin-generate-schema-docs && npm version ${{ github.event.inputs.semver }})
-          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
+          npm run --workspace=demo docusaurus docs:version $VERSION
 
-      - name: Push changes and tags
-        run: git push --follow-tags
+      - name: Version schemas
+        run: |
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
+          # Copy schemas to versioned directory
+          mkdir -p demo/static/schemas/$VERSION
+          cp -r demo/static/schemas/next/* demo/static/schemas/$VERSION/
+          # Update schema ids
+          node packages/docusaurus-plugin-generate-schema-docs/helpers/update-schema-ids.js
+
+      - name: Commit and push versioned files
+        run: |
+          git add .
+          git commit -m "docs: version docs and schemas for ${{ github.ref_name }}"
+          git push
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.bump_version.outputs.tag }}
+          tag_name: ${{ github.ref_name }}
           generate_release_notes: true
 
       - name: Publish package
