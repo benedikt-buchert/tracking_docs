@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -26,23 +28,23 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: |
-          npm install -g npm@latest
-          npm ci --ignore-scripts
+        run: npm ci --ignore-scripts
 
       - name: Run tests
         run: npm test
 
-      - name: Bump version
-        id: bump_version
-        working-directory: ./packages/docusaurus-plugin-generate-schema-docs
+      - name: Configure Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
-          npm version ${{ github.event.inputs.semver }}
+
+      - name: Bump version and create tag
+        id: bump_version
+        run: |
+          (cd packages/docusaurus-plugin-generate-schema-docs && npm version ${{ github.event.inputs.semver }})
           echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
 
-      - name: Push changes
+      - name: Push changes and tags
         run: git push --follow-tags
 
       - name: Create GitHub Release
