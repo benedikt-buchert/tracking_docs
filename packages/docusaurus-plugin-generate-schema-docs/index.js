@@ -1,22 +1,28 @@
 import validateSchemas from './validateSchemas.js';
 import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 export default async function (context) {
     const { siteDir } = context;
     const { organizationName, projectName } = context.siteConfig;
     const options = { organizationName, projectName, siteDir };
-    await generateEventDocs(options);
+    const schemasPath = path.join(siteDir, 'static/schemas');
 
     return {
         name: 'docusaurus-plugin-generate-schema-docs',
 
+        getPathsToWatch() {
+            // Watch the schemas directory for changes
+            return [schemasPath];
+        },
+
+        async loadContent() {
+            // Generate event documentation when watched files change
+            await generateEventDocs(options);
+        },
+
         getThemePath() {
-            return path.resolve(__dirname, './components');
+            return './components';
         },
 
         extendCli(cli) {
