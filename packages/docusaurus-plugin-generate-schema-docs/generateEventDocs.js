@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import loadSchema from './helpers/loadSchema';
 import processSchema from './helpers/processSchema';
+import MdxTemplate from './helpers/mdx-template.js';
 
 export default async function generateEventDocs(options) {
     const { organizationName, projectName, siteDir } = options || {};
@@ -9,6 +10,7 @@ export default async function generateEventDocs(options) {
     // CONFIGURATION
     const SCHEMA_DIR = path.join(siteDir, 'static/schemas'); // Where your JSON files are
     const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
+    const PARTIALS_DIR = path.join(siteDir, 'docs/partials'); // Where your partials are
 
     // Ensure output dir exists
     if (!fs.existsSync(OUTPUT_DIR))
@@ -26,26 +28,36 @@ export default async function generateEventDocs(options) {
         const filePath = path.join(SCHEMA_DIR, file);
         const schema = loadSchema(filePath);
         const mergedSchema = await processSchema(filePath);
+        const eventName = file.replace('.json', '');
 
-        // Define the MDX Content
-        // We embed the JSON directly into the file to avoid Webpack import issues
-        const mdxContent = `---
-title: ${schema.title}
-description: ${schema.description}
-sidebar_label: ${schema.title}
-custom_edit_url: ${baseEditUrl}/demo/static/schemas/${file}
----
+        // Check for partials
+        const topPartialPath = path.join(PARTIALS_DIR, `${eventName}.mdx`);
+        const bottomPartialPath = path.join(PARTIALS_DIR, `${eventName}_bottom.mdx`);
 
-import SchemaViewer from '@theme/SchemaViewer';
-import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+        let topPartialImport = '';
+        let topPartialComponent = '';
+        if (fs.existsSync(topPartialPath)) {
+            topPartialImport = `import TopPartial from '@site/docs/partials/${eventName}.mdx';`;
+            topPartialComponent = '<TopPartial />';
+        }
 
-# ${schema.title}
+        let bottomPartialImport = '';
+        let bottomPartialComponent = '';
+        if (fs.existsSync(bottomPartialPath)) {
+            bottomPartialImport = `import BottomPartial from '@site/docs/partials/${eventName}_bottom.mdx';`;
+            bottomPartialComponent = '<BottomPartial />';
+        }
 
-${schema.description}
-
-<SchemaViewer schema={${JSON.stringify(mergedSchema)}} />
-<SchemaJsonViewer schema={${JSON.stringify(schema)}} />
-`;
+        const mdxContent = MdxTemplate({
+            schema,
+            mergedSchema,
+            baseEditUrl,
+            file,
+            topPartialImport,
+            bottomPartialImport,
+            topPartialComponent,
+            bottomPartialComponent
+        });
 
         // Write the .mdx file
         const outputFilename = file.replace('.json', '.mdx');

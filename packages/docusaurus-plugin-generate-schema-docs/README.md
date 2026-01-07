@@ -66,6 +66,28 @@ The plugin reads your JSON schemas, dereferences any `$ref` properties, and merg
 
 The validation script builds an example from each schema and validates it against the schema itself, ensuring your examples are always in sync with your schemas.
 
+## Partials
+
+You can provide additional content to the generated documentation pages by creating partial files. Partials are Markdown files that can be automatically included in the generated pages.
+
+### Naming Convention
+
+Partials must be named after the schema file they correspond to. For a schema named `my-event.json`, the partials would be:
+
+*   `my-event.mdx`: This partial is rendered directly after the schema's main description.
+*   `my-event_bottom.mdx`: This partial is rendered at the very bottom of the page.
+
+### Location
+
+Place your partial files in the `/docs/partials` directory at the root of your docusaurus project. The plugin will automatically find and include them.
+
+### Example
+
+If you have a schema `add-to-cart-event.json`, you can create the following files:
+
+*   `docs/partials/add-to-cart-event.mdx`: For content to appear after the description.
+*   `docs/partials/add-to-cart-event_bottom.mdx`: For content to appear at the bottom.
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request if you have any ideas or improvements.

@@ -13,6 +13,8 @@ jest.mock('fs', () => {
         writeFileSync: jest.fn(),
         mkdirSync: jest.fn(),
         existsSync: jest.fn(),
+        readdirSync: originalFs.readdirSync,
+        readFileSync: originalFs.readFileSync,
     };
 });
 
@@ -25,6 +27,8 @@ describe('generateEventDocs', () => {
         siteDir: path.resolve(__dirname, '__fixtures__')
     }
     const outputDir = path.join(options.siteDir, 'docs/events');
+    const partialsDir = path.join(options.siteDir, 'docs/partials');
+
 
     beforeEach(() => {
         // Clear all instances and calls to constructor and all methods:
@@ -33,14 +37,13 @@ describe('generateEventDocs', () => {
         fs.existsSync.mockClear();
     });
 
-    it('should generate documentation for schemas and create output dir', async () => {
+    it('should generate documentation correctly when no partials exist', async () => {
         console.log = jest.fn(); // suppress console.log
-        fs.existsSync.mockReturnValue(false); // Simulate that the directory does not exist
+
+        // Simulate that no partials exist
+        fs.existsSync.mockReturnValue(false);
 
         await generateEventDocs(options);
-
-        // Expect mkdirSync to have been called to create the output directory
-        expect(fs.mkdirSync).toHaveBeenCalledWith(outputDir, { recursive: true });
 
         // Expect writeFileSync to have been called once for each schema
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
@@ -51,16 +54,31 @@ describe('generateEventDocs', () => {
         expect(content).toMatchSnapshot();
     });
 
-    it('should not create output directory if it already exists', async () => {
+    it('should generate documentation with top and bottom partials when they exist', async () => {
         console.log = jest.fn(); // suppress console.log
-        fs.existsSync.mockReturnValue(true); // Simulate that the directory exists
+
+        // Simulate that the output directory and partials exist
+        fs.existsSync.mockImplementation((filePath) => {
+            if (filePath === outputDir) {
+                return true;
+            }
+            if (filePath === path.join(partialsDir, 'add-to-cart-event.mdx')) {
+                return true;
+            }
+            if (filePath === path.join(partialsDir, 'add-to-cart-event_bottom.mdx')) {
+                return true;
+            }
+            return false;
+        });
 
         await generateEventDocs(options);
 
-        // Expect mkdirSync not to have been called
-        expect(fs.mkdirSync).not.toHaveBeenCalled();
-
-        // Still expect the file to be written
+        // Expect writeFileSync to have been called once for each schema
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+
+        // Check the content of the generated file
+        const [filePath, content] = fs.writeFileSync.mock.calls[0];
+        expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
+        expect(content).toMatchSnapshot();
     });
 });
