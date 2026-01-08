@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
@@ -40,19 +40,10 @@ jobs:
           VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
           npm --prefix packages/docusaurus-plugin-generate-schema-docs version $VERSION --no-git-tag-version
 
-      - name: Create Docusaurus version
+      - name: Create Docusaurus version and version schemas
         run: |
           VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
-          npm run --workspace=demo docusaurus docs:version $VERSION
-
-      - name: Version schemas
-        run: |
-          VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
-          # Copy schemas to versioned directory
-          mkdir -p demo/static/schemas/$VERSION
-          cp -r demo/static/schemas/next/* demo/static/schemas/$VERSION/
-          # Update schema ids
-          npm run --workspace=demo update-schema-ids -- $VERSION
+          npm run version -- $VERSION
 
       - name: Commit and push versioned files
         run: |
@@ -61,7 +52,7 @@ jobs:
           git push
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
