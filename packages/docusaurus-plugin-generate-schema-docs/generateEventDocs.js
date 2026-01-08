@@ -46,15 +46,16 @@ export default async function generateEventDocs(options) {
         const filePath = path.join(SCHEMA_DIR, file);
         const schema = loadSchema(filePath);
 
-        // Update the $id of the schema
+        // Update the $id of the schema in memory for documentation generation
+        // This doesn't modify the file on disk - that's handled by update-schema-ids
         if (version) {
+            const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
             if (version !== 'current') {
-                schema.$id = `${url}schemas/${version}/${file}`;
+                schema.$id = `${baseUrl}/schemas/${version}/${file}`;
             } else {
-                schema.$id = `${url}schemas/next/${file}`;
+                schema.$id = `${baseUrl}/schemas/next/${file}`;
             }
         }
-        // For non-versioned, we don't touch the $id
 
         const mergedSchema = await processSchema(filePath);
         const eventName = file.replace('.json', '');

@@ -35,6 +35,11 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
+      - name: Update package version
+        run: |
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
+          npm --prefix packages/docusaurus-plugin-generate-schema-docs version $VERSION --no-git-tag-version
+
       - name: Create Docusaurus version
         run: |
           VERSION=$(echo ${{ github.ref_name }} | sed 's/v//')
@@ -47,12 +52,12 @@ jobs:
           mkdir -p demo/static/schemas/$VERSION
           cp -r demo/static/schemas/next/* demo/static/schemas/$VERSION/
           # Update schema ids
-          node packages/docusaurus-plugin-generate-schema-docs/helpers/update-schema-ids.js
+          npm run --workspace=demo update-schema-ids -- $VERSION
 
       - name: Commit and push versioned files
         run: |
           git add .
-          git commit -m "docs: version docs and schemas for ${{ github.ref_name }}"
+          git commit -m "docs: version docs and schemas for ${{ github.ref_name }} [skip ci]"
           git push
 
       - name: Create GitHub Release

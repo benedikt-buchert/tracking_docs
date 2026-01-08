@@ -47,10 +47,11 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
-          lastVersion: 'current',
+          lastVersion: '1.1.1',
           versions: {
             current: {
-              label: '1.1.1',
+              label: 'next',
+              banner: 'unreleased',
             },
           },
         },

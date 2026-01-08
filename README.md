@@ -73,6 +73,97 @@ To validate all schemas, run:
 npm run validate-schemas
 ```
 
+## Versioning
+
+This plugin supports Docusaurus versioning for both documentation and schemas. When you create a new version, both the docs and schemas are versioned together.
+
+### Creating a New Version
+
+**Important:** Do NOT use the standard `docusaurus docs:version` command, as it only versions documentation files and not the schemas. Instead, use the custom command provided by this plugin:
+
+```bash
+npm run version 1.2.0
+```
+
+This is a shortcut for:
+
+```bash
+npx docusaurus version-with-schemas 1.2.0
+```
+
+### What This Command Does
+
+The `version-with-schemas` command performs the following steps automatically:
+
+1. **Creates docs version** - Runs the standard Docusaurus `docs:version` command to copy `docs/` to `versioned_docs/version-<version>/`
+2. **Copies schemas** - Copies `static/schemas/next/` to `static/schemas/<version>/`
+3. **Updates schema IDs** - Updates all `$id` fields in the versioned schemas to include the version number
+4. **Generates documentation** - Generates MDX documentation for the new version
+
+### Directory Structure
+
+With versioning enabled, your project structure will look like:
+
+```
+demo/
+├── docs/                           # Current/next version docs (auto-generated)
+├── versioned_docs/
+│   └── version-1.1.1/             # Versioned docs
+│       └── events/                # Event documentation for v1.1.1
+├── static/
+│   └── schemas/
+│       ├── next/                  # Current/next version schemas (source of truth)
+│       └── 1.1.1/                 # Versioned schemas for v1.1.1
+└── versions.json                  # List of all versions
+```
+
+### Configuring Version Labels
+
+In `docusaurus.config.js`, you can configure how versions are displayed:
+
+```javascript
+module.exports = {
+  presets: [
+    [
+      'classic',
+      {
+        docs: {
+          lastVersion: '1.1.1',  // The latest stable version
+          versions: {
+            current: {
+              label: 'next',           // Label for unreleased version
+              banner: 'unreleased',    // Shows "unreleased" banner
+            },
+          },
+        },
+      },
+    ],
+  ],
+};
+```
+
+### Workflow for New Versions
+
+1. **Work on next version** - Make changes to schemas in `static/schemas/next/`
+2. **Test locally** - The dev server automatically generates docs from the `next` schemas
+3. **Create version** - When ready to release, run `npm run version 1.2.0`
+4. **Commit changes** - The command creates new directories and updates `versions.json`
+5. **Continue development** - Keep working on `static/schemas/next/` for the next release
+
+### Other Versioning Commands
+
+Update schema IDs for a specific version (useful if you need to change the base URL):
+
+```bash
+npm run update-schema-ids 1.2.0
+```
+
+Update schema IDs for all versions:
+
+```bash
+npm run update-schema-ids
+```
+
 ## Deployment
 
 Deployment is handled automatically by a GitHub Action. Pushing changes to the `main` branch will trigger a workflow that builds the website and deplates it to GitHub Pages.

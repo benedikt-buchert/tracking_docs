@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/add-to-cart-event.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.1.1/add-to-cart-event.json",
   "title": "Add to Cart Event",
   "description": "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
   "type": "object",
@@ -25,7 +25,7 @@
           "examples": [
             30.03,
             99.99,
-            45.50
+            45.5
           ]
         },
         "currency": {

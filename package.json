@@ -12,6 +12,7 @@
     "gen-docs": "npm run gen-docs -w demo",
     "validate-schemas": "npm run validate-schemas -w demo",
     "update-schema-ids": "npm run update-schema-ids -w demo",
+    "version": "npm run version -w demo",
     "lint": "eslint .",
     "prepare": "husky",
     "test": "jest"
