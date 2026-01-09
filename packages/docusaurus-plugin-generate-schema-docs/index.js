@@ -12,11 +12,12 @@ export default async function (context) {
 
     const extendCli = (cli) => {
         cli
-            .command('validate-schemas')
+            .command('validate-schemas [version]')
             .description('Validate JSON Schemas with the examples inside the schemas')
-            .action(async () => {
+            .action(async (version) => {
                 console.log('Validating GTM Schemas...');
-                const schemaPath = options?.path || path.join(context.siteDir, 'static/schemas');
+                const schemaVersion = version || 'next';
+                const schemaPath = path.join(context.siteDir, 'static/schemas', schemaVersion);
                 const success = await validateSchemas(schemaPath);
                 if (!success) {
                     console.error('Validation failed.');

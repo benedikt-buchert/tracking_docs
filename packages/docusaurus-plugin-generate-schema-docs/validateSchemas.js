@@ -5,6 +5,7 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import $RefParser from "@apidevtools/json-schema-ref-parser";
 import mergeJsonSchema from "json-schema-merge-allof";
+import processSchema from './helpers/processSchema';
 
 const validateSchemas = async (schemaPath) => {
     const ajv = new Ajv2020();
@@ -44,17 +45,7 @@ const validateSchemas = async (schemaPath) => {
     {
         const filePath = path.join(schemaPath, file);
 
-        // Dereference and merge, same as in generateEventDocs.js
-        const clonedSchema = await $RefParser.dereference(filePath, {
-            mutateInputSchema: false, dereference: {
-                circular: 'ignore'
-            }
-        });
-        const mergedSchema = mergeJsonSchema(clonedSchema, {
-            resolvers: {
-                defaultResolver: mergeJsonSchema.options.resolvers.title
-            }
-        });
+        const mergedSchema = await processSchema(filePath);
 
         const example_data = buildExampleFromSchema(mergedSchema);
 

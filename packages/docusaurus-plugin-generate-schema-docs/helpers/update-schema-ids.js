@@ -8,6 +8,25 @@ export default function updateSchemaIds(siteDir, url, version = null) {
         return;
     }
 
+    const getAllFiles = (dir, allFiles = []) => {
+        const files = fs.readdirSync(dir);
+
+        files.forEach(file => {
+            const filePath = path.join(dir, file);
+            if (fs.statSync(filePath).isDirectory())
+            {
+                getAllFiles(filePath, allFiles);
+            } else
+            {
+                if (file.endsWith('.json'))
+                {
+                    allFiles.push(filePath);
+                }
+            }
+        });
+        return allFiles;
+    };
+
     const versions = version ? [version] : JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
 
     for (const version of versions) {
@@ -15,14 +34,14 @@ export default function updateSchemaIds(siteDir, url, version = null) {
         if (!fs.existsSync(schemaDir)) {
             continue;
         }
-        const files = fs.readdirSync(schemaDir).filter(file => file.endsWith('.json'));
+        const files = getAllFiles(schemaDir);
 
         for (const file of files) {
-            const filePath = path.join(schemaDir, file);
-            const schema = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+            const schema = JSON.parse(fs.readFileSync(file, 'utf8'));
             const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-            schema.$id = `${baseUrl}/schemas/${version}/${file}`;
-            fs.writeFileSync(filePath, JSON.stringify(schema, null, 2));
+            const relativePath = path.relative(path.join(siteDir, 'static'), file);
+            schema.$id = `${baseUrl}/${relativePath.replace(/\\/g, '/')}`;
+            fs.writeFileSync(file, JSON.stringify(schema, null, 2));
             console.log(`Updated $id for ${file} in version ${version}`);
         }
     }
