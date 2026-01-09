@@ -5,7 +5,7 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import { themes as prismThemes } from 'prism-react-renderer';
-
+const isProduction = process.env.NODE_ENV === 'production';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
@@ -48,6 +48,7 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           lastVersion: '1.1.1',
+          includeCurrentVersion: !isProduction,
           versions: {
             current: {
               label: 'next',
