@@ -50,10 +50,13 @@ const config = {
           lastVersion: '1.1.1',
           includeCurrentVersion: !isProduction,
           versions: {
-            current: {
-              label: 'next',
-              banner: 'unreleased',
-            },
+            ...(!isProduction && {
+              current: {
+                            label: 'Next 🚧',
+                            path: 'next',
+                            banner: 'unreleased',
+                          },
+            }),
           },
         },
         theme: {
