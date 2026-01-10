@@ -1,0 +1,54 @@
+name: PR Commands
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  release_demo:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/release-demo')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR branch name
+        id: get_pr_branch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            return pr.data.head.ref;
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get_pr_branch.outputs.result }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Create Docusaurus version and version schemas
+        run: |
+          VERSION=$(echo "${{ github.event.comment.body }}" | cut -d' ' -f2)
+          npm run version -- $VERSION
+
+      - name: Commit and push versioned files
+        run: |
+          git add .
+          git commit -m "docs: version docs and schemas for $VERSION [skip ci]"
+          git push
+        env:
+          VERSION: $(echo "${{ github.event.comment.body }}" | cut -d' ' -f2)
