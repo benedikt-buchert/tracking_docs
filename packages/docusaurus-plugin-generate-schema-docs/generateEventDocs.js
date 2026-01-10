@@ -78,10 +78,12 @@ export default async function generateEventDocs(options) {
             bottomPartialComponent = '<BottomPartial />';
         }
 
+        const editUrl = `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+
         const mdxContent = MdxTemplate({
             schema,
             mergedSchema,
-            baseEditUrl,
+            editUrl,
             file,
             topPartialImport,
             bottomPartialImport,
