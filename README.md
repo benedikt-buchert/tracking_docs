@@ -73,13 +73,21 @@ To validate all schemas, run:
 npm run validate-schemas
 ```
 
-## Versioning
+## Release Process
 
-This plugin supports Docusaurus versioning for both documentation and schemas. When you create a new version, both the docs and schemas are versioned together.
+This project has a separated release process for the demo site and the plugin.
 
-### Creating a New Version
+### Demo Site Release
 
-**Important:** Do NOT use the standard `docusaurus docs:version` command, as it only versions documentation files and not the schemas. Instead, use the custom command provided by this plugin:
+1.  **Create a Pull Request**: Make your changes to the schemas in the `static/schemas/next` directory on a new branch and open a pull request.
+2.  **Create a Demo Version**: To create a new version of the demo site for previewing, add a comment to your pull request with the following format:
+    `/release-demo <version>`
+    For example: `/release-demo 1.2.0`
+3.  **CI Magic**: A GitHub Action will automatically run, generate the new version of the documentation and schemas, and push a new commit to your pull request branch.
+4.  **Preview**: The existing CI workflow will then build a preview of your pull request on Netlify, which will include the new version of the demo site.
+5.  **Merge**: Once you are happy with the preview, you can merge the pull request. The `gh-pages` workflow will then deploy the updated site to production.
+
+Alternatively, you can run the versioning command manually:
 
 ```bash
 npm run version 1.2.0
@@ -91,7 +99,7 @@ This is a shortcut for:
 npx docusaurus version-with-schemas 1.2.0
 ```
 
-### What This Command Does
+#### What This Command Does
 
 The `version-with-schemas` command performs the following steps automatically:
 
@@ -100,7 +108,7 @@ The `version-with-schemas` command performs the following steps automatically:
 3. **Updates schema IDs** - Updates all `$id` fields in the versioned schemas to include the version number
 4. **Generates documentation** - Generates MDX documentation for the new version
 
-### Directory Structure
+#### Directory Structure
 
 With versioning enabled, your project structure will look like:
 
@@ -117,38 +125,12 @@ demo/
 └── versions.json                  # List of all versions
 ```
 
-### Configuring Version Labels
+### Plugin Release
 
-In `docusaurus.config.js`, you can configure how versions are displayed:
-
-```javascript
-module.exports = {
-  presets: [
-    [
-      'classic',
-      {
-        docs: {
-          lastVersion: '1.1.1',  // The latest stable version
-          versions: {
-            current: {
-              label: 'next',           // Label for unreleased version
-              banner: 'unreleased',    // Shows "unreleased" banner
-            },
-          },
-        },
-      },
-    ],
-  ],
-};
-```
-
-### Workflow for New Versions
-
-1. **Work on next version** - Make changes to schemas in `static/schemas/next/`
-2. **Test locally** - The dev server automatically generates docs from the `next` schemas
-3. **Create version** - When ready to release, run `npm run version 1.2.0`
-4. **Commit changes** - The command creates new directories and updates `versions.json`
-5. **Continue development** - Keep working on `static/schemas/next/` for the next release
+1.  **Tag the `main` branch**: To release a new version of the plugin, create a tag on the `main` branch with the format `plugin-v<version>` and push it to the repository.
+    `git tag plugin-v1.2.0`
+    `git push origin plugin-v1.2.0`
+2.  **CI Magic**: A GitHub Action will automatically run, update the plugin's version, publish it to npm, and create a GitHub Release.
 
 ### Other Versioning Commands
 
@@ -164,6 +146,3 @@ Update schema IDs for all versions:
 npm run update-schema-ids
 ```
 
-## Deployment
-
-Deployment is handled automatically by a GitHub Action. Pushing changes to the `main` branch will trigger a workflow that builds the website and deplates it to GitHub Pages.
