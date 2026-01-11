@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`generateEventDocs should generate documentation correctly when no partials exist 1`] = `
+exports[`generateEventDocs (non-versioned) should generate documentation correctly 1`] = `
 "---
 title: Add to Cart Event
 description: "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications."
 sidebar_label: Add to Cart Event
-custom_edit_url: https://github.com/test-org/test-project/edit/main/demo/static/schemas/add-to-cart-event.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/add-to-cart-event.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
@@ -26,12 +26,90 @@ An add_to_cart event fires when a user adds one or more items to their shopping 
 "
 `;
 
-exports[`generateEventDocs should generate documentation with top and bottom partials when they exist 1`] = `
+exports[`generateEventDocs (non-versioned) should generate documentation correctly 2`] = `
+"---
+title: Choice Event
+description: "An example event that uses oneOf and anyOf."
+sidebar_label: Choice Event
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/choice-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Choice Event
+
+An example event that uses oneOf and anyOf.
+
+
+
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/one-of-event.schema.json","title":"Choice Event","description":"An example event that uses oneOf and anyOf.","type":"object","required":["event","user_id","payment_method"],"properties":{"event":{"type":"string","const":"one_of_event"},"user_id":{"description":"The user's ID.","oneOf":[{"type":"string","title":"User ID as String","description":"The user's ID as a string.","examples":["user-123"]},{"type":"integer","title":"User ID as Integer","description":"The user's ID as an integer.","examples":[123]}]},"payment_method":{"description":"The user's payment method.","anyOf":[{"title":"Credit Card","type":"object","properties":{"card_number":{"type":"string","examples":["1234-5678-9012-3456"]},"expiry_date":{"type":"string","examples":["12/26"]}},"required":["card_number","expiry_date"]},{"title":"PayPal","type":"object","properties":{"email":{"type":"string","format":"email","examples":["test@example.com"]}},"required":["email"]}]}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/one-of-event.schema.json","title":"Choice Event","description":"An example event that uses oneOf and anyOf.","type":"object","properties":{"event":{"type":"string","const":"one_of_event"},"user_id":{"description":"The user's ID.","oneOf":[{"type":"string","title":"User ID as String","description":"The user's ID as a string.","examples":["user-123"]},{"type":"integer","title":"User ID as Integer","description":"The user's ID as an integer.","examples":[123]}]},"payment_method":{"description":"The user's payment method.","anyOf":[{"title":"Credit Card","type":"object","properties":{"card_number":{"type":"string","examples":["1234-5678-9012-3456"]},"expiry_date":{"type":"string","examples":["12/26"]}},"required":["card_number","expiry_date"]},{"title":"PayPal","type":"object","properties":{"email":{"type":"string","format":"email","examples":["test@example.com"]}},"required":["email"]}]}},"required":["event","user_id","payment_method"]}} />
+
+
+"
+`;
+
+exports[`generateEventDocs (non-versioned) should generate documentation correctly 3`] = `
+"---
+title: Root Choice Event
+description: "An example event that has oneOf at the root level."
+sidebar_label: Root Choice Event
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-choice-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Root Choice Event
+
+An example event that has oneOf at the root level.
+
+
+
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Root Choice Event","description":"An example event that has oneOf at the root level.","oneOf":[{"title":"Option A","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}},{"title":"Option B","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}]}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Root Choice Event","description":"An example event that has oneOf at the root level.","oneOf":[{"title":"Option A","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}},{"title":"Option B","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}]}} />
+
+
+"
+`;
+
+exports[`generateEventDocs (non-versioned) should generate documentation correctly 4`] = `
+"---
+title: Root AnyOf Event
+description: "An example event that has anyOf at the root level."
+sidebar_label: Root AnyOf Event
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-any-of-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Root AnyOf Event
+
+An example event that has anyOf at the root level.
+
+
+
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-any-of-event.schema.json","title":"Root AnyOf Event","description":"An example event that has anyOf at the root level.","type":"object","anyOf":[{"title":"Has Param C","properties":{"param_c":{"type":"string","examples":["example_c"]}}},{"title":"Has Param D","properties":{"param_d":{"type":"boolean","examples":[true]}}}],"properties":{"event":{"type":"string","const":"any_of_event"}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-any-of-event.schema.json","title":"Root AnyOf Event","description":"An example event that has anyOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"any_of_event"}},"anyOf":[{"title":"Has Param C","properties":{"param_c":{"type":"string","examples":["example_c"]}}},{"title":"Has Param D","properties":{"param_d":{"type":"boolean","examples":[true]}}}]}} />
+
+
+"
+`;
+
+exports[`generateEventDocs (non-versioned) should generate documentation with top and bottom partials when they exist 1`] = `
 "---
 title: Add to Cart Event
 description: "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications."
 sidebar_label: Add to Cart Event
-custom_edit_url: https://github.com/test-org/test-project/edit/main/demo/static/schemas/add-to-cart-event.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/add-to-cart-event.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';

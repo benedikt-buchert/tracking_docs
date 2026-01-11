@@ -97,4 +97,12 @@ describe('validateSchemas', () => {
         }));
     });
 
+    it('should throw an error if duplicate schema IDs are found', async () => {
+        const schemaA = { $id: 'duplicate-id', type: 'object', properties: { a: { type: 'string' } } };
+        const schemaB = { $id: 'duplicate-id', type: 'object', properties: { b: { type: 'string' } } };
+        writeSchema(path.join(tmpDir, 'A'), 'schema-A.json', schemaA);
+        writeSchema(path.join(tmpDir, 'B'), 'schema-B.json', schemaB);
+
+        await expect(validateSchemas(tmpDir)).rejects.toThrow('schema with key or id "duplicate-id" already exists');
+    });
 });

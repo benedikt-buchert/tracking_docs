@@ -5,7 +5,7 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import { themes as prismThemes } from 'prism-react-renderer';
-
+const isProduction = process.env.NODE_ENV === 'production';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
@@ -47,6 +47,17 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          lastVersion: '1.2.0',
+          includeCurrentVersion: !isProduction,
+          versions: {
+            ...(!isProduction && {
+              current: {
+                            label: 'Next 🚧',
+                            path: 'next',
+                            banner: 'unreleased',
+                          },
+            }),
+          },
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -76,6 +87,10 @@ const config = {
             sidebarId: 'tutorialSidebar',
             position: 'left',
             label: 'Docs',
+          },
+          {
+            type: 'docsVersionDropdown',
+            position: 'right',
           },
           {
             href: 'https://github.com/benedikt-buchert/tracking_docs',

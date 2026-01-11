@@ -1,6 +1,28 @@
-const buildExampleFromSchema = (schema) => {
+const buildExampleFromSchema = (schema, getOneOfAnyOfChoice = () => 0, onlyProperty = null) => {
+    if (!schema) return {};
+
+    if (schema.oneOf && schema.oneOf.length > 0) {
+        const choice = getOneOfAnyOfChoice(schema.oneOf);
+        return buildExampleFromSchema(schema.oneOf[choice], getOneOfAnyOfChoice, onlyProperty);
+    }
+    if (schema.anyOf && schema.anyOf.length > 0) {
+        const choice = getOneOfAnyOfChoice(schema.anyOf);
+        return buildExampleFromSchema(schema.anyOf[choice], getOneOfAnyOfChoice, onlyProperty);
+    }
+
+
     const buildValue = (prop) => {
         if (!prop) return undefined;
+
+        // Handle oneOf/anyOf by picking the chosen option
+        if (prop.oneOf && prop.oneOf.length > 0) {
+            const choice = getOneOfAnyOfChoice(prop.oneOf);
+            return buildValue(prop.oneOf[choice]);
+        }
+        if (prop.anyOf && prop.anyOf.length > 0) {
+            const choice = getOneOfAnyOfChoice(prop.anyOf);
+            return buildValue(prop.anyOf[choice]);
+        }
 
         // 1. Prefer explicit examples or constants if available
         if (prop.examples && prop.examples.length) return prop.examples[0];
@@ -68,6 +90,9 @@ const buildExampleFromSchema = (schema) => {
     {
         const out = {};
         Object.entries(schema.properties).forEach(([k, p]) => {
+            if (onlyProperty && k !== onlyProperty) {
+                return;
+            }
             const val = buildValue(p);
             // Only add top-level keys if they are not undefined
             if (val !== undefined)

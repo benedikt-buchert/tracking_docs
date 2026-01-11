@@ -45,7 +45,7 @@ npm install --save docusaurus-plugin-generate-schema-docs
 To generate the documentation from your schemas, run the following command:
 
 ```bash
-npx docusaurus generate schema-docs
+npm run gen-docs
 ```
 
 This will generate MDX files in the `docs/events` directory.
@@ -55,10 +55,20 @@ This will generate MDX files in the `docs/events` directory.
 To validate your schemas, run the following command:
 
 ```bash
-npx docusaurus validate-schemas
+npm run validate-schemas
 ```
 
 This will validate the schemas in the `schemas` directory.
+
+### Update Schema IDs
+
+When using versioning, you can update the `$id` of your versioned schemas by running:
+
+```bash
+npm run update-schema-ids
+```
+
+This command will update the `$id` of all schemas in the versioned directories.
 
 ## How it Works
 
@@ -66,9 +76,36 @@ The plugin reads your JSON schemas, dereferences any `$ref` properties, and merg
 
 The validation script builds an example from each schema and validates it against the schema itself, ensuring your examples are always in sync with your schemas.
 
+## Versioning
+
+This plugin supports documentation and schema versioning, integrated with Docusaurus's native versioning system.
+
+### Enabling Versioning
+
+To enable versioning, you need to:
+
+1.  **Enable Docusaurus Versioning**: Follow the [Docusaurus documentation](https://docusaurus.io/docs/versioning) to enable versioning for your site. This typically involves creating a `versions.json` file.
+
+2.  **Organize Your Schemas**: Create a versioned directory structure for your schemas. Instead of placing your schemas in `static/schemas`, you should have:
+    *   `static/schemas/next`: For the "current" or "next" version of your schemas.
+    *   `static/schemas/<version>`: For each version of your schemas (e.g., `static/schemas/1.1.1`).
+
+When versioning is enabled, the plugin will automatically detect the `versions.json` file and generate documentation for each version, as well as for the `current` version.
+
+### Non-Versioned Mode
+
+If you do not have a `versions.json` file in your `siteDir`, the plugin will run in non-versioned mode. It will read your schemas from `static/schemas` and generate documentation in `docs/events`.
+
+### Schema `$id` Versioning
+
+When using the versioning feature, the plugin will automatically update the `$id` of your schemas to include the version number. For example, if your site's `url` is `https://example.com` and you have a schema `my-event.json` in version `1.0.0`, the `$id` will be updated to `https://example.com/schemas/1.0.0/my-event.json`.
+
+This is done automatically by the plugin. However, if you need to update the `$id`s of your schemas manually, you can use the `update-schema-ids.js` script located in the plugin's `helpers` directory.
+
 ## Partials
 
 You can provide additional content to the generated documentation pages by creating partial files. Partials are Markdown files that can be automatically included in the generated pages.
+
 
 ### Naming Convention
 
