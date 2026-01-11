@@ -37,6 +37,11 @@
           "title": "Credit Card",
           "type": "object",
           "properties": {
+            "payment_type": {
+              "type": "string",
+              "enum": ["credit_card", "debit_card"],
+              "examples": ["credit_card"]
+            },
             "card_number": {
               "type": "string",
               "examples": [
@@ -59,6 +64,10 @@
           "title": "PayPal",
           "type": "object",
           "properties": {
+            "payment_type": {
+              "type": "string",
+              "const": "paypal"
+            },
             "email": {
               "type": "string",
               "format": "email",
