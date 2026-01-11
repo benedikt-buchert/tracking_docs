@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "gen-docs": "docusaurus generate schema-docs",
+    "gen-docs": "docusaurus generate-schema-docs",
     "validate-schemas": "docusaurus validate-schemas",
+    "update-schema-ids": "docusaurus update-schema-ids",
+    "version": "docusaurus version-with-schemas",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",

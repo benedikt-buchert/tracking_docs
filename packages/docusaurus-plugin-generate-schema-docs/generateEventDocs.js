@@ -3,13 +3,17 @@ import path from 'path';
 import loadSchema from './helpers/loadSchema';
 import processSchema from './helpers/processSchema';
 import MdxTemplate from './helpers/mdx-template.js';
+import { getPathsForVersion } from './helpers/path-helpers.js';
 
 export default async function generateEventDocs(options) {
-    const { organizationName, projectName, siteDir } = options || {};
+    const { organizationName, projectName, siteDir, version, url } = options || {};
+
+    const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
+
     const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
     // CONFIGURATION
-    const SCHEMA_DIR = path.join(siteDir, 'static/schemas'); // Where your JSON files are
-    const OUTPUT_DIR = path.join(siteDir, 'docs/events'); // Where MDX goes
+    const SCHEMA_DIR = schemaDir; // Where your JSON files are
+    const OUTPUT_DIR = outputDir; // Where MDX goes
     const PARTIALS_DIR = path.join(siteDir, 'docs/partials'); // Where your partials are
 
     // Ensure output dir exists
@@ -27,6 +31,18 @@ export default async function generateEventDocs(options) {
     {
         const filePath = path.join(SCHEMA_DIR, file);
         const schema = loadSchema(filePath);
+
+        // Update the $id of the schema in memory for documentation generation
+        // This doesn't modify the file on disk - that's handled by update-schema-ids
+        if (version) {
+            const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+            if (version !== 'current') {
+                schema.$id = `${baseUrl}/schemas/${version}/${file}`;
+            } else {
+                schema.$id = `${baseUrl}/schemas/next/${file}`;
+            }
+        }
+
         const mergedSchema = await processSchema(filePath);
         const eventName = file.replace('.json', '');
 
@@ -48,10 +64,12 @@ export default async function generateEventDocs(options) {
             bottomPartialComponent = '<BottomPartial />';
         }
 
+        const editUrl = `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+
         const mdxContent = MdxTemplate({
             schema,
             mergedSchema,
-            baseEditUrl,
+            editUrl,
             file,
             topPartialImport,
             bottomPartialImport,

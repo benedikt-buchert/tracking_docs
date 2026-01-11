@@ -1,12 +1,9 @@
-name: Create Release
+name: Release Plugin
 
 on:
-  workflow_dispatch:
-    inputs:
-      semver:
-        description: "The semver bump type (patch, minor, major)"
-        required: true
-        default: "patch"
+  push:
+    tags:
+      - "plugin-v*"
 
 jobs:
   release:
@@ -21,7 +18,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "24"
           registry-url: "https://registry.npmjs.org"
@@ -38,19 +35,21 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Bump version and create tag
-        id: bump_version
+      - name: Update package version
         run: |
-          (cd packages/docusaurus-plugin-generate-schema-docs && npm version ${{ github.event.inputs.semver }})
-          echo "tag=$(git describe --tags --abbrev=0)" >> $GITHUB_OUTPUT
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/refs\/tags\/plugin-v//')
+          npm --prefix packages/docusaurus-plugin-generate-schema-docs version $VERSION --no-git-tag-version
 
-      - name: Push changes and tags
-        run: git push --follow-tags
+      - name: Commit and push package.json
+        run: |
+          git add packages/docusaurus-plugin-generate-schema-docs/package.json
+          git commit -m "chore(release): update plugin version to plugin-v$(echo ${{ github.ref_name }} | sed 's/refs\/tags\/plugin-v//') [skip ci]"
+          git push
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.bump_version.outputs.tag }}
+          tag_name: ${{ github.ref_name }}
           generate_release_notes: true
 
       - name: Publish package
