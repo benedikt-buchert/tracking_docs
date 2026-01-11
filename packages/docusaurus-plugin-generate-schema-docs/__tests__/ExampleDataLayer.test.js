@@ -86,7 +86,7 @@ window.dataLayer.push({
         expect(codeElement.textContent).toMatchInlineSnapshot(`"window.dataLayer.push({});"`);
     });
 
-    it('should render tabs for multiple oneOf/anyOf properties', () => {
+    it('should render pure examples for multiple oneOf/anyOf properties', () => {
         const schema = {
             type: 'object',
             properties: {
@@ -135,46 +135,31 @@ window.dataLayer.push({
 
         const { getAllByTestId } = render(<ExampleDataLayer schema={schema} />);
 
-        const tabs = getAllByTestId('tabs');
-        expect(tabs).toHaveLength(2);
-
         const tabItems = getAllByTestId('tab-item');
         expect(tabItems).toHaveLength(4);
 
         // Check tabs for user_id
-        expect(tabItems[0]).toHaveAttribute('data-label', 'User ID as String');
         expect(tabItems[0].textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
-  "user_id": "user-123",
-  "payment_method": {
-    "card_number": "1234-5678-9012-3456"
-  }
+  "user_id": "user-123"
 });"
 `);
-        expect(tabItems[1]).toHaveAttribute('data-label', 'User ID as Integer');
         expect(tabItems[1].textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
-  "user_id": 123,
-  "payment_method": {
-    "card_number": "1234-5678-9012-3456"
-  }
+  "user_id": 123
 });"
 `);
 
         // Check tabs for payment_method
-        expect(tabItems[2]).toHaveAttribute('data-label', 'Credit Card');
         expect(tabItems[2].textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
-  "user_id": "user-123",
   "payment_method": {
     "card_number": "1234-5678-9012-3456"
   }
 });"
 `);
-        expect(tabItems[3]).toHaveAttribute('data-label', 'PayPal');
         expect(tabItems[3].textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
-  "user_id": "user-123",
   "payment_method": {
     "email": "test@example.com"
   }

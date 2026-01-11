@@ -22,9 +22,18 @@ const generateCodeSnippet = (example, schema) => {
     return codeSnippet;
 };
 
+const getOneOfAnyOfProperties = (schema) => {
+    if (schema.oneOf || schema.anyOf) {
+        return [['root', schema]];
+    }
+    if (schema.properties) {
+        return Object.entries(schema.properties).filter(([, prop]) => prop.oneOf || prop.anyOf);
+    }
+    return [];
+}
+
 export default function ExampleDataLayer({ schema }) {
-    const properties = schema.properties || {};
-    const oneOfAnyOfProperties = Object.entries(properties).filter(([, prop]) => prop.oneOf || prop.anyOf);
+    const oneOfAnyOfProperties = getOneOfAnyOfProperties(schema);
 
     if (oneOfAnyOfProperties.length > 0) {
         return (
@@ -33,16 +42,17 @@ export default function ExampleDataLayer({ schema }) {
                     const choices = prop.oneOf || prop.anyOf;
                     return (
                         <div key={key} style={{ marginTop: '20px' }}>
-                            <Heading as="h4"><code>{key}</code> options:</Heading>
+                            {key !== 'root' && <Heading as="h4"><code>{key}</code> options:</Heading>}
                             <Tabs>
                                 {choices.map((choice, index) => {
                                     const getChoice = (schemas) => {
                                         if (schemas === choices) {
                                             return index;
                                         }
-                                        return 0; // Default to first choice for other oneOf/anyOf
+                                        return 0;
                                     };
-                                    const example = buildExampleFromSchema(schema, getChoice);
+                                    const onlyProperty = key === 'root' ? null : key;
+                                    const example = buildExampleFromSchema(schema, getChoice, onlyProperty);
                                     const codeSnippet = generateCodeSnippet(example, schema);
                                     return (
                                         <TabItem value={index} label={choice.title || `Option ${index + 1}`} key={index}>

@@ -47,7 +47,7 @@ describe('generateEventDocs (non-versioned)', () => {
 
         await generateEventDocs(options);
 
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(4);
 
         const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
             acc[path.basename(call[0])] = call[1];
@@ -56,6 +56,8 @@ describe('generateEventDocs (non-versioned)', () => {
 
         expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
         expect(writtenFiles['choice-event.mdx']).toMatchSnapshot();
+        expect(writtenFiles['root-choice-event.mdx']).toMatchSnapshot();
+        expect(writtenFiles['root-any-of-event.mdx']).toMatchSnapshot();
     });
 
     it('should generate documentation with top and bottom partials when they exist', async () => {
@@ -78,7 +80,7 @@ describe('generateEventDocs (non-versioned)', () => {
         await generateEventDocs(options);
 
         // Expect writeFileSync to have been called for each schema
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(4);
 
         const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
             acc[path.basename(call[0])] = call[1];

@@ -96,4 +96,25 @@ describe('buildExampleFromSchema with oneOf and anyOf', () => {
             },
         });
     });
+
+    it('should generate an example with only the specified property', () => {
+        const schema = {
+            type: 'object',
+            properties: {
+                user_id: {
+                    type: 'string',
+                    examples: ['user-123'],
+                },
+                event: {
+                    type: 'string',
+                    examples: ['test_event'],
+                },
+            },
+        };
+
+        const example = buildExampleFromSchema(schema, () => 0, 'user_id');
+        expect(example).toEqual({
+            user_id: 'user-123',
+        });
+    });
 });
