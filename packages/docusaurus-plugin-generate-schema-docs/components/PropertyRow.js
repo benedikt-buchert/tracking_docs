@@ -3,6 +3,7 @@ import clsx from 'clsx';
 
 // Helper to format the property type
 const getPropertyType = (type) => {
+    if (!type) return '';
     return Array.isArray(type) ? type.join(' | ') : type;
 };
 
@@ -22,6 +23,26 @@ const formatExamples = (examples) => {
 const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
     const isReq = requiredList.includes(propertyKey);
     const constraints = getConstraints(prop, isReq);
+
+    const hasOneOf = prop.oneOf || (prop.items && prop.items.oneOf);
+    const hasAnyOf = prop.anyOf || (prop.items && prop.items.anyOf);
+
+    if (hasOneOf || hasAnyOf) {
+        const choices = hasOneOf || hasAnyOf;
+        const types = choices.map(choice => choice.type).filter(Boolean);
+        const uniqueTypes = [...new Set(types)];
+
+        return (
+            <tr className={clsx(isReq && 'required-row')}>
+                <td>
+                    <strong>{propertyKey}</strong>
+                </td>
+                <td><code>{getPropertyType(uniqueTypes)}</code></td>
+                <td colSpan="3">{prop.description || ''}</td>
+            </tr>
+        );
+    }
+
 
     const childProperties = prop.properties || (prop.items && prop.items.properties);
     const hasChildren = childProperties && Object.keys(childProperties).length > 0;

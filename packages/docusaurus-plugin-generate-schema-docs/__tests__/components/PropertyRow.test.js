@@ -64,4 +64,39 @@ describe('PropertyRow', () => {
         );
         expect(getByText('foo, bar')).toBeInTheDocument();
     });
+
+    it('renders oneOf property with combined types', () => {
+        const prop = {
+            oneOf: [
+                { type: 'string' },
+                { type: 'integer' },
+            ],
+            description: 'The ID of the user.'
+        };
+        const { getByText } = render(
+            <table>
+                <tbody>
+                    <PropertyRow propertyKey="user_id" prop={prop} requiredList={[]} getConstraints={getConstraints} />
+                </tbody>
+            </table>
+        );
+        expect(getByText('user_id')).toBeInTheDocument();
+        expect(getByText('string | integer')).toBeInTheDocument();
+        expect(getByText('The ID of the user.')).toBeInTheDocument();
+    });
+
+    it('does not render empty code tag for constraints', () => {
+        const prop = { type: 'string' };
+        const { container } = render(
+            <table>
+                <tbody>
+                    <PropertyRow propertyKey="name" prop={prop} requiredList={[]} getConstraints={() => []} />
+                </tbody>
+            </table>
+        );
+        // There should be no `<code>` tag if there are no constraints.
+        // The cell for constraints should be empty.
+        const cells = container.querySelectorAll('td');
+        expect(cells[2].innerHTML).toBe('');
+    });
 });

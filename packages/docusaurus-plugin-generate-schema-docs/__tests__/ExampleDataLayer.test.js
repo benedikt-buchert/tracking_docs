@@ -2,13 +2,22 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExampleDataLayer, { findClearableProperties } from '../components/ExampleDataLayer';
-import buildExampleFromSchema from '../helpers/buildExampleFromSchema';
-
-jest.mock('../helpers/buildExampleFromSchema', () => jest.fn());
 
 jest.mock('@theme/CodeBlock', () => {
     return function CodeBlock({ children }) {
         return <pre>{children}</pre>;
+    };
+});
+
+jest.mock('@theme/Tabs', () => {
+    return function Tabs({ children }) {
+        return <div data-testid="tabs">{children}</div>;
+    };
+});
+
+jest.mock('@theme/TabItem', () => {
+    return function TabItem({ children, label }) {
+        return <div data-testid="tab-item" data-label={label}>{children}</div>;
     };
 });
 
@@ -24,12 +33,9 @@ describe('ExampleDataLayer', () => {
                 event: { type: 'string', examples: ['test_event'] },
             },
         };
-        const example = { event: 'test_event' };
-        buildExampleFromSchema.mockReturnValue(example);
 
         const { container } = render(<ExampleDataLayer schema={schema} />);
 
-        expect(buildExampleFromSchema).toHaveBeenCalledWith(schema);
         const codeElement = container.querySelector('pre');
         expect(codeElement.textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
@@ -45,20 +51,13 @@ describe('ExampleDataLayer', () => {
                 ecommerce: {
                     'x-gtm-clear': true,
                     type: 'object',
-                    properties: { items: { type: 'array' } },
+                    properties: { items: { type: 'array', examples: [[{ item_name: 'donuts' }]] } },
                 },
-                user_id: { type: 'string' }
+                user_id: { type: 'string', examples: ['123'] }
             },
         };
-        const example = {
-            ecommerce: { items: [{ item_name: 'donuts' }] },
-            user_id: '123'
-        };
-        buildExampleFromSchema.mockReturnValue(example);
 
         const { container } = render(<ExampleDataLayer schema={schema} />);
-
-        expect(buildExampleFromSchema).toHaveBeenCalledWith(schema);
 
         const codeElement = container.querySelector('pre');
         expect(codeElement.textContent).toMatchInlineSnapshot(`
@@ -80,57 +79,105 @@ window.dataLayer.push({
 
     it('should render correctly with an empty schema', () => {
         const schema = {};
-        const example = {};
-        buildExampleFromSchema.mockReturnValue(example);
 
         const { container } = render(<ExampleDataLayer schema={schema} />);
 
-        expect(buildExampleFromSchema).toHaveBeenCalledWith(schema);
         const codeElement = container.querySelector('pre');
         expect(codeElement.textContent).toMatchInlineSnapshot(`"window.dataLayer.push({});"`);
     });
 
-    it('should not reset properties that are not in the final example', () => {
+    it('should render tabs for multiple oneOf/anyOf properties', () => {
         const schema = {
             type: 'object',
             properties: {
-                ecommerce: {
-                    'x-gtm-clear': true,
-                    type: 'object',
-                    properties: { items: { type: 'array' } },
+                user_id: {
+                    description: "The user's ID.",
+                    oneOf: [
+                        {
+                            type: 'string',
+                            title: 'User ID as String',
+                            examples: ['user-123'],
+                        },
+                        {
+                            type: 'integer',
+                            title: 'User ID as Integer',
+                            examples: [123],
+                        },
+                    ],
                 },
-                user_data: {
-                    'x-gtm-clear': true,
-                    type: 'object'
+                payment_method: {
+                    description: "The user's payment method.",
+                    anyOf: [
+                        {
+                            title: 'Credit Card',
+                            type: 'object',
+                            properties: {
+                                card_number: {
+                                    type: 'string',
+                                    examples: ['1234-5678-9012-3456'],
+                                },
+                            },
+                        },
+                        {
+                            title: 'PayPal',
+                            type: 'object',
+                            properties: {
+                                email: {
+                                    type: 'string',
+                                    examples: ['test@example.com'],
+                                },
+                            },
+                        },
+                    ],
                 },
-                event: { type: 'string' }
             },
         };
-        // buildExampleFromSchema will not include user_data because it's an empty object
-        const example = {
-            ecommerce: { items: [{ item_name: 'donuts' }] },
-            event: 'purchase'
-        };
-        buildExampleFromSchema.mockReturnValue(example);
 
-        const { container } = render(<ExampleDataLayer schema={schema} />);
+        const { getAllByTestId } = render(<ExampleDataLayer schema={schema} />);
 
-        expect(buildExampleFromSchema).toHaveBeenCalledWith(schema);
+        const tabs = getAllByTestId('tabs');
+        expect(tabs).toHaveLength(2);
 
-        const codeElement = container.querySelector('pre');
-        expect(codeElement.textContent).toMatchInlineSnapshot(`
+        const tabItems = getAllByTestId('tab-item');
+        expect(tabItems).toHaveLength(4);
+
+        // Check tabs for user_id
+        expect(tabItems[0]).toHaveAttribute('data-label', 'User ID as String');
+        expect(tabItems[0].textContent).toMatchInlineSnapshot(`
 "window.dataLayer.push({
-  "ecommerce": null
-});
-window.dataLayer.push({
-  "ecommerce": {
-    "items": [
-      {
-        "item_name": "donuts"
-      }
-    ]
-  },
-  "event": "purchase"
+  "user_id": "user-123",
+  "payment_method": {
+    "card_number": "1234-5678-9012-3456"
+  }
+});"
+`);
+        expect(tabItems[1]).toHaveAttribute('data-label', 'User ID as Integer');
+        expect(tabItems[1].textContent).toMatchInlineSnapshot(`
+"window.dataLayer.push({
+  "user_id": 123,
+  "payment_method": {
+    "card_number": "1234-5678-9012-3456"
+  }
+});"
+`);
+
+        // Check tabs for payment_method
+        expect(tabItems[2]).toHaveAttribute('data-label', 'Credit Card');
+        expect(tabItems[2].textContent).toMatchInlineSnapshot(`
+"window.dataLayer.push({
+  "user_id": "user-123",
+  "payment_method": {
+    "card_number": "1234-5678-9012-3456"
+  }
+});"
+`);
+        expect(tabItems[3]).toHaveAttribute('data-label', 'PayPal');
+        expect(tabItems[3].textContent).toMatchInlineSnapshot(`
+"window.dataLayer.push({
+  "user_id": "user-123",
+  "payment_method": {
+    "email": "test@example.com"
+  }
 });"
 `);
     });

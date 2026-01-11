@@ -3,8 +3,6 @@ import path from 'path';
 import buildExampleFromSchema from './helpers/buildExampleFromSchema';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
-import $RefParser from "@apidevtools/json-schema-ref-parser";
-import mergeJsonSchema from "json-schema-merge-allof";
 import processSchema from './helpers/processSchema';
 
 const validateSchemas = async (schemaPath) => {

@@ -1,23 +1,16 @@
 import React from 'react';
 import CodeBlock from '@theme/CodeBlock';
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Heading from '@theme/Heading';
 import buildExampleFromSchema from '../helpers/buildExampleFromSchema';
 
-export default function ExampleDataLayer({ schema }) {
-    // 1. Identify properties that need to be reset (cleared) first
+const generateCodeSnippet = (example, schema) => {
     const clearableProperties = findClearableProperties(schema || {});
-
-    // 2. Build the main example data
-    const example = buildExampleFromSchema(schema || {});
-
-    // 3. Construct the code snippet
     let codeSnippet = '';
-
-    // Filter properties to reset to only those present in the example
     const propertiesToClear = clearableProperties.filter(prop => prop in example);
 
-    // If there are properties to reset, push them as null first
-    if (propertiesToClear.length > 0)
-    {
+    if (propertiesToClear.length > 0) {
         const resetObject = {};
         propertiesToClear.forEach(prop => {
             resetObject[prop] = null;
@@ -25,9 +18,48 @@ export default function ExampleDataLayer({ schema }) {
         codeSnippet += `window.dataLayer.push(${JSON.stringify(resetObject, null, 2)});\n`;
     }
 
-    // Append the main data payload
     codeSnippet += `window.dataLayer.push(${JSON.stringify(example, null, 2)});`;
+    return codeSnippet;
+};
 
+export default function ExampleDataLayer({ schema }) {
+    const properties = schema.properties || {};
+    const oneOfAnyOfProperties = Object.entries(properties).filter(([, prop]) => prop.oneOf || prop.anyOf);
+
+    if (oneOfAnyOfProperties.length > 0) {
+        return (
+            <>
+                {oneOfAnyOfProperties.map(([key, prop]) => {
+                    const choices = prop.oneOf || prop.anyOf;
+                    return (
+                        <div key={key} style={{ marginTop: '20px' }}>
+                            <Heading as="h4"><code>{key}</code> options:</Heading>
+                            <Tabs>
+                                {choices.map((choice, index) => {
+                                    const getChoice = (schemas) => {
+                                        if (schemas === choices) {
+                                            return index;
+                                        }
+                                        return 0; // Default to first choice for other oneOf/anyOf
+                                    };
+                                    const example = buildExampleFromSchema(schema, getChoice);
+                                    const codeSnippet = generateCodeSnippet(example, schema);
+                                    return (
+                                        <TabItem value={index} label={choice.title || `Option ${index + 1}`} key={index}>
+                                            <CodeBlock language="javascript">{codeSnippet}</CodeBlock>
+                                        </TabItem>
+                                    );
+                                })}
+                            </Tabs>
+                        </div>
+                    );
+                })}
+            </>
+        );
+    }
+
+    const example = buildExampleFromSchema(schema);
+    const codeSnippet = generateCodeSnippet(example, schema);
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>
 };
 

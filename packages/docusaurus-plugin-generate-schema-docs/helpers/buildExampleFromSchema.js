@@ -1,6 +1,16 @@
-const buildExampleFromSchema = (schema) => {
+const buildExampleFromSchema = (schema, getOneOfAnyOfChoice = () => 0) => {
     const buildValue = (prop) => {
         if (!prop) return undefined;
+
+        // Handle oneOf/anyOf by picking the first option
+        if (prop.oneOf && prop.oneOf.length > 0) {
+            const choice = getOneOfAnyOfChoice(prop.oneOf);
+            return buildValue(prop.oneOf[choice]);
+        }
+        if (prop.anyOf && prop.anyOf.length > 0) {
+            const choice = getOneOfAnyOfChoice(prop.anyOf);
+            return buildValue(prop.anyOf[choice]);
+        }
 
         // 1. Prefer explicit examples or constants if available
         if (prop.examples && prop.examples.length) return prop.examples[0];

@@ -8,12 +8,15 @@ import path from 'path';
 
 jest.mock('fs', () => {
     const originalFs = jest.requireActual('fs');
+    const path = require('path');
+    const schemaDir = path.resolve(__dirname, '__fixtures__/static/schemas');
+    const files = originalFs.readdirSync(schemaDir);
     return {
         ...originalFs,
         writeFileSync: jest.fn(),
         mkdirSync: jest.fn(),
         existsSync: jest.fn(),
-        readdirSync: originalFs.readdirSync,
+        readdirSync: jest.fn().mockReturnValue(files),
         readFileSync: originalFs.readFileSync,
     };
 });
@@ -37,21 +40,22 @@ describe('generateEventDocs (non-versioned)', () => {
         fs.existsSync.mockClear();
     });
 
-    it('should generate documentation correctly when no partials exist', async () => {
+    it('should generate documentation correctly', async () => {
         console.log = jest.fn(); // suppress console.log
 
-        // Simulate that no partials exist
         fs.existsSync.mockReturnValue(false);
 
         await generateEventDocs(options);
 
-        // Expect writeFileSync to have been called once for each schema
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
 
-        // Check the content of the generated file
-        const [filePath, content] = fs.writeFileSync.mock.calls[0];
-        expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
-        expect(content).toMatchSnapshot();
+        const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
+            acc[path.basename(call[0])] = call[1];
+            return acc;
+        }, {});
+
+        expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
+        expect(writtenFiles['one-of-event.mdx']).toMatchSnapshot();
     });
 
     it('should generate documentation with top and bottom partials when they exist', async () => {
@@ -73,12 +77,14 @@ describe('generateEventDocs (non-versioned)', () => {
 
         await generateEventDocs(options);
 
-        // Expect writeFileSync to have been called once for each schema
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
+        // Expect writeFileSync to have been called for each schema
+        expect(fs.writeFileSync).toHaveBeenCalledTimes(2);
 
-        // Check the content of the generated file
-        const [filePath, content] = fs.writeFileSync.mock.calls[0];
-        expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
-        expect(content).toMatchSnapshot();
+        const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
+            acc[path.basename(call[0])] = call[1];
+            return acc;
+        }, {});
+
+        expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
     });
 });
