@@ -55,7 +55,7 @@ describe('generateEventDocs (non-versioned)', () => {
         }, {});
 
         expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
-        expect(writtenFiles['one-of-event.mdx']).toMatchSnapshot();
+        expect(writtenFiles['choice-event.mdx']).toMatchSnapshot();
     });
 
     it('should generate documentation with top and bottom partials when they exist', async () => {

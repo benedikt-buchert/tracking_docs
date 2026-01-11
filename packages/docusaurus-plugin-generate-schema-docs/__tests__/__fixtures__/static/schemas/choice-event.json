@@ -1,7 +1,7 @@
 {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://example.com/one-of-event.schema.json",
-    "title": "OneOf Event",
+    "title": "Choice Event",
     "description": "An example event that uses oneOf and anyOf.",
     "type": "object",
     "properties": {

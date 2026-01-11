@@ -9,8 +9,7 @@ const getPropertyType = (type) => {
 
 // Helper to format examples
 const formatExamples = (examples) => {
-    if (!examples)
-    {
+    if (!examples) {
         return '';
     }
     return examples
@@ -20,38 +19,40 @@ const formatExamples = (examples) => {
         .join(', ');
 };
 
-const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
-    const isReq = requiredList.includes(propertyKey);
+/**
+ * Renders a simplified row for properties that have `oneOf` or `anyOf`.
+ * It displays the property key, a combined list of possible types, and the description.
+ */
+const OneOfAnyOfRow = ({ propertyKey, prop, isReq }) => {
+    const choices = prop.oneOf || prop.anyOf || (prop.items && (prop.items.oneOf || prop.items.anyOf));
+    const types = choices.map(choice => choice.type).filter(Boolean);
+    const uniqueTypes = [...new Set(types)];
+
+    return (
+        <tr className={clsx(isReq && 'required-row')}>
+            <td>
+                <strong>{propertyKey}</strong>
+            </td>
+            <td><code>{getPropertyType(uniqueTypes)}</code></td>
+            <td colSpan="3">{prop.description || ''}</td>
+        </tr>
+    );
+};
+
+/**
+ * Renders a default row for a regular schema property.
+ * It displays the property key, type, constraints, examples, and description.
+ * It also handles nested properties by showing an indicator.
+ */
+const DefaultRow = ({ propertyKey, prop, isReq, getConstraints }) => {
     const constraints = getConstraints(prop, isReq);
-
-    const hasOneOf = prop.oneOf || (prop.items && prop.items.oneOf);
-    const hasAnyOf = prop.anyOf || (prop.items && prop.items.anyOf);
-
-    if (hasOneOf || hasAnyOf) {
-        const choices = hasOneOf || hasAnyOf;
-        const types = choices.map(choice => choice.type).filter(Boolean);
-        const uniqueTypes = [...new Set(types)];
-
-        return (
-            <tr className={clsx(isReq && 'required-row')}>
-                <td>
-                    <strong>{propertyKey}</strong>
-                </td>
-                <td><code>{getPropertyType(uniqueTypes)}</code></td>
-                <td colSpan="3">{prop.description || ''}</td>
-            </tr>
-        );
-    }
-
-
     const childProperties = prop.properties || (prop.items && prop.items.properties);
     const hasChildren = childProperties && Object.keys(childProperties).length > 0;
 
     const isObject = prop.type === 'object';
     const isArrayOfObjects = prop.type === 'array' && prop.items && prop.items.type === 'object';
 
-    if ((isObject || isArrayOfObjects) && !hasChildren)
-    {
+    if ((isObject || isArrayOfObjects) && !hasChildren) {
         return null;
     }
 
@@ -90,6 +91,23 @@ const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
             ))}
         </React.Fragment>
     );
+};
+
+/**
+ * Renders a single row in the properties table.
+ * It determines whether the property is a regular property or a `oneOf`/`anyOf` property
+ * and renders the appropriate component.
+ */
+const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
+    const isReq = requiredList.includes(propertyKey);
+    const hasOneOf = prop.oneOf || (prop.items && prop.items.oneOf);
+    const hasAnyOf = prop.anyOf || (prop.items && prop.items.anyOf);
+
+    if (hasOneOf || hasAnyOf) {
+        return <OneOfAnyOfRow propertyKey={propertyKey} prop={prop} isReq={isReq} />;
+    }
+
+    return <DefaultRow propertyKey={propertyKey} prop={prop} isReq={isReq} getConstraints={getConstraints} />;
 };
 
 export default PropertyRow;
