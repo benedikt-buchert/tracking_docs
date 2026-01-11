@@ -3,26 +3,12 @@ import path from 'path';
 import loadSchema from './helpers/loadSchema';
 import processSchema from './helpers/processSchema';
 import MdxTemplate from './helpers/mdx-template.js';
+import { getPathsForVersion } from './helpers/path-helpers.js';
 
 export default async function generateEventDocs(options) {
     const { organizationName, projectName, siteDir, version, url } = options || {};
 
-    let schemaDir;
-    let outputDir;
-
-    if (version) {
-        if (version !== 'current') {
-            schemaDir = path.join(siteDir, 'static/schemas', version);
-            outputDir = path.join(siteDir, 'versioned_docs', `version-${version}`, 'events');
-        } else {
-            schemaDir = path.join(siteDir, 'static/schemas', 'next');
-            outputDir = path.join(siteDir, 'docs/events');
-        }
-    } else {
-        // Non-versioned
-        schemaDir = path.join(siteDir, 'static/schemas');
-        outputDir = path.join(siteDir, 'docs/events');
-    }
+    const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
 
     const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
     // CONFIGURATION

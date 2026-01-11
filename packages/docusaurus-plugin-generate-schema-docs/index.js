@@ -1,3 +1,4 @@
+import { getPathsForVersion } from './helpers/path-helpers.js';
 import updateSchemaIds from './helpers/update-schema-ids.js';
 import fs from 'fs';
 import validateSchemas from './validateSchemas.js';
@@ -18,8 +19,8 @@ export default async function (context) {
             .action(async (version) => {
                 console.log('Validating GTM Schemas...');
                 const schemaVersion = version || 'next';
-                const schemaPath = path.join(context.siteDir, 'static/schemas', schemaVersion);
-                const success = await validateSchemas(schemaPath);
+                const { schemaDir } = getPathsForVersion(schemaVersion, context.siteDir);
+                const success = await validateSchemas(schemaDir);
                 if (!success) {
                     console.error('Validation failed.');
                     process.exit(1);
