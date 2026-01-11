@@ -9,6 +9,7 @@ export default async function (context) {
     const { organizationName, projectName, url } = context.siteConfig;
     const options = { organizationName, projectName, siteDir, url };
     const versionsJsonPath = path.join(siteDir, 'versions.json');
+    const isVersioned = fs.existsSync(versionsJsonPath);
 
     const extendCli = (cli) => {
         cli
@@ -30,7 +31,7 @@ export default async function (context) {
             .command('generate-schema-docs')
             .description('Generate schema documentation from JSON schemas')
             .action(async () => {
-                if (fs.existsSync(versionsJsonPath)) {
+                if (isVersioned) {
                     const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
                     for (const version of versions) {
                         await generateEventDocs({ ...options, version });
@@ -100,54 +101,33 @@ export default async function (context) {
             });
     };
 
-    if (fs.existsSync(versionsJsonPath)) {
-        // Versioned docs
-        const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
-        const schemasPath = path.join(siteDir, 'static/schemas/next');
+    const schemasPath = isVersioned
+        ? path.join(siteDir, 'static/schemas/next')
+        : path.join(siteDir, 'static/schemas');
 
-        return {
-            name: 'docusaurus-plugin-generate-schema-docs',
+    return {
+        name: 'docusaurus-plugin-generate-schema-docs',
 
-            getPathsToWatch() {
-                // Watch the schemas directory for changes
-                return [schemasPath];
-            },
+        getPathsToWatch() {
+            return [schemasPath];
+        },
 
-            async loadContent() {
-                // Generate event documentation for all versions
+        async loadContent() {
+            if (isVersioned) {
+                const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
                 for (const version of versions) {
                     await generateEventDocs({ ...options, version });
                 }
-                // Also generate for "current"
                 await generateEventDocs({ ...options, version: 'current' });
-            },
-
-            getThemePath() {
-                return './components';
-            },
-
-            extendCli,
-        };
-    } else {
-        // Non-versioned docs
-        const schemasPath = path.join(siteDir, 'static/schemas');
-
-        return {
-            name: 'docusaurus-plugin-generate-schema-docs',
-
-            getPathsToWatch() {
-                return [schemasPath];
-            },
-
-            async loadContent() {
+            } else {
                 await generateEventDocs(options);
-            },
+            }
+        },
 
-            getThemePath() {
-                return './components';
-            },
+        getThemePath() {
+            return './components';
+        },
 
-            extendCli,
-        };
-    }
+        extendCli,
+    };
 }
