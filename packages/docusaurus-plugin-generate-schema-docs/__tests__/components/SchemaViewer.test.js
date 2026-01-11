@@ -24,4 +24,22 @@ describe('SchemaViewer', () => {
         expect(getByText('Event Properties')).toBeInTheDocument();
         expect(getByText('Mocked PropertiesTable')).toBeInTheDocument();
     });
+
+    it('renders "DataLayer Examples" when schema has oneOf', () => {
+        const schema = {
+            type: 'object',
+            properties: {
+                user_id: {
+                    oneOf: [
+                        { type: 'string' },
+                        { type: 'integer' },
+                    ],
+                },
+            },
+        };
+
+        const { getByText } = render(<SchemaViewer schema={schema} />);
+
+        expect(getByText('DataLayer Examples')).toBeInTheDocument();
+    });
 });
