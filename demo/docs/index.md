@@ -1,5 +1,6 @@
 ---
 title: Home
+slug: /
 ---
 
 # Welcome to Tracking Docs
