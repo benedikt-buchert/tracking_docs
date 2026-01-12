@@ -109,7 +109,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/events/complex-event',
+                to: '/events/complex-event',
               },
             ],
           },
