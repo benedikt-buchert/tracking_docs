@@ -1,16 +1,16 @@
 export default function MdxTemplate(data) {
-    const {
-        schema,
-        mergedSchema,
-        editUrl,
-        file,
-        topPartialImport,
-        bottomPartialImport,
-        topPartialComponent,
-        bottomPartialComponent
-    } = data;
+  const {
+    schema,
+    mergedSchema,
+    editUrl,
+    file,
+    topPartialImport,
+    bottomPartialImport,
+    topPartialComponent,
+    bottomPartialComponent,
+  } = data;
 
-    return `---
+  return `---
 title: ${schema.title}
 description: ${JSON.stringify(schema.description)}
 sidebar_label: ${schema.title}

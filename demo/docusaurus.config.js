@@ -51,10 +51,10 @@ const config = {
           versions: {
             ...(!isProduction && {
               current: {
-                            label: 'Next 🚧',
-                            path: 'next',
-                            banner: 'unreleased',
-                          },
+                label: 'Next 🚧',
+                path: 'next',
+                banner: 'unreleased',
+              },
             }),
           },
         },
@@ -135,9 +135,7 @@ const config = {
         darkTheme: prismThemes.dracula,
       },
     }),
-  plugins: [
-    'docusaurus-plugin-generate-schema-docs',
-  ],
+  plugins: ['docusaurus-plugin-generate-schema-docs'],
 };
 
 export default config;
