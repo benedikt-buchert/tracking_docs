@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/root-choice-event.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/root-choice-event.json",
   "title": "Root Choice Event",
   "description": "An example event that has oneOf at the root level.",
   "oneOf": [
