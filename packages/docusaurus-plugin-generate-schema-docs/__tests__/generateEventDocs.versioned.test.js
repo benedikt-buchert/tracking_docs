@@ -18,15 +18,15 @@ jest.mock('fs', () => {
     };
 });
 
-describe('generateEventDocs (non-versioned)', () => {
+describe('generateEventDocs (versioned)', () => {
 
     const options = {
         organizationName: 'test-org',
         projectName: 'test-project',
-        // Use the fixtures directory as the siteDir for tests
-        siteDir: path.resolve(__dirname, '__fixtures__')
+        url: 'https://tracking-docs-demo.buchert.digital/',
+        // Use the fixtures_versioned directory as the siteDir for tests
+        siteDir: path.resolve(__dirname, '__fixtures_versioned__')
     }
-    const outputDir = path.join(options.siteDir, 'docs/events');
     const partialsDir = path.join(options.siteDir, 'docs/partials');
 
 
@@ -37,47 +37,30 @@ describe('generateEventDocs (non-versioned)', () => {
         fs.existsSync.mockClear();
     });
 
-    it('should generate documentation correctly when no partials exist', async () => {
+    it('should generate documentation for "current" version', async () => {
         console.log = jest.fn(); // suppress console.log
-
-        // Simulate that no partials exist
         fs.existsSync.mockReturnValue(false);
 
-        await generateEventDocs(options);
+        await generateEventDocs({ ...options, version: 'current' });
 
-        // Expect writeFileSync to have been called once for each schema
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
 
-        // Check the content of the generated file
         const [filePath, content] = fs.writeFileSync.mock.calls[0];
+        const outputDir = path.join(options.siteDir, 'docs/events');
         expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
         expect(content).toMatchSnapshot();
     });
 
-    it('should generate documentation with top and bottom partials when they exist', async () => {
+    it('should generate documentation for a specific version', async () => {
         console.log = jest.fn(); // suppress console.log
+        fs.existsSync.mockReturnValue(false);
 
-        // Simulate that the output directory and partials exist
-        fs.existsSync.mockImplementation((filePath) => {
-            if (filePath === outputDir) {
-                return true;
-            }
-            if (filePath === path.join(partialsDir, 'add-to-cart-event.mdx')) {
-                return true;
-            }
-            if (filePath === path.join(partialsDir, 'add-to-cart-event_bottom.mdx')) {
-                return true;
-            }
-            return false;
-        });
+        await generateEventDocs({ ...options, version: '1.1.1' });
 
-        await generateEventDocs(options);
-
-        // Expect writeFileSync to have been called once for each schema
         expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
 
-        // Check the content of the generated file
         const [filePath, content] = fs.writeFileSync.mock.calls[0];
+        const outputDir = path.join(options.siteDir, 'versioned_docs', 'version-1.1.1', 'events');
         expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
         expect(content).toMatchSnapshot();
     });

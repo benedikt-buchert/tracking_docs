@@ -1,4 +1,3 @@
-
-
 npx eslint .
 npm run test
+npm run validate-schemas

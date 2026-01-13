@@ -2,7 +2,7 @@ export default function MdxTemplate(data) {
     const {
         schema,
         mergedSchema,
-        baseEditUrl,
+        editUrl,
         file,
         topPartialImport,
         bottomPartialImport,
@@ -14,7 +14,7 @@ export default function MdxTemplate(data) {
 title: ${schema.title}
 description: ${JSON.stringify(schema.description)}
 sidebar_label: ${schema.title}
-custom_edit_url: ${baseEditUrl}/demo/static/schemas/${file}
+custom_edit_url: ${editUrl}
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
