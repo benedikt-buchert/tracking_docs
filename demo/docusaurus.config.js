@@ -47,6 +47,7 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          routeBasePath: '/',
           lastVersion: '1.2.0',
           includeCurrentVersion: !isProduction,
           versions: {
@@ -59,6 +60,7 @@ const config = {
             }),
           },
         },
+        blog: false,
         theme: {
           customCss: './src/css/custom.css',
         },
@@ -107,7 +109,7 @@ const config = {
             items: [
               {
                 label: 'Tutorial',
-                to: '/docs/events/complex-event',
+                to: '/events/complex-event',
               },
             ],
           },
