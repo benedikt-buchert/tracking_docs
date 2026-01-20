@@ -6,6 +6,7 @@
   "oneOf": [
     {
       "title": "Option A",
+      "description": "This is the description for Option A.",
       "type": "object",
       "properties": {
         "event": {

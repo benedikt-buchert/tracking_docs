@@ -49,7 +49,7 @@ const validateSchemas = async (schemaPath) => {
 
         if (!example_data)
         {
-            console.error(`❌ Schema ${file} does not produce a valid example.`);
+            console.error(`x Schema ${file} does not produce a valid example.`);
             allValid = false;
         } else
         {
@@ -57,16 +57,16 @@ const validateSchemas = async (schemaPath) => {
             const validate = ajv.getSchema(originalSchema.$id);
             if (!validate)
             {
-                console.error(`❌ Could not find compiled schema for ${originalSchema.$id}`);
+                console.error(`x Could not find compiled schema for ${originalSchema.$id}`);
                 allValid = false;
                 continue;
             }
             if (validate(example_data))
             {
-                console.log(`✅ Schema ${file} produced a valid example.`);
+                console.log(`OK Schema ${file} produced a valid example.`);
             } else
             {
-                console.error(`❌ Schema ${file} example data failed validation:`);
+                console.error(`x Schema ${file} example data failed validation:`);
                 console.error(validate.errors);
                 allValid = false;
             }

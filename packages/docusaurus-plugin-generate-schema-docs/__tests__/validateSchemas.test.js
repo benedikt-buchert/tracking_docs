@@ -41,7 +41,7 @@ describe('validateSchemas', () => {
 
         const result = await validateSchemas(tmpDir);
         expect(result).toBe(true);
-        expect(consoleLogSpy).toHaveBeenCalledWith('✅ Schema valid-schema.json produced a valid example.');
+        expect(consoleLogSpy).toHaveBeenCalledWith('OK Schema valid-schema.json produced a valid example.');
     });
 
     it('should return false if an example fails validation', async () => {
@@ -50,7 +50,7 @@ describe('validateSchemas', () => {
 
         const result = await validateSchemas(tmpDir);
         expect(result).toBe(false);
-        expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Schema invalid-example-schema.json example data failed validation:');
+        expect(consoleErrorSpy).toHaveBeenCalledWith('x Schema invalid-example-schema.json example data failed validation:');
         expect(consoleErrorSpy).toHaveBeenCalledWith(expect.arrayContaining([
             expect.objectContaining({
                 instancePath: '/age',
@@ -66,13 +66,7 @@ describe('validateSchemas', () => {
 
         const result = await validateSchemas(tmpDir);
         expect(result).toBe(false);
-        expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Schema no-valid-example-schema.json example data failed validation:');
-        expect(consoleErrorSpy).toHaveBeenCalledWith(expect.arrayContaining([
-            expect.objectContaining({
-                keyword: 'required',
-                params: { missingProperty: 'some_prop' },
-            })
-        ]));
+        expect(consoleErrorSpy).toHaveBeenCalledWith('x Schema no-valid-example-schema.json does not produce a valid example.');
     });
 
     it('should handle schemas with $refs correctly', async () => {
@@ -84,7 +78,7 @@ describe('validateSchemas', () => {
 
         const result = await validateSchemas(tmpDir);
         expect(result).toBe(true);
-        expect(consoleLogSpy).toHaveBeenCalledWith('✅ Schema main-schema-with-ref.json produced a valid example.');
+        expect(consoleLogSpy).toHaveBeenCalledWith('OK Schema main-schema-with-ref.json produced a valid example.');
     });
 
     it('should reject if a referenced schema is missing', async () => {

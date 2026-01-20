@@ -2,91 +2,92 @@
  * @jest-environment node
  */
 
-import generateEventDocs from '../generateEventDocs';
-import fs from 'fs';
-import path from 'path';
+import generateEventDocs from "../generateEventDocs";
+import fs from "fs";
+import path from "path";
 
-jest.mock('fs', () => {
-    const originalFs = jest.requireActual('fs');
-    const path = require('path');
-    const schemaDir = path.resolve(__dirname, '__fixtures__/static/schemas');
-    const files = originalFs.readdirSync(schemaDir);
-    return {
-        ...originalFs,
-        writeFileSync: jest.fn(),
-        mkdirSync: jest.fn(),
-        existsSync: jest.fn(),
-        readdirSync: jest.fn().mockReturnValue(files),
-        readFileSync: originalFs.readFileSync,
-    };
+jest.mock("fs", () => {
+  const memfs = require("memfs");
+  return memfs;
 });
 
-describe('generateEventDocs (non-versioned)', () => {
+describe("generateEventDocs (non-versioned)", () => {
+  const options = {
+    organizationName: "test-org",
+    projectName: "test-project",
+    // Use the fixtures directory as the siteDir for tests
+    siteDir: path.resolve(__dirname, "__fixtures__"),
+    url: "https://tracking-docs-demo.buchert.digital",
+  };
+  const outputDir = path.join(options.siteDir, "docs/events");
 
-    const options = {
-        organizationName: 'test-org',
-        projectName: 'test-project',
-        // Use the fixtures directory as the siteDir for tests
-        siteDir: path.resolve(__dirname, '__fixtures__')
+  beforeEach(() => {
+    fs.vol.reset();
+    const realFs = jest.requireActual("fs");
+    const fixturesDir = path.resolve(__dirname, "__fixtures__");
+
+    function readDirRecursive(dir) {
+      const files = realFs.readdirSync(dir, { withFileTypes: true });
+      for (const file of files) {
+        const filePath = path.join(dir, file.name);
+        if (file.isDirectory()) {
+          fs.vol.mkdirSync(filePath, { recursive: true });
+          readDirRecursive(filePath);
+        } else {
+          const content = realFs.readFileSync(filePath);
+          fs.vol.writeFileSync(filePath, content);
+        }
+      }
     }
-    const outputDir = path.join(options.siteDir, 'docs/events');
-    const partialsDir = path.join(options.siteDir, 'docs/partials');
+    readDirRecursive(fixturesDir);
+  });
 
+  it("should generate documentation correctly", async () => {
+    console.log = jest.fn(); // suppress console.log
 
-    beforeEach(() => {
-        // Clear all instances and calls to constructor and all methods:
-        fs.writeFileSync.mockClear();
-        fs.mkdirSync.mockClear();
-        fs.existsSync.mockClear();
-    });
+    await generateEventDocs(options);
 
-    it('should generate documentation correctly', async () => {
-        console.log = jest.fn(); // suppress console.log
+    const outputFiles = fs
+      .readdirSync(outputDir, { recursive: true })
+      .filter((file) => fs.statSync(path.join(outputDir, file)).isFile());
 
-        fs.existsSync.mockReturnValue(false);
+    expect(outputFiles).toHaveLength(6);
 
-        await generateEventDocs(options);
+    // Check content of generated files
+    const addToCart = fs.readFileSync(
+      path.join(outputDir, "add-to-cart-event.mdx"),
+      "utf-8",
+    );
+    expect(addToCart).toMatchSnapshot();
 
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(4);
+    const choiceEvent = fs.readFileSync(
+      path.join(outputDir, "choice-event.mdx"),
+      "utf-8",
+    );
+    expect(choiceEvent).toMatchSnapshot();
 
-        const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
-            acc[path.basename(call[0])] = call[1];
-            return acc;
-        }, {});
+    const rootAnyOf = fs.readFileSync(
+      path.join(outputDir, "root-any-of-event.mdx"),
+      "utf-8",
+    );
+    expect(rootAnyOf).toMatchSnapshot();
 
-        expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
-        expect(writtenFiles['choice-event.mdx']).toMatchSnapshot();
-        expect(writtenFiles['root-choice-event.mdx']).toMatchSnapshot();
-        expect(writtenFiles['root-any-of-event.mdx']).toMatchSnapshot();
-    });
+    const rootChoiceIndex = fs.readFileSync(
+      path.join(outputDir, "root-choice-event/index.mdx"),
+      "utf-8",
+    );
+    expect(rootChoiceIndex).toMatchSnapshot();
 
-    it('should generate documentation with top and bottom partials when they exist', async () => {
-        console.log = jest.fn(); // suppress console.log
+    const rootChoiceA = fs.readFileSync(
+      path.join(outputDir, "root-choice-event/option-a.mdx"),
+      "utf-8",
+    );
+    expect(rootChoiceA).toMatchSnapshot();
 
-        // Simulate that the output directory and partials exist
-        fs.existsSync.mockImplementation((filePath) => {
-            if (filePath === outputDir) {
-                return true;
-            }
-            if (filePath === path.join(partialsDir, 'add-to-cart-event.mdx')) {
-                return true;
-            }
-            if (filePath === path.join(partialsDir, 'add-to-cart-event_bottom.mdx')) {
-                return true;
-            }
-            return false;
-        });
-
-        await generateEventDocs(options);
-
-        // Expect writeFileSync to have been called for each schema
-        expect(fs.writeFileSync).toHaveBeenCalledTimes(4);
-
-        const writtenFiles = fs.writeFileSync.mock.calls.reduce((acc, call) => {
-            acc[path.basename(call[0])] = call[1];
-            return acc;
-        }, {});
-
-        expect(writtenFiles['add-to-cart-event.mdx']).toMatchSnapshot();
-    });
+    const rootChoiceB = fs.readFileSync(
+      path.join(outputDir, "root-choice-event/option-b.mdx"),
+      "utf-8",
+    );
+    expect(rootChoiceB).toMatchSnapshot();
+  });
 });

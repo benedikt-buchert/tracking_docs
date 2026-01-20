@@ -1,113 +1,107 @@
 import React from 'react';
 import clsx from 'clsx';
+import CodeBlock from '@theme/CodeBlock';
 
-// Helper to format the property type
-const getPropertyType = (type) => {
-    if (!type) return '';
-    return Array.isArray(type) ? type.join(' | ') : type;
-};
-
-// Helper to format examples
-const formatExamples = (examples) => {
-    if (!examples) {
-        return '';
-    }
-    return examples
-        .map((example) =>
-            typeof example === 'object' ? JSON.stringify(example) : example
-        )
-        .join(', ');
+/**
+ * Formats an example value into a string for display in a CodeBlock.
+ * - Objects are stringified with indentation.
+ * - Arrays are joined by newlines.
+ * @param {any} example The example to format.
+ * @returns {string}
+ */
+const formatExample = (example) => {
+  if (typeof example === 'undefined' || example === null) return '';
+  if (Array.isArray(example)) {
+    return example
+      .map((ex) => (typeof ex === 'object' ? JSON.stringify(ex, null, 2) : String(ex)))
+      .join('\n');
+  }
+  if (typeof example === 'object') {
+    return JSON.stringify(example, null, 2);
+  }
+  return String(example);
 };
 
 /**
- * Renders a simplified row for properties that have `oneOf` or `anyOf`.
- * It displays the property key, a combined list of possible types, and the description.
+ * Renders a single property row in the schema table.
+ * All data is passed in via the `row` prop, which comes from `tableData`.
+ * This component handles multi-row constraints using `rowSpan`.
  */
-const OneOfAnyOfRow = ({ propertyKey, prop, isReq }) => {
-    const choices = prop.oneOf || prop.anyOf || (prop.items && (prop.items.oneOf || prop.items.anyOf));
-    const types = choices.map(choice => choice.type).filter(Boolean);
-    const uniqueTypes = [...new Set(types)];
+export default function PropertyRow({ row, isLastInGroup }) {
+  const {
+    name,
+    level,
+    required,
+    propertyType,
+    description,
+    example,
+    constraints,
+  } = row;
 
-    return (
-        <tr className={clsx(isReq && 'required-row')}>
-            <td>
-                <strong>{propertyKey}</strong>
-            </td>
-            <td><code>{getPropertyType(uniqueTypes)}</code></td>
-            <td colSpan="3">{prop.description || ''}</td>
+  const indentStyle = {
+    paddingLeft: `${level * 20 + 8}px`,
+  };
+
+  const hasConstraints = constraints && constraints.length > 0;
+  // Set rowspan to 1 if there are no constraints.
+  const rowSpan = hasConstraints ? constraints.length : 1;
+  // Gracefully handle case with no constraints
+  const [firstConstraint, ...remainingConstraints] = hasConstraints ? constraints : [null];
+  const formattedExample = formatExample(example);
+
+  return (
+    <>
+      <tr className={clsx(required && 'required-row')}>
+        <td
+          rowSpan={rowSpan}
+          style={indentStyle}
+          className={clsx(level > 0 && `level-${level}`, isLastInGroup && 'is-last')}
+        >
+          <strong>{name}</strong>
+        </td>
+        <td rowSpan={rowSpan}>
+          <code>{propertyType}</code>
+        </td>
+
+        {/* The first constraint cell */}
+        <td>
+          {firstConstraint && (
+            <code
+              className={clsx(
+                'constraint-code',
+                firstConstraint === 'required' && 'required',
+              )}
+            >
+              {firstConstraint}
+            </code>
+          )}
+        </td>
+
+        <td rowSpan={rowSpan}>
+          {formattedExample && (
+            <CodeBlock language="json" className="schema-examples">
+              {formattedExample}
+            </CodeBlock>
+          )}
+        </td>
+        <td rowSpan={rowSpan}>{description || ''}</td>
+      </tr>
+
+      {/* Render subsequent constraints in their own rows */}
+      {remainingConstraints.map((constraint) => (
+        <tr className={clsx(required && 'required-row')} key={constraint}>
+          <td>
+            <code
+              className={clsx(
+                'constraint-code',
+                constraint === 'required' && 'required',
+              )}
+            >
+              {constraint}
+            </code>
+          </td>
         </tr>
-    );
-};
-
-/**
- * Renders a default row for a regular schema property.
- * It displays the property key, type, constraints, examples, and description.
- * It also handles nested properties by showing an indicator.
- */
-const DefaultRow = ({ propertyKey, prop, isReq, getConstraints }) => {
-    const constraints = getConstraints(prop, isReq);
-    const childProperties = prop.properties || (prop.items && prop.items.properties);
-    const hasChildren = childProperties && Object.keys(childProperties).length > 0;
-
-    const isObject = prop.type === 'object';
-    const isArrayOfObjects = prop.type === 'array' && prop.items && prop.items.type === 'object';
-
-    if ((isObject || isArrayOfObjects) && !hasChildren) {
-        return null;
-    }
-
-    const numRows = Math.max(1, constraints.length);
-    const [firstConstraint, ...remainingConstraints] = constraints;
-
-    return (
-        <React.Fragment>
-            <tr className={clsx(isReq && 'required-row')}>
-                <td rowSpan={numRows}>
-                    <strong>{propertyKey}</strong>
-                    {hasChildren && <span style={{ fontSize: '0.8em', marginLeft: '5px' }}>⤵</span>}
-                </td>
-                <td rowSpan={numRows}><code>{getPropertyType(prop.type)}</code></td>
-                <td>
-                    {firstConstraint && (
-                        <code className={clsx('constraint-code', firstConstraint === 'required' && 'required')}>
-                            {firstConstraint}
-                        </code>
-                    )}
-                </td>
-                <td rowSpan={numRows}>
-                    {formatExamples(prop.examples)}
-                </td>
-                <td rowSpan={numRows}>{prop.description || ''}</td>
-            </tr>
-
-            {remainingConstraints.map((constraint, index) => (
-                <tr className={clsx(isReq && 'required-row')} key={`${propertyKey}-constraint-${index}`}>
-                    <td>
-                        <code className={clsx('constraint-code', constraint === 'required' && 'required')}>
-                            {constraint}
-                        </code>
-                    </td>
-                </tr>
-            ))}
-        </React.Fragment>
-    );
-};
-
-/**
- * Renders a single row in the properties table.
- * It determines whether the property is a regular property or a `oneOf`/`anyOf` property
- * and renders the appropriate component.
- */
-const PropertyRow = ({ propertyKey, prop, requiredList, getConstraints }) => {
-    const isReq = requiredList.includes(propertyKey);
-    const hasOneOf = prop.oneOf || (prop.items && prop.items.oneOf);
-    const hasAnyOf = prop.anyOf || (prop.items && prop.items.anyOf);
-
-    if (hasOneOf || hasAnyOf) {
-        return <OneOfAnyOfRow propertyKey={propertyKey} prop={prop} isReq={isReq} />;
-    }
-
-    return <DefaultRow propertyKey={propertyKey} prop={prop} isReq={isReq} getConstraints={getConstraints} />;
-};
-
-export default PropertyRow;
+      ))}
+    </>
+  );
+}

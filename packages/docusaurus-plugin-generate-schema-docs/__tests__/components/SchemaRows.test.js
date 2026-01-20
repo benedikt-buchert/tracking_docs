@@ -4,77 +4,99 @@ import { render } from '@testing-library/react';
 import SchemaRows from '../../components/SchemaRows';
 
 // Mock child components
-jest.mock('../../components/PropertyRow', () => (props) => <tr><td>Mocked PropertyRow: {props.propertyKey}</td></tr>);
-jest.mock('../../components/TableHeader', () => () => <thead><tr><th>Mocked TableHeader</th></tr></thead>);
+jest.mock('../../components/PropertyRow', () => (props) => (
+  <tr>
+    <td>Mocked PropertyRow: {props.row.name}</td>
+  </tr>
+));
+
+jest.mock('../../components/FoldableRows', () => (props) => (
+  <tr>
+    <td>Mocked FoldableRows: {props.row.choiceType}</td>
+  </tr>
+));
 
 describe('SchemaRows', () => {
-    it('renders a PropertyRow for each property', () => {
-        const properties = {
-            name: { type: 'string' },
-            age: { type: 'integer' },
-        };
-        const { getByText } = render(
-            <table>
-                <tbody>
-                    <SchemaRows properties={properties} getConstraints={() => []} />
-                </tbody>
-            </table>
-        );
+  it('renders a PropertyRow for each property type item in tableData', () => {
+    const tableData = [
+      { type: 'property', name: 'name', path: ['name'] },
+      { type: 'property', name: 'age', path: ['age'] },
+    ];
 
-        expect(getByText('Mocked PropertyRow: name')).toBeInTheDocument();
-        expect(getByText('Mocked PropertyRow: age')).toBeInTheDocument();
-    });
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <SchemaRows tableData={tableData} />
+        </tbody>
+      </table>
+    );
 
-    it('recursively renders for nested objects', () => {
-        const properties = {
-            user: {
-                type: 'object',
-                properties: {
-                    name: { type: 'string' },
-                },
-            },
-        };
-        const { getByText } = render(
-            <table>
-                <tbody>
-                    <SchemaRows properties={properties} getConstraints={() => []} />
-                </tbody>
-            </table>
-        );
+    expect(getByText('Mocked PropertyRow: name')).toBeInTheDocument();
+    expect(getByText('Mocked PropertyRow: age')).toBeInTheDocument();
+  });
 
-        expect(getByText('Mocked PropertyRow: user')).toBeInTheDocument();
-        expect(getByText('Mocked TableHeader')).toBeInTheDocument();
-        expect(getByText('user { }')).toBeInTheDocument();
-        // This will be inside the nested table
-        expect(getByText('Mocked PropertyRow: name')).toBeInTheDocument();
-    });
+  it('renders nested properties from a flat list', () => {
+    const tableData = [
+      { type: 'property', name: 'user', path: ['user'], level: 0 },
+      { type: 'property', name: 'id', path: ['user', 'id'], level: 1 },
+    ];
 
-    it('recursively renders for nested arrays of objects', () => {
-        const properties = {
-            products: {
-                type: 'array',
-                items: {
-                    type: 'object',
-                    properties: {
-                        name: { type: 'string' },
-                        price: { type: 'number' },
-                    },
-                },
-            },
-        };
-        const { getByText } = render(
-            <table>
-                <tbody>
-                    <SchemaRows properties={properties} getConstraints={() => []} />
-                </tbody>
-            </table>
-        );
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <SchemaRows tableData={tableData} />
+        </tbody>
+      </table>
+    );
 
-        expect(getByText('Mocked PropertyRow: products')).toBeInTheDocument();
-        expect(getByText('Mocked TableHeader')).toBeInTheDocument();
-        expect(getByText('products [ ]')).toBeInTheDocument();
-        // These will be inside the nested table
-        expect(getByText('Mocked PropertyRow: name')).toBeInTheDocument();
-        expect(getByText('Mocked PropertyRow: price')).toBeInTheDocument();
-    });
+    // It should render both the parent and child property from the flat list
+    expect(getByText('Mocked PropertyRow: user')).toBeInTheDocument();
+    expect(getByText('Mocked PropertyRow: id')).toBeInTheDocument();
+  });
+
+  it('renders a FoldableRows for choice type items in tableData', () => {
+    const tableData = [
+      {
+        type: 'choice',
+        choiceType: 'oneOf',
+        path: ['choice'],
+        options: [],
+      },
+    ];
+
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <SchemaRows tableData={tableData} />
+        </tbody>
+      </table>
+    );
+
+    expect(getByText('Mocked FoldableRows: oneOf')).toBeInTheDocument();
+  });
+
+  it('renders a mix of properties and choices', () => {
+    const tableData = [
+      { type: 'property', name: 'prop1', path: ['prop1'] },
+      {
+        type: 'choice',
+        choiceType: 'anyOf',
+        path: ['choice'],
+        options: [],
+      },
+      { type: 'property', name: 'prop2', path: ['prop2'] },
+    ];
+
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <SchemaRows tableData={tableData} />
+        </tbody>
+      </table>
+    );
+
+    expect(getByText('Mocked PropertyRow: prop1')).toBeInTheDocument();
+    expect(getByText('Mocked FoldableRows: anyOf')).toBeInTheDocument();
+    expect(getByText('Mocked PropertyRow: prop2')).toBeInTheDocument();
+  });
 });

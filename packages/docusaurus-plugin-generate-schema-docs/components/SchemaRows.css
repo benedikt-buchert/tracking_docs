@@ -1,28 +1,197 @@
 .required-row {
-    background-color: rgba(255, 0, 0, 0.05);
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.05);
 }
 
 .constraint-code {
-    white-space: pre-wrap;
-    margin-right: 4px;
-    display: inline-block;
-    margin-bottom: 4px;
+  white-space: pre-wrap;
+  margin-right: 4px;
+  display: inline-block;
+  margin-bottom: 4px;
 }
 
 .constraint-code.required {
-    font-weight: bold;
-    color: #c7254e;
-    /* A reddish color */
-    background-color: #f9f2f4;
-    padding: 2px 4px;
-    border-radius: 4px;
+  font-weight: bold;
+  color: var(--ifm-color-danger-dark);
+  background-color: var(--ifm-color-danger-lightest);
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 .nested-table-container {
-    padding-left: 20px;
-    border-left: 4px solid #eee;
+  padding-left: 20px;
+  border-left: 4px solid var(--ifm-table-border-color);
 }
 
 .schema-json-viewer {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
+}
+
+/* --- Organigram Connector Line Styles --- */
+
+td[class*='level-'] {
+  position: relative;
+}
+
+td[class*='level-']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--ifm-table-border-color);
+}
+
+td[class*='level-']::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  height: 0;
+  width: 12px;
+  border-bottom: 1px solid var(--ifm-table-border-color);
+}
+
+.is-last[class*='level-']::before {
+  bottom: 50%;
+}
+
+td.level-1::before,
+td.level-1::after {
+  left: 8px;
+}
+
+td.level-2::before,
+td.level-2::after {
+  left: 28px;
+}
+
+td.level-3::before,
+td.level-3::after {
+  left: 48px;
+}
+
+td.level-4::before,
+td.level-4::after {
+  left: 68px;
+}
+
+/* --- Choice Row Styles --- */
+
+.choice-row {
+  background-color: var(--ifm-table-stripe-background);
+}
+
+.choice-row:hover {
+  background-color: var(--ifm-hover-overlay);
+}
+
+.choice-row-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.choice-row-header input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.choice-row-description {
+  margin-left: 28px;
+  font-size: 0.9em;
+  color: var(--ifm-color-secondary-darkest);
+}
+.choice-row-header-description {
+  font-size: 0.9em;
+  color: var(--ifm-color-secondary-darkest);
+}
+
+.choice-row-header-headline {
+    margin-bottom: 0px;
+}
+
+.choice-row-toggle {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.choice-row-toggle.radio {
+  border-radius: 50%;
+}
+
+.choice-row-toggle.checkbox {
+  border-radius: 4px;
+}
+
+.choice-row-toggle.checkbox::after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.radio {
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.choice-row-toggle.radio::after {
+  content: '';
+  position: absolute;
+  display: none;
+  border-radius: 50%;
+  background-color: var(--ifm-color-primary);
+  width: 0.5em;
+  height: 0.5em;
+  left: 22%;
+  top: 22%;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.radio::after {
+  display: block;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.checkbox {
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.choice-row-header input:checked + .choice-row-toggle.checkbox::after {
+  display: block;
+  left: 0.29em;
+  top: 2px;
+  width: 3px;
+  height: 7px;
+  border: solid var(--ifm-color-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* --- Example CodeBlock Styles --- */
+
+.schema-examples {
+  margin: 0;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  /* Override theme defaults to make it blend into the table cell */
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.schema-examples pre,
+.schema-examples code {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Hide the copy button within the examples code block */
+.schema-examples button {
+  display: none;
 }

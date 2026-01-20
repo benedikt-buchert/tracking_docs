@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ExampleDataLayer should render a single example for a simple schema 1`] = `
+<div>
+  <pre
+    data-language="javascript"
+  >
+    window.dataLayer.push({
+  "event": "test_event"
+});
+  </pre>
+</div>
+`;
+
+exports[`ExampleDataLayer should render grouped tabs for a schema with choices 1`] = `
+<div>
+  <div
+    style="margin-top: 20px;"
+  >
+    <h4>
+      <code>
+        user_id
+      </code>
+       options:
+    </h4>
+    <div
+      data-testid="tabs"
+    >
+      <div
+        data-label="User ID as String"
+        data-testid="tab-item"
+      >
+        <pre
+          data-language="javascript"
+        >
+          window.dataLayer.push({
+  "event": "one_of_event",
+  "user_id": "user-123",
+  "payment_method": {
+    "payment_type": "credit_card",
+    "card_number": "1234-5678-9012-3456",
+    "expiry_date": "12/26"
+  }
+});
+        </pre>
+      </div>
+      <div
+        data-label="User ID as Integer"
+        data-testid="tab-item"
+      >
+        <pre
+          data-language="javascript"
+        >
+          window.dataLayer.push({
+  "event": "one_of_event",
+  "user_id": 123,
+  "payment_method": {
+    "payment_type": "credit_card",
+    "card_number": "1234-5678-9012-3456",
+    "expiry_date": "12/26"
+  }
+});
+        </pre>
+      </div>
+    </div>
+  </div>
+  <div
+    style="margin-top: 20px;"
+  >
+    <h4>
+      <code>
+        payment_method
+      </code>
+       options:
+    </h4>
+    <div
+      data-testid="tabs"
+    >
+      <div
+        data-label="Credit Card"
+        data-testid="tab-item"
+      >
+        <pre
+          data-language="javascript"
+        >
+          window.dataLayer.push({
+  "event": "one_of_event",
+  "user_id": "user-123",
+  "payment_method": {
+    "payment_type": "credit_card",
+    "card_number": "1234-5678-9012-3456",
+    "expiry_date": "12/26"
+  }
+});
+        </pre>
+      </div>
+      <div
+        data-label="PayPal"
+        data-testid="tab-item"
+      >
+        <pre
+          data-language="javascript"
+        >
+          window.dataLayer.push({
+  "event": "one_of_event",
+  "user_id": "user-123",
+  "payment_method": {
+    "payment_type": "paypal",
+    "email": "test@example.com"
+  }
+});
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+`;
