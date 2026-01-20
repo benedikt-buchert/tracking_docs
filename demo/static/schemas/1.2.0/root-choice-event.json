@@ -6,7 +6,7 @@
   "oneOf": [
     {
       "title": "Option A",
-      "description": "This is the description for Option A.",
+      "description": "This is the description for Param A.",
       "type": "object",
       "properties": {
         "event": {
@@ -15,7 +15,9 @@
         },
         "param_a": {
           "type": "string",
-          "examples": ["example_a"]
+          "examples": [
+            "example_a"
+          ]
         }
       }
     },
@@ -29,7 +31,9 @@
         },
         "param_b": {
           "type": "integer",
-          "examples": [123]
+          "examples": [
+            123
+          ]
         }
       }
     }

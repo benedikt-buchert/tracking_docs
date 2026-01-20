@@ -32,15 +32,20 @@
     },
     "payment_method": {
       "description": "The user's payment method.",
-      "type": "object",
       "anyOf": [
         {
           "title": "Credit Card",
+          "type": "object",
           "properties": {
             "payment_type": {
               "type": "string",
-              "enum": ["credit_card", "debit_card"],
-              "examples": ["credit_card"]
+              "enum": [
+                "credit_card",
+                "debit_card"
+              ],
+              "examples": [
+                "credit_card"
+              ]
             },
             "card_number": {
               "type": "string",
