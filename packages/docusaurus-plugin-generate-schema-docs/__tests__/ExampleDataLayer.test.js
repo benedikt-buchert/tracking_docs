@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExampleDataLayer, { findClearableProperties } from '../components/ExampleDataLayer';
-import choiceEventSchema from './__fixtures__/schemas/choice-event.json';
+import choiceEventSchema from './__fixtures__/static/schemas/choice-event.json';
 
 // Mock the CodeBlock to make assertions on its content easier
 jest.mock('@theme/CodeBlock', () => {

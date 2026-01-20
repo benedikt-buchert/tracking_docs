@@ -1,6 +1,7 @@
+
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/root-any-of-event.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/root-any-of-event.json",
   "title": "Root AnyOf Event",
   "description": "An example event that has anyOf at the root level.",
   "type": "object",
@@ -13,11 +14,11 @@
   "anyOf": [
     {
       "title": "Has Param C",
-      "description": "This is the description for Param C.",
       "properties": {
         "param_c": {
           "type": "string",
-          "examples": ["example_c"]
+          "examples": ["example_c"],
+          "description": "This is the description for Param C."
         }
       }
     },

@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import SchemaViewer from '../../components/SchemaViewer';
-import choiceEventSchema from '../__fixtures__/schemas/choice-event.json';
+import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
 
 // Mock the CodeBlock component as it's not relevant to this test
 jest.mock('@theme/CodeBlock', () => {

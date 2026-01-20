@@ -1,5 +1,5 @@
 import { schemaToExamples } from '../../helpers/schemaToExamples';
-import choiceEventSchema from '../__fixtures__/schemas/choice-event.json';
+import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
 
 describe('schemaToExamples', () => {
     it('should generate examples for all options in a complex schema', () => {

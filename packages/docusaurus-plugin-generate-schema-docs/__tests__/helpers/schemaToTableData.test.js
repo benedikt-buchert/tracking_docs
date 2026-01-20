@@ -1,6 +1,6 @@
 import { schemaToTableData } from '../../helpers/schemaToTableData';
-import choiceEventSchema from '../__fixtures__/schemas/choice-event.json';
-import rootAnyOfEventSchema from '../__fixtures__/schemas/root-any-of-event.json';
+import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
+import rootAnyOfEventSchema from '../__fixtures__/static/schemas/root-any-of-event.json';
 
 describe('schemaToTableData', () => {
   it('handles "oneOf" and "anyOf" correctly for a complex schema', () => {

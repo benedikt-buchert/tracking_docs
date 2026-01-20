@@ -10,7 +10,8 @@ import {
   processOneOfSchema,
   slugify,
 } from "./helpers/schema-processing.js";
-import MdxTemplate from "./helpers/mdx-template.js";
+import SchemaDocTemplate from "./helpers/schema-doc-template.js";
+import ChoiceIndexTemplate from "./helpers/choice-index-template.js";
 import processSchema from "./helpers/processSchema.js";
 
 async function generateAndWriteDoc(
@@ -49,7 +50,7 @@ async function generateAndWriteDoc(
     filePath,
   )}`;
 
-  const mdxContent = MdxTemplate({
+  const mdxContent = SchemaDocTemplate({
     schema,
     mergedSchema,
     editUrl,
@@ -91,24 +92,7 @@ export default async function generateEventDocs(options) {
       const eventOutputDir = path.join(outputDir, eventName);
       createDir(eventOutputDir);
 
-      const indexPageContent = `---
-title: ${schema.title}
-description: "${schema.description}"
----
-
-# ${schema.title}
-
-${schema.description}
-
-Please select one of the following options:
-
-${schema[choiceType]
-  .map(
-    (optionSchema) =>
-      `- [${optionSchema.title}](./${slugify(optionSchema.title)})`,
-  )
-  .join("\n")}
-`;
+      const indexPageContent = ChoiceIndexTemplate({ schema, choiceType });
       writeDoc(eventOutputDir, "index.mdx", indexPageContent);
 
       const processed = processOneOfSchema(schema, filePath);
