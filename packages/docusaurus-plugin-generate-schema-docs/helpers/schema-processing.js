@@ -44,6 +44,9 @@ export function processOneOfSchema(schema, filePath) {
           ...optionSchema.properties,
         },
       };
+      if (!optionSchema.$id) {
+        newSchema.$id = `${schema.$id}#${slug}`;
+      }
       delete newSchema.oneOf;
       delete newSchema.anyOf;
       delete newSchema.allOf;

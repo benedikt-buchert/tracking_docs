@@ -117,8 +117,8 @@ An example event that has oneOf at the root level.
 
 
 
-<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Option A","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}}} />
-<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Option A","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}}} />
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json#option-a","title":"Option A","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json#option-a","title":"Option A","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}}} />
 
 
 "
@@ -143,8 +143,8 @@ An example event that has oneOf at the root level.
 
 
 
-<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Option B","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}} />
-<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json","title":"Option B","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}} />
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json#option-b","title":"Option B","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/root-choice-event.schema.json#option-b","title":"Option B","description":"An example event that has oneOf at the root level.","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}} />
 
 
 "

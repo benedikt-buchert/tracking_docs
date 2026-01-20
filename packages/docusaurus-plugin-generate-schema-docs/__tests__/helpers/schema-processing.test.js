@@ -47,5 +47,36 @@ describe("schema-processing", () => {
       expect(result[1].schema.properties.prop2).toEqual({ type: "number" });
       expect(result[1].slug).toBe("option-2");
     });
+
+    it('should use option $id when available', () => {
+        const rootSchema = {
+            $id: 'root.json',
+            title: 'Root',
+            oneOf: [
+                {
+                    $id: 'option1.json',
+                    title: 'Option 1',
+                },
+            ],
+        };
+        const filePath = '/path/to/schema.json';
+        const result = processOneOfSchema(rootSchema, filePath);
+        expect(result[0].schema.$id).toBe('option1.json');
+    });
+
+    it('should generate a new $id when option $id is not available', () => {
+        const rootSchema = {
+            $id: 'root.json',
+            title: 'Root',
+            oneOf: [
+                {
+                    title: 'Option 1',
+                },
+            ],
+        };
+        const filePath = '/path/to/schema.json';
+        const result = processOneOfSchema(rootSchema, filePath);
+        expect(result[0].schema.$id).toBe('root.json#option-1');
+    });
   });
 });
