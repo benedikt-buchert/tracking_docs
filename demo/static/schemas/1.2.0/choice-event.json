@@ -27,6 +27,7 @@
       ]
     },
     "payment_method": {
+      "type": "object",
       "description": "The user's payment method.",
       "anyOf": [
         {

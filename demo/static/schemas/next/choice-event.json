@@ -28,6 +28,7 @@
     },
     "payment_method": {
       "description": "The user's payment method.",
+      "type": "object",
       "anyOf": [
         {
           "title": "Credit Card",
