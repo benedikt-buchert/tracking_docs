@@ -1,36 +1,36 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://example.com/root-choice-event.schema.json",
-    "title": "Root Choice Event",
-    "description": "An example event that has oneOf at the root level.",
-    "oneOf": [
-        {
-            "title": "Option A",
-            "type": "object",
-            "properties": {
-                "event": {
-                    "type": "string",
-                    "const": "option_a"
-                },
-                "param_a": {
-                    "type": "string",
-                    "examples": ["example_a"]
-                }
-            }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/root-choice-event.schema.json",
+  "title": "Root Choice Event",
+  "description": "An example event that has oneOf at the root level.",
+  "oneOf": [
+    {
+      "title": "Option A",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "option_a"
         },
-        {
-            "title": "Option B",
-            "type": "object",
-            "properties": {
-                "event": {
-                    "type": "string",
-                    "const": "option_b"
-                },
-                "param_b": {
-                    "type": "integer",
-                    "examples": [123]
-                }
-            }
+        "param_a": {
+          "type": "string",
+          "examples": ["example_a"]
         }
-    ]
+      }
+    },
+    {
+      "title": "Option B",
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "const": "option_b"
+        },
+        "param_b": {
+          "type": "integer",
+          "examples": [123]
+        }
+      }
+    }
+  ]
 }

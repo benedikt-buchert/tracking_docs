@@ -21,7 +21,7 @@ describe('PropertyRow', () => {
         <tbody>
           <PropertyRow row={row} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(getByText('name')).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe('PropertyRow', () => {
         <tbody>
           <PropertyRow row={row} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(container.querySelector('.required-row')).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe('PropertyRow', () => {
         <tbody>
           <PropertyRow row={row} />
         </tbody>
-      </table>
+      </table>,
     );
     expect(getByText('required')).toBeInTheDocument();
     expect(getByText('minLength: 1')).toBeInTheDocument();
@@ -96,7 +96,7 @@ describe('PropertyRow', () => {
         <tbody>
           <PropertyRow row={row} />
         </tbody>
-      </table>
+      </table>,
     );
     expect(getByText('foo')).toBeInTheDocument();
   });
@@ -118,7 +118,7 @@ describe('PropertyRow', () => {
         <tbody>
           <PropertyRow row={row} />
         </tbody>
-      </table>
+      </table>,
     );
 
     // The cell for constraints is the 3rd cell (index 2)

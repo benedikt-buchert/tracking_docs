@@ -22,68 +22,40 @@
         "transaction_id": {
           "type": "string",
           "description": "The unique ID of a transaction. The transaction_id parameter helps avoid duplicate transaction recording.",
-          "examples": [
-            "T_12345",
-            "TXN_20231205_001"
-          ]
+          "examples": ["T_12345", "TXN_20231205_001"]
         },
         "value": {
           "type": "number",
           "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
-          "examples": [
-            72.05,
-            99.99,
-            150.50
-          ]
+          "examples": [72.05, 99.99, 150.5]
         },
         "currency": {
           "type": "string",
           "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
           "minLength": 3,
           "maxLength": 3,
-          "examples": [
-            "USD",
-            "EUR",
-            "GBP"
-          ]
+          "examples": ["USD", "EUR", "GBP"]
         },
         "coupon": {
           "type": "string",
           "description": "The coupon/code associated with the event. Event-level and item-level coupon parameters are independent.",
-          "examples": [
-            "SUMMER_SALE",
-            "WELCOME15"
-          ]
+          "examples": ["SUMMER_SALE", "WELCOME15"]
         },
         "shipping": {
           "type": "number",
           "description": "The shipping cost associated with the transaction.",
-          "examples": [
-            5.99,
-            10.00,
-            0
-          ]
+          "examples": [5.99, 10.0, 0]
         },
         "tax": {
           "type": "number",
           "description": "The tax associated with the transaction.",
-          "examples": [
-            3.60,
-            7.50,
-            0
-          ]
+          "examples": [3.6, 7.5, 0]
         },
         "customer_type": {
           "type": "string",
-          "enum": [
-            "new",
-            "returning"
-          ],
+          "enum": ["new", "returning"],
           "description": "Whether this is from a new or returning customer. 'new' = customer with no purchase in the specified time window (default 540 days). 'returning' = customer with purchase in the specified time window.",
-          "examples": [
-            "new",
-            "returning"
-          ]
+          "examples": ["new", "returning"]
         },
         "items": {
           "type": "array",
@@ -94,12 +66,7 @@
           }
         }
       },
-      "required": [
-        "transaction_id",
-        "value",
-        "currency",
-        "items"
-      ]
+      "required": ["transaction_id", "value", "currency", "items"]
     }
   }
 }

@@ -4,7 +4,14 @@ import Heading from '@theme/Heading';
 import clsx from 'clsx';
 
 // A clickable row that acts as a header/summary for a foldable choice
-const ChoiceRow = ({ title, description, onToggle, isActive, isRadio, name }) => (
+const ChoiceRow = ({
+  title,
+  description,
+  onToggle,
+  isActive,
+  isRadio,
+  name,
+}) => (
   <tr className="choice-row">
     <td colSpan={5}>
       <label className="choice-row-header">
@@ -14,14 +21,15 @@ const ChoiceRow = ({ title, description, onToggle, isActive, isRadio, name }) =>
           checked={isActive}
           onChange={onToggle}
         />
-        <span className={clsx('choice-row-toggle', isRadio ? 'radio' : 'checkbox')} />
+        <span
+          className={clsx('choice-row-toggle', isRadio ? 'radio' : 'checkbox')}
+        />
         <strong>{title}</strong>
       </label>
       {description && <p className="choice-row-description">{description}</p>}
     </td>
   </tr>
 );
-
 
 /**
  * Renders 'oneOf' and 'anyOf' choices as a set of foldable `<tr>` elements

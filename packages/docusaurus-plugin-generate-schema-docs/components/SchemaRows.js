@@ -21,11 +21,7 @@ export default function SchemaRows({ tableData }) {
 
     if (row.type === 'property') {
       return (
-        <PropertyRow
-          key={key}
-          row={row}
-          isLastInGroup={row.isLastInGroup}
-        />
+        <PropertyRow key={key} row={row} isLastInGroup={row.isLastInGroup} />
       );
     }
 

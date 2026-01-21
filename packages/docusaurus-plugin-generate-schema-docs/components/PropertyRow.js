@@ -13,7 +13,9 @@ const formatExample = (example) => {
   if (typeof example === 'undefined' || example === null) return '';
   if (Array.isArray(example)) {
     return example
-      .map((ex) => (typeof ex === 'object' ? JSON.stringify(ex, null, 2) : String(ex)))
+      .map((ex) =>
+        typeof ex === 'object' ? JSON.stringify(ex, null, 2) : String(ex),
+      )
       .join('\n');
   }
   if (typeof example === 'object') {
@@ -46,7 +48,9 @@ export default function PropertyRow({ row, isLastInGroup }) {
   // Set rowspan to 1 if there are no constraints.
   const rowSpan = hasConstraints ? constraints.length : 1;
   // Gracefully handle case with no constraints
-  const [firstConstraint, ...remainingConstraints] = hasConstraints ? constraints : [null];
+  const [firstConstraint, ...remainingConstraints] = hasConstraints
+    ? constraints
+    : [null];
   const formattedExample = formatExample(example);
 
   return (
@@ -55,7 +59,10 @@ export default function PropertyRow({ row, isLastInGroup }) {
         <td
           rowSpan={rowSpan}
           style={indentStyle}
-          className={clsx(level > 0 && `level-${level}`, isLastInGroup && 'is-last')}
+          className={clsx(
+            level > 0 && `level-${level}`,
+            isLastInGroup && 'is-last',
+          )}
         >
           <strong>{name}</strong>
         </td>

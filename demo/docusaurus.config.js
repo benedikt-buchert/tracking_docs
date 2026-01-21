@@ -4,15 +4,15 @@
 // There are various equivalent ways to declare your Docusaurus config.
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
-import { themes as prismThemes } from "prism-react-renderer";
-const isProduction = process.env.NODE_ENV === "production";
+import { themes as prismThemes } from 'prism-react-renderer';
+const isProduction = process.env.NODE_ENV === 'production';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: "Event Tracking Specs",
-  tagline: "Dinosaurs are cool",
-  favicon: "img/favicon.ico",
+  title: 'Event Tracking Specs',
+  tagline: 'Dinosaurs are cool',
+  favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -20,49 +20,49 @@ const config = {
   },
 
   // Set the production url of your site here
-  url: "https://tracking-docs-demo.buchert.digital/",
+  url: 'https://tracking-docs-demo.buchert.digital/',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: "/",
+  baseUrl: '/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: "benedikt-buchert", // Usually your GitHub org/user name.
-  projectName: "tracking_docs", // Usually your repo name.
+  organizationName: 'benedikt-buchert', // Usually your GitHub org/user name.
+  projectName: 'tracking_docs', // Usually your repo name.
 
-  onBrokenLinks: "throw",
+  onBrokenLinks: 'throw',
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
   // may want to replace "en" with "zh-Hans".
   i18n: {
-    defaultLocale: "en",
-    locales: ["en"],
+    defaultLocale: 'en',
+    locales: ['en'],
   },
 
   presets: [
     [
-      "classic",
+      'classic',
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: "./sidebars.js",
-          routeBasePath: "/",
-          lastVersion: "1.2.0",
+          sidebarPath: './sidebars.js',
+          routeBasePath: '/',
+          lastVersion: '1.2.0',
           includeCurrentVersion: !isProduction,
           versions: {
             ...(!isProduction && {
               current: {
-                label: "Next 🚧",
-                path: "next",
-                banner: "unreleased",
+                label: 'Next 🚧',
+                path: 'next',
+                banner: 'unreleased',
               },
             }),
           },
         },
         blog: false,
         theme: {
-          customCss: "./src/css/custom.css",
+          customCss: './src/css/custom.css',
         },
       }),
     ],
@@ -72,65 +72,65 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: "img/docusaurus-social-card.jpg",
+      image: 'img/docusaurus-social-card.jpg',
       colorMode: {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: "Event Tracking Specs",
+        title: 'Event Tracking Specs',
         logo: {
-          alt: "Event Tracking Specs Logo",
-          src: "img/logo.svg",
-          srcDark: "img/logo-dark.svg",
+          alt: 'Event Tracking Specs Logo',
+          src: 'img/logo.svg',
+          srcDark: 'img/logo-dark.svg',
         },
         items: [
           {
-            type: "docSidebar",
-            sidebarId: "tutorialSidebar",
-            position: "left",
-            label: "Docs",
+            type: 'docSidebar',
+            sidebarId: 'tutorialSidebar',
+            position: 'left',
+            label: 'Docs',
           },
           {
-            type: "docsVersionDropdown",
-            position: "right",
+            type: 'docsVersionDropdown',
+            position: 'right',
           },
           {
-            href: "https://github.com/benedikt-buchert/tracking_docs",
-            label: "GitHub",
-            position: "right",
+            href: 'https://github.com/benedikt-buchert/tracking_docs',
+            label: 'GitHub',
+            position: 'right',
           },
         ],
       },
       footer: {
-        style: "dark",
+        style: 'dark',
         links: [
           {
-            title: "Docs",
+            title: 'Docs',
             items: [
               {
-                label: "Example event",
-                to: "/events/complex-event",
+                label: 'Example event',
+                to: '/events/complex-event',
               },
               {
-                label: "GTM Data Layer Documentation",
-                to: "https://developers.google.com/tag-platform/tag-manager/datalayer#tag-manager",
+                label: 'GTM Data Layer Documentation',
+                to: 'https://developers.google.com/tag-platform/tag-manager/datalayer#tag-manager',
               },
               {
-                label: "docusaurus docs",
-                to: "https://docusaurus.io/docs",
+                label: 'docusaurus docs',
+                to: 'https://docusaurus.io/docs',
               },
             ],
           },
           {
-            title: "Community",
+            title: 'Community',
             items: [
               {
-                label: "Stack Overflow",
-                href: "https://stackoverflow.com/questions/tagged/docusaurus",
+                label: 'Stack Overflow',
+                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
               },
               {
-                label: "Discord",
-                href: "https://discordapp.com/invite/docusaurus",
+                label: 'Discord',
+                href: 'https://discordapp.com/invite/docusaurus',
               },
             ],
           },
@@ -142,7 +142,7 @@ const config = {
         darkTheme: prismThemes.dracula,
       },
     }),
-  plugins: ["docusaurus-plugin-generate-schema-docs"],
+  plugins: ['docusaurus-plugin-generate-schema-docs'],
 };
 
 export default config;

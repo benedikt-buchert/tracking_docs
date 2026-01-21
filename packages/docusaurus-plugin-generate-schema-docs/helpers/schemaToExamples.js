@@ -15,7 +15,11 @@ export function schemaToExamples(rootSchema) {
     if (!subSchema) return;
 
     // First, check for choices at the current schema level
-    const choiceType = subSchema.oneOf ? 'oneOf' : subSchema.anyOf ? 'anyOf' : null;
+    const choiceType = subSchema.oneOf
+      ? 'oneOf'
+      : subSchema.anyOf
+        ? 'anyOf'
+        : null;
     if (choiceType) {
       choicePoints.push({ path, schema: subSchema });
     }
@@ -35,10 +39,12 @@ export function schemaToExamples(rootSchema) {
     const example = buildExampleFromSchema(rootSchema);
     if (example && Object.keys(example).length > 0) {
       // Return in the same group structure for consistency
-      return [{
-        property: 'default',
-        options: [{ title: 'Example', example }]
-      }];
+      return [
+        {
+          property: 'default',
+          options: [{ title: 'Example', example }],
+        },
+      ];
     }
     return [];
   }
@@ -57,7 +63,10 @@ export function schemaToExamples(rootSchema) {
       // If path is empty, the choice is at the root of the schema.
       if (path.length === 0) {
         // Merge the chosen option's properties into the root properties
-        schemaVariant.properties = { ...schemaVariant.properties, ...option.properties };
+        schemaVariant.properties = {
+          ...schemaVariant.properties,
+          ...option.properties,
+        };
         // Remove the choice block from the root
         delete schemaVariant.oneOf;
         delete schemaVariant.anyOf;

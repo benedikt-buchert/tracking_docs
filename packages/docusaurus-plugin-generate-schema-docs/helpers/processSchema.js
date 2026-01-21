@@ -1,5 +1,5 @@
-import $RefParser from "@apidevtools/json-schema-ref-parser";
-import mergeJsonSchema from "json-schema-merge-allof";
+import $RefParser from '@apidevtools/json-schema-ref-parser';
+import mergeJsonSchema from 'json-schema-merge-allof';
 
 /**
  * Processes a JSON schema file by bundling external references,
@@ -17,7 +17,7 @@ export default async function processSchema(filePath) {
   // 2. Dereference the bundled schema to resolve internal refs for allOf merging
   const dereferencedSchema = await $RefParser.dereference(bundledSchema, {
     dereference: {
-      circular: "ignore", // Keep recursive parts as $refs
+      circular: 'ignore', // Keep recursive parts as $refs
     },
   });
 

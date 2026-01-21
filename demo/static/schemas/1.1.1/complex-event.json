@@ -20,38 +20,27 @@
       "type": "string",
       "const": "user_update",
       "description": "The event name.",
-      "examples": [
-        "user_update"
-      ]
+      "examples": ["user_update"]
     },
     "timestamp": {
       "type": "integer",
       "description": "Unix timestamp of the event.",
-      "examples": [
-        16788922
-      ]
+      "examples": [16788922]
     },
     "user_data": {
       "type": "object",
       "description": "Container for user information.",
-      "required": [
-        "user_id",
-        "attributes"
-      ],
+      "required": ["user_id", "attributes"],
       "properties": {
         "user_id": {
           "type": "string",
           "description": "Unique User ID.",
-          "examples": [
-            "U_999"
-          ]
+          "examples": ["U_999"]
         },
         "is_active": {
           "type": "boolean",
           "description": "Status of the user.",
-          "examples": [
-            true
-          ]
+          "examples": [true]
         },
         "attributes": {
           "type": "object",
@@ -60,16 +49,12 @@
             "segment": {
               "type": "string",
               "description": "Marketing segment.",
-              "examples": [
-                "premium"
-              ]
+              "examples": ["premium"]
             },
             "score": {
               "type": "number",
               "description": "Engagement score.",
-              "examples": [
-                95
-              ]
+              "examples": [95]
             }
           }
         },
@@ -78,28 +63,19 @@
           "description": "List of user addresses.",
           "items": {
             "type": "object",
-            "required": [
-              "city",
-              "zip"
-            ],
+            "required": ["city", "zip"],
             "properties": {
               "street": {
                 "type": "string",
-                "examples": [
-                  "123 Main St"
-                ]
+                "examples": ["123 Main St"]
               },
               "city": {
                 "type": "string",
-                "examples": [
-                  "New York"
-                ]
+                "examples": ["New York"]
               },
               "zip": {
                 "type": "string",
-                "examples": [
-                  "10001"
-                ]
+                "examples": ["10001"]
               }
             }
           }
@@ -113,9 +89,7 @@
       "maxLength": 10,
       "pattern": "^[a-z]+$",
       "format": "hostname",
-      "examples": [
-        "example"
-      ]
+      "examples": ["example"]
     },
     "number_constraints": {
       "type": "number",
@@ -123,18 +97,14 @@
       "minimum": 10,
       "maximum": 100,
       "multipleOf": 5,
-      "examples": [
-        50
-      ]
+      "examples": [50]
     },
     "exclusive_number_constraints": {
       "type": "number",
       "description": "A number with exclusive constraints.",
       "exclusiveMinimum": 10,
       "exclusiveMaximum": 100,
-      "examples": [
-        50
-      ]
+      "examples": [50]
     },
     "array_constraints": {
       "type": "array",
@@ -145,12 +115,7 @@
       "items": {
         "type": "string"
       },
-      "examples": [
-        [
-          "a",
-          "b"
-        ]
-      ]
+      "examples": [["a", "b"]]
     },
     "contains_array_constraints": {
       "type": "array",
@@ -160,13 +125,7 @@
       },
       "minContains": 1,
       "maxContains": 2,
-      "examples": [
-        [
-          1,
-          "text",
-          2
-        ]
-      ]
+      "examples": [[1, "text", 2]]
     },
     "object_constraints": {
       "type": "object",
@@ -180,15 +139,11 @@
       "properties": {
         "prop_a": {
           "type": "string",
-          "examples": [
-            "some_value"
-          ]
+          "examples": ["some_value"]
         },
         "prop_b": {
           "type": "string",
-          "examples": [
-            "another_value"
-          ]
+          "examples": ["another_value"]
         }
       },
       "examples": [
@@ -202,22 +157,16 @@
       "type": "object",
       "description": "An object with dependent required properties.",
       "dependentRequired": {
-        "credit_card": [
-          "billing_address"
-        ]
+        "credit_card": ["billing_address"]
       },
       "properties": {
         "credit_card": {
           "type": "number",
-          "examples": [
-            1234567890123456
-          ]
+          "examples": [1234567890123456]
         },
         "billing_address": {
           "type": "string",
-          "examples": [
-            "123 Billing Address, Anytown, USA"
-          ]
+          "examples": ["123 Billing Address, Anytown, USA"]
         }
       },
       "examples": [
@@ -230,22 +179,14 @@
     "enum_constraint": {
       "type": "string",
       "description": "A property with an enum constraint.",
-      "enum": [
-        "admin",
-        "editor",
-        "viewer"
-      ],
-      "examples": [
-        "admin"
-      ]
+      "enum": ["admin", "editor", "viewer"],
+      "examples": ["admin"]
     },
     "const_constraint": {
       "type": "string",
       "description": "A property that must have a constant value.",
       "const": "must_be_this",
-      "examples": [
-        "must_be_this"
-      ]
+      "examples": ["must_be_this"]
     }
   }
 }

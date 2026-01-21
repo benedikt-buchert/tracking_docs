@@ -3,15 +3,25 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import FoldableRows from '../../components/FoldableRows';
 
-// Mock child components and theme components
-jest.mock('../../components/SchemaRows', () => (props) => (
-  // The mock needs to return a valid element to be a child of a tbody
-  // We'll use a data-testid to check for its presence.
-  <tr data-testid="schema-rows">
-    <td>{JSON.stringify(props.tableData)}</td>
-  </tr>
-));
-jest.mock('@theme/Heading', () => ({ children }) => <h4>{children}</h4>);
+jest.mock('../../components/SchemaRows', () => {
+  const MockSchemaRows = (props) => (
+    // The mock needs to return a valid element to be a child of a tbody
+    // We'll use a data-testid to check for its presence.
+    <tr data-testid="schema-rows">
+      <td>{JSON.stringify(props.tableData)}</td>
+    </tr>
+  );
+  MockSchemaRows.displayName = 'MockSchemaRows';
+  return MockSchemaRows;
+});
+
+jest.mock('@theme/Heading', () => {
+  const MockHeading = ({ as: Component, children, ...props }) => (
+    <Component {...props}>{children}</Component>
+  );
+  MockHeading.displayName = 'MockHeading';
+  return MockHeading;
+});
 
 describe('FoldableRows', () => {
   const oneOfRow = {
@@ -21,8 +31,16 @@ describe('FoldableRows', () => {
     level: 1,
     description: 'Select one payment method:',
     options: [
-      { title: 'Credit Card', description: 'Pay with card', rows: [{ name: 'cardNumber' }] },
-      { title: 'PayPal', description: 'Pay with PayPal', rows: [{ name: 'email' }] },
+      {
+        title: 'Credit Card',
+        description: 'Pay with card',
+        rows: [{ name: 'cardNumber' }],
+      },
+      {
+        title: 'PayPal',
+        description: 'Pay with PayPal',
+        rows: [{ name: 'email' }],
+      },
     ],
   };
 
@@ -33,8 +51,16 @@ describe('FoldableRows', () => {
     level: 1,
     description: 'Select any contact method:',
     options: [
-      { title: 'Email', description: 'Contact via email', rows: [{ name: 'email_address' }] },
-      { title: 'Phone', description: 'Contact via phone', rows: [{ name: 'phone_number' }] },
+      {
+        title: 'Email',
+        description: 'Contact via email',
+        rows: [{ name: 'email_address' }],
+      },
+      {
+        title: 'Phone',
+        description: 'Contact via phone',
+        rows: [{ name: 'phone_number' }],
+      },
     ],
   };
 
@@ -44,22 +70,30 @@ describe('FoldableRows', () => {
         <tbody>
           <FoldableRows row={oneOfRow} />
         </tbody>
-      </table>
+      </table>,
     );
 
     const creditCardToggle = screen.getByText('Credit Card');
     const paypalToggle = screen.getByText('PayPal');
 
     // Initially, first option is open
-    expect(screen.getByText(JSON.stringify([{ name: 'cardNumber' }]))).toBeInTheDocument();
-    expect(screen.queryByText(JSON.stringify([{ name: 'email' }]))).not.toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'cardNumber' }])),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(JSON.stringify([{ name: 'email' }])),
+    ).not.toBeInTheDocument();
 
     // Click the second option
     fireEvent.click(paypalToggle);
 
     // Now, second option should be open and first should be closed
-    expect(screen.queryByText(JSON.stringify([{ name: 'cardNumber' }]))).not.toBeInTheDocument();
-    expect(screen.getByText(JSON.stringify([{ name: 'email' }]))).toBeInTheDocument();
+    expect(
+      screen.queryByText(JSON.stringify([{ name: 'cardNumber' }])),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'email' }])),
+    ).toBeInTheDocument();
   });
 
   it('renders anyOf as a checkbox-style accordion', () => {
@@ -68,7 +102,7 @@ describe('FoldableRows', () => {
         <tbody>
           <FoldableRows row={anyOfRow} />
         </tbody>
-      </table>
+      </table>,
     );
 
     const emailToggle = screen.getByText('Email');
@@ -79,17 +113,29 @@ describe('FoldableRows', () => {
 
     // Click the first option
     fireEvent.click(emailToggle);
-    expect(screen.getByText(JSON.stringify([{ name: 'email_address' }]))).toBeInTheDocument();
-    expect(screen.queryByText(JSON.stringify([{ name: 'phone_number' }]))).not.toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'email_address' }])),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(JSON.stringify([{ name: 'phone_number' }])),
+    ).not.toBeInTheDocument();
 
     // Click the second option
     fireEvent.click(phoneToggle);
-    expect(screen.getByText(JSON.stringify([{ name: 'email_address' }]))).toBeInTheDocument();
-    expect(screen.getByText(JSON.stringify([{ name: 'phone_number' }]))).toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'email_address' }])),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'phone_number' }])),
+    ).toBeInTheDocument();
 
     // Click the first option again to close it
     fireEvent.click(emailToggle);
-    expect(screen.queryByText(JSON.stringify([{ name: 'email_address' }]))).not.toBeInTheDocument();
-    expect(screen.getByText(JSON.stringify([{ name: 'phone_number' }]))).toBeInTheDocument();
+    expect(
+      screen.queryByText(JSON.stringify([{ name: 'email_address' }])),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(JSON.stringify([{ name: 'phone_number' }])),
+    ).toBeInTheDocument();
   });
 });

@@ -12,7 +12,8 @@ describe('schemaToTableData', () => {
 
     // 1. Test 'event' property
     const eventProp = tableData.find(
-      (row) => row.type === 'property' && row.name === 'event' && row.level === 0,
+      (row) =>
+        row.type === 'property' && row.name === 'event' && row.level === 0,
     );
     expect(eventProp).toBeDefined();
     expect(eventProp.propertyType).toBe('string');
@@ -30,7 +31,6 @@ describe('schemaToTableData', () => {
     expect(userIdChoice.choiceType).toBe('oneOf');
     expect(userIdChoice.options).toHaveLength(2);
     expect(userIdChoice.description).toBe("The user's ID.");
-
 
     // Check the options for user_id
     const userIdOption1 = userIdChoice.options[0];
@@ -193,11 +193,14 @@ describe('schemaToTableData', () => {
 
     // Test 'event' property
     const eventProp = tableData.find(
-      (row) => row.type === 'property' && row.name === 'event' && row.level === 0,
+      (row) =>
+        row.type === 'property' && row.name === 'event' && row.level === 0,
     );
     expect(eventProp).toBeDefined();
 
-    const rootChoice = tableData.find((row) => row.type === 'choice' && row.level === 0);
+    const rootChoice = tableData.find(
+      (row) => row.type === 'choice' && row.level === 0,
+    );
     expect(rootChoice).toBeDefined();
     expect(rootChoice.choiceType).toBe('anyOf');
     expect(rootChoice.options).toHaveLength(2);

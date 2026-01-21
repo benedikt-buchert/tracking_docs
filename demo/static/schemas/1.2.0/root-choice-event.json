@@ -15,9 +15,7 @@
         },
         "param_a": {
           "type": "string",
-          "examples": [
-            "example_a"
-          ]
+          "examples": ["example_a"]
         }
       }
     },
@@ -31,9 +29,7 @@
         },
         "param_b": {
           "type": "integer",
-          "examples": [
-            123
-          ]
+          "examples": [123]
         }
       }
     }

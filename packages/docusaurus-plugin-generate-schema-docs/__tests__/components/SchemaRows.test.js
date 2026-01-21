@@ -4,17 +4,25 @@ import { render } from '@testing-library/react';
 import SchemaRows from '../../components/SchemaRows';
 
 // Mock child components
-jest.mock('../../components/PropertyRow', () => (props) => (
-  <tr>
-    <td>Mocked PropertyRow: {props.row.name}</td>
-  </tr>
-));
+jest.mock('../../components/PropertyRow', () => {
+  const MockPropertyRow = (props) => (
+    <tr>
+      <td>Mocked PropertyRow: {props.row.name}</td>
+    </tr>
+  );
+  MockPropertyRow.displayName = 'MockPropertyRow';
+  return MockPropertyRow;
+});
 
-jest.mock('../../components/FoldableRows', () => (props) => (
-  <tr>
-    <td>Mocked FoldableRows: {props.row.choiceType}</td>
-  </tr>
-));
+jest.mock('../../components/FoldableRows', () => {
+  const MockFoldableRows = (props) => (
+    <tr>
+      <td>Mocked FoldableRows: {props.row.choiceType}</td>
+    </tr>
+  );
+  MockFoldableRows.displayName = 'MockFoldableRows';
+  return MockFoldableRows;
+});
 
 describe('SchemaRows', () => {
   it('renders a PropertyRow for each property type item in tableData', () => {
@@ -28,7 +36,7 @@ describe('SchemaRows', () => {
         <tbody>
           <SchemaRows tableData={tableData} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(getByText('Mocked PropertyRow: name')).toBeInTheDocument();
@@ -46,7 +54,7 @@ describe('SchemaRows', () => {
         <tbody>
           <SchemaRows tableData={tableData} />
         </tbody>
-      </table>
+      </table>,
     );
 
     // It should render both the parent and child property from the flat list
@@ -69,7 +77,7 @@ describe('SchemaRows', () => {
         <tbody>
           <SchemaRows tableData={tableData} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(getByText('Mocked FoldableRows: oneOf')).toBeInTheDocument();
@@ -92,7 +100,7 @@ describe('SchemaRows', () => {
         <tbody>
           <SchemaRows tableData={tableData} />
         </tbody>
-      </table>
+      </table>,
     );
 
     expect(getByText('Mocked PropertyRow: prop1')).toBeInTheDocument();

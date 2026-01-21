@@ -6,9 +6,7 @@
       "request": "launch",
       "name": "Validate Schemas",
       "program": "${workspaceFolder}/node_modules/.bin/docusaurus",
-      "args": [
-        "validate-schemas"
-      ],
+      "args": ["validate-schemas"],
       "console": "integratedTerminal"
     },
     {
@@ -16,10 +14,7 @@
       "type": "node",
       "request": "launch",
       "runtimeExecutable": "npm",
-      "runtimeArgs": [
-        "run",
-        "start"
-      ],
+      "runtimeArgs": ["run", "start"],
       "cwd": "${workspaceFolder}",
       "sourceMaps": true,
       "console": "integratedTerminal"

@@ -6,14 +6,17 @@ import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json'
 
 // Mock the CodeBlock component as it's not relevant to this test
 jest.mock('@theme/CodeBlock', () => {
-  return ({ children }) => <pre>{children}</pre>;
+  const MockCodeBlock = ({ children }) => <pre>{children}</pre>;
+  MockCodeBlock.displayName = 'MockCodeBlock';
+  return MockCodeBlock;
 });
 
 // Mock the Heading component
 jest.mock('@theme/Heading', () => {
-  return ({ as: Component, ...props }) => <Component {...props} />;
+  const MockHeading = ({ as: Component, ...props }) => <Component {...props} />;
+  MockHeading.displayName = 'MockHeading';
+  return MockHeading;
 });
-
 
 describe('SchemaViewer', () => {
   it('renders complex schema with payment_method and required indicators', () => {
@@ -23,11 +26,11 @@ describe('SchemaViewer', () => {
     const table = screen.getByRole('table');
     expect(within(table).getByText('payment_method')).toBeInTheDocument();
 
-
     // Check that the "required" text is rendered for the user_id choice
     const userIdChoiceHeader = screen.getByText(
       (content, element) =>
-        element.tagName.toLowerCase() === 'h4' && content.includes('Select one of the following options:'),
+        element.tagName.toLowerCase() === 'h4' &&
+        content.includes('Select one of the following options:'),
     );
     expect(userIdChoiceHeader).toBeInTheDocument();
 

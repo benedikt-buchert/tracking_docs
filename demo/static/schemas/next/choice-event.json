@@ -16,17 +16,13 @@
           "type": "string",
           "title": "User ID as String",
           "description": "The user's ID as a string.",
-          "examples": [
-            "user-123"
-          ]
+          "examples": ["user-123"]
         },
         {
           "type": "integer",
           "title": "User ID as Integer",
           "description": "The user's ID as an integer.",
-          "examples": [
-            123
-          ]
+          "examples": [123]
         }
       ]
     },
@@ -44,21 +40,14 @@
             },
             "card_number": {
               "type": "string",
-              "examples": [
-                "1234-5678-9012-3456"
-              ]
+              "examples": ["1234-5678-9012-3456"]
             },
             "expiry_date": {
               "type": "string",
-              "examples": [
-                "12/26"
-              ]
+              "examples": ["12/26"]
             }
           },
-          "required": [
-            "card_number",
-            "expiry_date"
-          ]
+          "required": ["card_number", "expiry_date"]
         },
         {
           "title": "PayPal",
@@ -71,21 +60,13 @@
             "email": {
               "type": "string",
               "format": "email",
-              "examples": [
-                "test@example.com"
-              ]
+              "examples": ["test@example.com"]
             }
           },
-          "required": [
-            "email"
-          ]
+          "required": ["email"]
         }
       ]
     }
   },
-  "required": [
-    "event",
-    "user_id",
-    "payment_method"
-  ]
+  "required": ["event", "user_id", "payment_method"]
 }

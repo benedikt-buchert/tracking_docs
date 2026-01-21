@@ -145,4 +145,3 @@ Update schema IDs for all versions:
 ```bash
 npm run update-schema-ids
 ```
-

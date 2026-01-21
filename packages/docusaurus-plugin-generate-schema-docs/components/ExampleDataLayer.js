@@ -8,7 +8,9 @@ import { schemaToExamples } from '../helpers/schemaToExamples';
 const generateCodeSnippet = (example, schema) => {
   const clearableProperties = findClearableProperties(schema || {});
   let codeSnippet = '';
-  const propertiesToClear = clearableProperties.filter((prop) => prop in example);
+  const propertiesToClear = clearableProperties.filter(
+    (prop) => prop in example,
+  );
 
   if (propertiesToClear.length > 0) {
     const resetObject = {};
@@ -30,11 +32,11 @@ export default function ExampleDataLayer({ schema }) {
   }
 
   // Handle the simple case of a single default example with no choices
-  if (
-    exampleGroups.length === 1 &&
-    exampleGroups[0].property === 'default'
-  ) {
-    const codeSnippet = generateCodeSnippet(exampleGroups[0].options[0].example, schema);
+  if (exampleGroups.length === 1 && exampleGroups[0].property === 'default') {
+    const codeSnippet = generateCodeSnippet(
+      exampleGroups[0].options[0].example,
+      schema,
+    );
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
   }
 

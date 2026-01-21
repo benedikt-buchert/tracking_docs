@@ -53,8 +53,8 @@ describe('schemaToTableData filtering', () => {
           properties: {},
         },
         empty_object_missing: {
-            type: 'object',
-            properties: {},
+          type: 'object',
+          properties: {},
         },
       },
     };

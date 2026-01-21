@@ -1,26 +1,32 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import ExampleDataLayer, { findClearableProperties } from '../components/ExampleDataLayer';
+import ExampleDataLayer, {
+  findClearableProperties,
+} from '../components/ExampleDataLayer';
 import choiceEventSchema from './__fixtures__/static/schemas/choice-event.json';
 
 // Mock the CodeBlock to make assertions on its content easier
 jest.mock('@theme/CodeBlock', () => {
-    return function CodeBlock({ children, language }) {
-        return <pre data-language={language}>{children}</pre>;
-    };
+  return function CodeBlock({ children, language }) {
+    return <pre data-language={language}>{children}</pre>;
+  };
 });
 
 jest.mock('@theme/Tabs', () => {
-    return function Tabs({ children }) {
-        return <div data-testid="tabs">{children}</div>;
-    };
+  return function Tabs({ children }) {
+    return <div data-testid="tabs">{children}</div>;
+  };
 });
 
 jest.mock('@theme/TabItem', () => {
-    return function TabItem({ children, label }) {
-        return <div data-testid="tab-item" data-label={label}>{children}</div>;
-    };
+  return function TabItem({ children, label }) {
+    return (
+      <div data-testid="tab-item" data-label={label}>
+        {children}
+      </div>
+    );
+  };
 });
 
 describe('ExampleDataLayer', () => {
@@ -43,7 +49,7 @@ describe('ExampleDataLayer', () => {
 
   it('should render grouped tabs for a schema with choices', () => {
     const { container, getAllByTestId } = render(
-      <ExampleDataLayer schema={choiceEventSchema} />
+      <ExampleDataLayer schema={choiceEventSchema} />,
     );
 
     // Check for the group headings
@@ -65,22 +71,22 @@ describe('ExampleDataLayer', () => {
 });
 
 describe('findClearableProperties', () => {
-    it('should return an empty array when schema is empty, null, or has no properties', () => {
-        expect(findClearableProperties({})).toEqual([]);
-        expect(findClearableProperties({ type: 'object' })).toEqual([]);
-        expect(findClearableProperties(null)).toEqual([]);
-        expect(findClearableProperties(undefined)).toEqual([]);
-    });
+  it('should return an empty array when schema is empty, null, or has no properties', () => {
+    expect(findClearableProperties({})).toEqual([]);
+    expect(findClearableProperties({ type: 'object' })).toEqual([]);
+    expect(findClearableProperties(null)).toEqual([]);
+    expect(findClearableProperties(undefined)).toEqual([]);
+  });
 
-    it('should return properties with "x-gtm-clear": true', () => {
-        const schema = {
-            properties: {
-                prop1: { type: 'string' },
-                prop2: { 'x-gtm-clear': true, type: 'object' },
-                prop3: { 'x-gtm-clear': false, type: 'object' },
-                prop4: { 'x-gtm-clear': true, type: 'array' },
-            }
-        };
-        expect(findClearableProperties(schema)).toEqual(['prop2', 'prop4']);
-    });
+  it('should return properties with "x-gtm-clear": true', () => {
+    const schema = {
+      properties: {
+        prop1: { type: 'string' },
+        prop2: { 'x-gtm-clear': true, type: 'object' },
+        prop3: { 'x-gtm-clear': false, type: 'object' },
+        prop4: { 'x-gtm-clear': true, type: 'array' },
+      },
+    };
+    expect(findClearableProperties(schema)).toEqual(['prop2', 'prop4']);
+  });
 });

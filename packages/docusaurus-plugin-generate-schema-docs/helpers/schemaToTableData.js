@@ -75,7 +75,12 @@ export function schemaToTableData(schema, level = 0, path = []) {
     return Object.values(schemaNode.properties).every(isEffectivelyEmpty);
   }
 
-  function buildRows(subSchema, currentLevel, currentPath, requiredFromParent = []) {
+  function buildRows(
+    subSchema,
+    currentLevel,
+    currentPath,
+    requiredFromParent = [],
+  ) {
     if (!subSchema) return;
 
     if (subSchema.properties) {
@@ -123,7 +128,8 @@ export function schemaToTableData(schema, level = 0, path = []) {
           });
         } else {
           // This is a "normal" property or a complex one with a nested choice.
-          const isRequired = (subSchema.required || requiredFromParent)?.includes(name) || false;
+          const isRequired =
+            (subSchema.required || requiredFromParent)?.includes(name) || false;
           const constraints = getConstraints(propSchema);
           if (isRequired) {
             constraints.unshift('required');
@@ -149,15 +155,22 @@ export function schemaToTableData(schema, level = 0, path = []) {
           });
 
           if (propSchema.properties) {
-            buildRows(propSchema, currentLevel + 1, newPath, propSchema.required);
+            buildRows(
+              propSchema,
+              currentLevel + 1,
+              newPath,
+              propSchema.required,
+            );
           } else if (
             propSchema.type === 'array' &&
             propSchema.items?.properties
           ) {
-            buildRows(propSchema.items, currentLevel + 1, [
-              ...newPath,
-              '[n]',
-            ], propSchema.items.required);
+            buildRows(
+              propSchema.items,
+              currentLevel + 1,
+              [...newPath, '[n]'],
+              propSchema.items.required,
+            );
           } else if (isChoiceWrapper) {
             // This handles the "complex" choice property like payment_method.
             // A property row has already been created above, now we add the choice row.
@@ -185,7 +198,11 @@ export function schemaToTableData(schema, level = 0, path = []) {
     }
 
     // This handles choices at the root of a schema
-    const choiceType = subSchema.oneOf ? 'oneOf' : subSchema.anyOf ? 'anyOf' : null;
+    const choiceType = subSchema.oneOf
+      ? 'oneOf'
+      : subSchema.anyOf
+        ? 'anyOf'
+        : null;
     if (choiceType) {
       const choices = subSchema[choiceType];
       flatRows.push({
