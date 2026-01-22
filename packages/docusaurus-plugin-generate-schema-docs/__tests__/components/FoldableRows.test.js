@@ -138,4 +138,193 @@ describe('FoldableRows', () => {
       screen.getByText(JSON.stringify([{ name: 'phone_number' }])),
     ).toBeInTheDocument();
   });
+
+  describe('hierarchical lines feature', () => {
+    it('applies padding-left based on level using rem units', () => {
+      const rowWithLevel = {
+        type: 'choice',
+        choiceType: 'oneOf',
+        path: ['nested', 'payment'],
+        level: 2,
+        description: 'Nested choice',
+        continuingLevels: [],
+        options: [
+          {
+            title: 'Option A',
+            description: 'First option',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={rowWithLevel} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      // level 2: 2 * 1.25 + 0.5 = 3rem
+      cells.forEach((cell) => {
+        expect(cell.style.paddingLeft).toBe('3rem');
+      });
+    });
+
+    it('applies background-image for continuing ancestor lines', () => {
+      const rowWithContinuingLevels = {
+        type: 'choice',
+        choiceType: 'anyOf',
+        path: ['deeply', 'nested', 'choice'],
+        level: 2,
+        description: 'Choice with continuing lines',
+        continuingLevels: [0], // Ancestor at level 0 has more siblings
+        options: [
+          {
+            title: 'Option A',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={rowWithContinuingLevels} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      cells.forEach((cell) => {
+        expect(cell.style.backgroundImage).toContain('linear-gradient');
+      });
+    });
+
+    it('applies background-image for immediate parent level connection', () => {
+      const rowWithParentLevel = {
+        type: 'choice',
+        choiceType: 'oneOf',
+        path: ['parent', 'choice'],
+        level: 1,
+        description: 'Choice at level 1',
+        continuingLevels: [],
+        options: [
+          {
+            title: 'Option A',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={rowWithParentLevel} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      // Should have a line at parent level (level 0) position
+      cells.forEach((cell) => {
+        expect(cell.style.backgroundImage).toContain('linear-gradient');
+      });
+    });
+
+    it('has no background-image for root level choices with no continuing levels', () => {
+      const rootLevelRow = {
+        type: 'choice',
+        choiceType: 'oneOf',
+        path: ['user_id'],
+        level: 0,
+        description: 'Root level choice',
+        continuingLevels: [],
+        options: [
+          {
+            title: 'Option A',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={rootLevelRow} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      cells.forEach((cell) => {
+        expect(cell.style.backgroundImage).toBe('');
+      });
+    });
+
+    it('combines multiple continuing levels in background-image', () => {
+      const rowWithMultipleLevels = {
+        type: 'choice',
+        choiceType: 'anyOf',
+        path: ['a', 'b', 'c', 'choice'],
+        level: 3,
+        description: 'Deeply nested choice',
+        continuingLevels: [0, 1], // Multiple ancestors have siblings
+        options: [
+          {
+            title: 'Option A',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={rowWithMultipleLevels} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      cells.forEach((cell) => {
+        const bgImage = cell.style.backgroundImage;
+        // Should have multiple gradients (one for each continuing level + parent)
+        const gradientCount = (bgImage.match(/linear-gradient/g) || []).length;
+        expect(gradientCount).toBeGreaterThanOrEqual(2);
+      });
+    });
+
+    it('applies correct indentation for level 0', () => {
+      const levelZeroRow = {
+        type: 'choice',
+        choiceType: 'oneOf',
+        path: ['user_id'],
+        level: 0,
+        description: 'Level 0 choice',
+        continuingLevels: [],
+        options: [
+          {
+            title: 'Option A',
+            rows: [{ name: 'fieldA' }],
+          },
+        ],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <FoldableRows row={levelZeroRow} />
+          </tbody>
+        </table>,
+      );
+
+      const cells = container.querySelectorAll('td[colspan="5"]');
+      // level 0: 0 * 1.25 + 0.5 = 0.5rem
+      cells.forEach((cell) => {
+        expect(cell.style.paddingLeft).toBe('0.5rem');
+      });
+    });
+  });
 });

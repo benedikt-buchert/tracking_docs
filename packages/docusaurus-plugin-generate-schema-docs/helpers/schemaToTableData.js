@@ -6,6 +6,7 @@ function processOptions(
   path,
   isNestedInProperty,
   requiredArray = [],
+  continuingLevels = [],
 ) {
   return choices.map((optionSchema) => {
     const optionTitle = optionSchema.title || 'Option';
@@ -33,6 +34,9 @@ function processOptions(
         example: optionSchema.examples || optionSchema.example,
         constraints: constraints,
         isLastInGroup: true,
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [...continuingLevels],
       });
     } else {
       // This is a complex object within a choice
@@ -42,6 +46,7 @@ function processOptions(
         // Otherwise, they are one level deeper.
         level,
         isNestedInProperty ? [] : path,
+        continuingLevels,
       );
     }
 
@@ -53,7 +58,12 @@ function processOptions(
   });
 }
 
-export function schemaToTableData(schema, level = 0, path = []) {
+export function schemaToTableData(
+  schema,
+  level = 0,
+  path = [],
+  parentContinuingLevels = [],
+) {
   const flatRows = [];
 
   function isEffectivelyEmpty(schemaNode) {
@@ -80,6 +90,7 @@ export function schemaToTableData(schema, level = 0, path = []) {
     currentLevel,
     currentPath,
     requiredFromParent = [],
+    continuingLevels = [],
   ) {
     if (!subSchema) return;
 
@@ -87,19 +98,48 @@ export function schemaToTableData(schema, level = 0, path = []) {
       const propKeys = Object.keys(subSchema.properties);
       const hasSiblingChoices = !!(subSchema.oneOf || subSchema.anyOf);
 
-      propKeys.forEach((name, index) => {
+      // Filter out properties that should be skipped to get accurate count
+      const visiblePropKeys = propKeys.filter((name) => {
+        const propSchema = subSchema.properties[name];
+        return !(
+          propSchema['x-gtm-clear'] === true && isEffectivelyEmpty(propSchema)
+        );
+      });
+
+      visiblePropKeys.forEach((name, index) => {
         const propSchema = subSchema.properties[name];
         const newPath = [...currentPath, name];
 
+        const isLast =
+          index === visiblePropKeys.length - 1 && !hasSiblingChoices;
+        const isChoiceWrapper = !!(propSchema.oneOf || propSchema.anyOf);
+
+        // Determine if this property has children and what type
+        const hasNestedProperties = !!propSchema.properties;
+        const hasArrayItems =
+          propSchema.type === 'array' && !!propSchema.items?.properties;
+        const hasNestedChoice = isChoiceWrapper;
+        const hasChildren =
+          hasNestedProperties || hasArrayItems || hasNestedChoice;
+
+        // Determine container type for the symbol
+        let containerType = null;
         if (
-          propSchema['x-gtm-clear'] === true &&
-          isEffectivelyEmpty(propSchema)
+          hasNestedProperties ||
+          (isChoiceWrapper && propSchema.type === 'object')
         ) {
-          return;
+          containerType = 'object';
+        } else if (hasArrayItems) {
+          containerType = 'array';
         }
 
-        const isLast = index === propKeys.length - 1 && !hasSiblingChoices;
-        const isChoiceWrapper = !!(propSchema.oneOf || propSchema.anyOf);
+        // Calculate continuing levels for children
+        // If this is not the last item, add current level to continuing levels for children
+        // If this IS the last item, remove the immediate parent level (currentLevel - 1) because
+        // that line stops at this item and should not continue through its children
+        const childContinuingLevels = isLast
+          ? continuingLevels.filter((lvl) => lvl !== currentLevel - 1)
+          : [...continuingLevels, currentLevel];
 
         // This is a "simple" choice property like user_id.
         // It gets unwrapped into a choice row directly.
@@ -118,12 +158,16 @@ export function schemaToTableData(schema, level = 0, path = []) {
             title: propSchema.title,
             description: propSchema.description,
             isLastInGroup: isLast,
+            hasChildren: false,
+            containerType: null,
+            continuingLevels: [...continuingLevels],
             options: processOptions(
               choices,
               currentLevel,
               newPath,
               false,
               subSchema.required || requiredFromParent,
+              childContinuingLevels,
             ),
           });
         } else {
@@ -134,11 +178,6 @@ export function schemaToTableData(schema, level = 0, path = []) {
           if (isRequired) {
             constraints.unshift('required');
           }
-
-          const hasNestedChoice = isChoiceWrapper;
-          const hasNestedProperties =
-            !!propSchema.properties ||
-            (propSchema.type === 'array' && propSchema.items?.properties);
 
           flatRows.push({
             type: 'property',
@@ -151,7 +190,10 @@ export function schemaToTableData(schema, level = 0, path = []) {
             description: propSchema.description,
             example: propSchema.examples || propSchema.example,
             constraints,
-            isLastInGroup: isLast && !hasNestedChoice && !hasNestedProperties,
+            isLastInGroup: isLast,
+            hasChildren,
+            containerType,
+            continuingLevels: [...continuingLevels],
           });
 
           if (propSchema.properties) {
@@ -160,6 +202,7 @@ export function schemaToTableData(schema, level = 0, path = []) {
               currentLevel + 1,
               newPath,
               propSchema.required,
+              childContinuingLevels,
             );
           } else if (
             propSchema.type === 'array' &&
@@ -170,6 +213,7 @@ export function schemaToTableData(schema, level = 0, path = []) {
               currentLevel + 1,
               [...newPath, '[n]'],
               propSchema.items.required,
+              childContinuingLevels,
             );
           } else if (isChoiceWrapper) {
             // This handles the "complex" choice property like payment_method.
@@ -184,12 +228,16 @@ export function schemaToTableData(schema, level = 0, path = []) {
               title: propSchema.title,
               description: null,
               isLastInGroup: true,
+              hasChildren: false,
+              containerType: null,
+              continuingLevels: childContinuingLevels,
               options: processOptions(
                 choices,
                 currentLevel + 1,
                 newPath,
                 true,
                 propSchema.required,
+                childContinuingLevels,
               ),
             });
           }
@@ -213,12 +261,16 @@ export function schemaToTableData(schema, level = 0, path = []) {
         title: subSchema.title,
         description: subSchema.description,
         isLastInGroup: true,
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [...continuingLevels],
         options: processOptions(
           choices,
           currentLevel,
           currentPath,
           false,
           subSchema.required || requiredFromParent,
+          continuingLevels,
         ),
       });
     } else if (!subSchema.properties && subSchema.type) {
@@ -234,10 +286,13 @@ export function schemaToTableData(schema, level = 0, path = []) {
         example: subSchema.examples || subSchema.example,
         constraints: getConstraints(subSchema),
         isLastInGroup: true,
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [...continuingLevels],
       });
     }
   }
 
-  buildRows(schema, level, path, schema.required);
+  buildRows(schema, level, path, schema.required, parentContinuingLevels);
   return flatRows;
 }

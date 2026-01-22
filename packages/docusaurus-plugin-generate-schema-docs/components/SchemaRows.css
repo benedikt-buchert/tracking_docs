@@ -18,20 +18,50 @@
 }
 
 .nested-table-container {
-  padding-left: 20px;
-  border-left: 4px solid var(--ifm-table-border-color);
+  padding-left: 1.25rem;
+  border-left: 0.25rem solid var(--ifm-table-border-color);
 }
 
 .schema-json-viewer {
   margin-bottom: 1em;
 }
 
+/* --- Property Name and Container Symbol Styles --- */
+
+.property-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.container-symbol {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.9em;
+  color: var(--ifm-color-emphasis-600);
+  font-weight: bold;
+  margin-left: -0.55em;
+}
+
 /* --- Organigram Connector Line Styles --- */
 
-td[class*='level-'] {
+/*
+ * Strategy:
+ * - ::before = vertical line from parent (top to bottom, or top to 50% for last items)
+ * - ::after = horizontal connector (from vertical line to property name)
+ * - background-image = parent-to-child lines (from 50% down) + continuing ancestor lines
+ */
+
+/* Base positioning */
+td[class*='level-'],
+td.has-children {
   position: relative;
 }
 
+/*
+ * VERTICAL LINE (::before)
+ * Connects this row to its parent and siblings.
+ * Runs from top to bottom (or to 50% for last items in group).
+ */
 td[class*='level-']::before {
   content: '';
   position: absolute;
@@ -41,38 +71,61 @@ td[class*='level-']::before {
   border-left: 1px solid var(--ifm-table-border-color);
 }
 
+/* Last items: stop vertical line at middle */
+td.is-last[class*='level-']::before {
+  bottom: 50%;
+}
+
+/*
+ * HORIZONTAL CONNECTOR (::after)
+ * Connects vertical line to the property name.
+ */
 td[class*='level-']::after {
   content: '';
   position: absolute;
   top: 50%;
   height: 0;
-  width: 12px;
+  width: 0.75rem;
   border-bottom: 1px solid var(--ifm-table-border-color);
 }
 
-.is-last[class*='level-']::before {
-  bottom: 50%;
-}
+/* --- Level-based positioning --- */
 
 td.level-1::before,
 td.level-1::after {
-  left: 8px;
+  left: 0.5rem;
 }
 
 td.level-2::before,
 td.level-2::after {
-  left: 28px;
+  left: 1.75rem;
 }
 
 td.level-3::before,
 td.level-3::after {
-  left: 48px;
+  left: 3rem;
 }
 
 td.level-4::before,
 td.level-4::after {
-  left: 68px;
+  left: 4.25rem;
 }
+
+td.level-5::before,
+td.level-5::after {
+  left: 5.5rem;
+}
+
+td.level-6::before,
+td.level-6::after {
+  left: 6.75rem;
+}
+
+/*
+ * Note: Parent-to-child lines and continuing ancestor lines are now
+ * handled via inline styles in PropertyRow.js using background gradients.
+ * This allows dynamic combination of multiple line levels.
+ */
 
 /* --- Choice Row Styles --- */
 
@@ -115,9 +168,9 @@ td.level-4::after {
 
 .choice-row-toggle {
   display: inline-block;
-  width: 16px;
-  height: 16px;
-  margin-right: 12px;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.75rem;
   border: 1px solid var(--ifm-color-emphasis-400);
   flex-shrink: 0;
   position: relative;
@@ -128,7 +181,7 @@ td.level-4::after {
 }
 
 .choice-row-toggle.checkbox {
-  border-radius: 4px;
+  border-radius: 0.25rem;
 }
 
 .choice-row-toggle.checkbox::after {
@@ -164,11 +217,11 @@ td.level-4::after {
 .choice-row-header input:checked + .choice-row-toggle.checkbox::after {
   display: block;
   left: 0.29em;
-  top: 2px;
-  width: 3px;
-  height: 7px;
+  top: 0.125rem;
+  width: 0.1875rem;
+  height: 0.4375rem;
   border: solid var(--ifm-color-primary);
-  border-width: 0 2px 2px 0;
+  border-width: 0 0.125rem 0.125rem 0;
   transform: rotate(45deg);
 }
 
