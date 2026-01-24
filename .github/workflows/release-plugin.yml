@@ -3,7 +3,7 @@ name: Release Plugin
 on:
   push:
     tags:
-      - 'plugin-v*'
+      - '*'
 
 jobs:
   release:
@@ -37,7 +37,7 @@ jobs:
 
       - name: Update package version
         run: |
-          VERSION=$(echo ${{ github.ref_name }} | sed 's/refs\/tags\/plugin-v//')
+          VERSION=$(echo ${{ github.ref_name }}')
           npm --prefix packages/docusaurus-plugin-generate-schema-docs version $VERSION --no-git-tag-version
 
       - name: Commit and push package.json
