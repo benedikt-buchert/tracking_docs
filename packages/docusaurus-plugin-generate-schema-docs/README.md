@@ -76,6 +76,31 @@ The plugin reads your JSON schemas, dereferences any `$ref` properties, and merg
 
 The validation script builds an example from each schema and validates it against the schema itself, ensuring your examples are always in sync with your schemas.
 
+## Schema Composition (anyOf, oneOf)
+
+The plugin has special handling for `anyOf` and `oneOf` keywords in your JSON schemas.
+
+### `anyOf`
+
+When `anyOf` is used, the plugin will render a dropdown menu in the documentation that allows users to switch between the different sub-schemas. This is useful for representing properties that can have multiple different structures.
+
+### `oneOf`
+
+Similar to `anyOf`, `oneOf` will also render a dropdown menu.
+
+#### `oneOf` at the Root Level
+
+A special behavior is triggered when `oneOf` is used at the root level of a schema file. If a schema's top-level definition is a `oneOf` array, the plugin will generate a directory structure that reflects the choices.
+
+For example, given a schema `my-event.json` with a `oneOf` at the root, where each item in the `oneOf` array is a reference to another schema file (e.g., `option-a.json`, `option-b.json`), the plugin will generate the following structure:
+
+- `docs/events/my-event/`: A directory for the parent schema.
+- `docs/events/my-event/index.mdx`: An index page for `my-event`.
+- `docs/events/my-event/option-a.mdx`: A page for the first option.
+- `docs/events/my-event/option-b.mdx`: A page for the second option.
+
+This creates a nested navigation structure in Docusaurus, which is useful for grouping related events or entities under a single menu item.
+
 ## Versioning
 
 This plugin supports documentation and schema versioning, integrated with Docusaurus's native versioning system.

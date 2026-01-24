@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`generateEventDocs (oneOf with $anchor) should generate documentation using $anchor for slug 1`] = `
+"---
+title: Parent Event Anchor
+description: "This is a parent event with oneOf."
+---
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+# Parent Event Anchor
+
+This is a parent event with oneOf.
+
+Please select one of the following options:
+
+- [Child Event Anchor](./child-event-with-anchor)
+- [Child Event Title](./child-event-title)
+
+<SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json","title":"Parent Event Anchor","description":"This is a parent event with oneOf.","type":"object","oneOf":[{"title":"Child Event Anchor","description":"This is a child event with an anchor.","$anchor":"child-event-with-anchor","type":"object","properties":{"property_a":{"type":"string"}}},{"title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}]}} />
+"
+`;
+
+exports[`generateEventDocs (oneOf with $anchor) should generate documentation using $anchor for slug 2`] = `
+"---
+title: Child Event Anchor
+description: "This is a child event with an anchor."
+sidebar_label: Child Event Anchor
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/docs/parent-event-anchor/01-child-event-with-anchor.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Child Event Anchor
+
+This is a child event with an anchor.
+
+
+
+<SchemaViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-with-anchor","title":"Child Event Anchor","description":"This is a child event with an anchor.","type":"object","$anchor":"child-event-with-anchor","properties":{"property_a":{"type":"string"}}}} />
+<SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-with-anchor","title":"Child Event Anchor","description":"This is a child event with an anchor.","type":"object","$anchor":"child-event-with-anchor","properties":{"property_a":{"type":"string"}}}} />
+
+
+"
+`;
+
+exports[`generateEventDocs (oneOf with $anchor) should generate documentation using $anchor for slug 3`] = `
+"---
+title: Child Event Title
+description: "This is a child event with only a title."
+sidebar_label: Child Event Title
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/docs/parent-event-anchor/02-child-event-title.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Child Event Title
+
+This is a child event with only a title.
+
+
+
+<SchemaViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-title","title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}} />
+<SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-title","title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}} />
+
+
+"
+`;
