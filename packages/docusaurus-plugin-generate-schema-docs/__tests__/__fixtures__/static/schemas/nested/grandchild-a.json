@@ -1,0 +1,9 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/nested/grandchild-a.json",
+  "title": "Grandchild A",
+  "type": "object",
+  "properties": {
+    "prop_a": { "type": "string" }
+  }
+}

@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`generateEventDocs (nested oneOf) should generate nested documentation correctly 1`] = `
+"---
+title: Parent Event
+description: "undefined"
+---
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+# Parent Event
+
+undefined
+
+Please select one of the following options:
+
+- [Child Event](./child-event)
+
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/parent-event.json","title":"Parent Event","type":"object","oneOf":[{"$ref":"./child-event.json"}]}} />
+"
+`;
+
+exports[`generateEventDocs (nested oneOf) should generate nested documentation correctly 2`] = `
+"---
+title: Child Event
+description: "undefined"
+---
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+# Child Event
+
+undefined
+
+Please select one of the following options:
+
+- [Grandchild A](./grandchild-a)
+- [Grandchild B](./grandchild-b)
+
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}],"properties":{}}} />
+"
+`;
+
+exports[`generateEventDocs (nested oneOf) should generate nested documentation correctly 3`] = `
+"---
+title: Grandchild A
+description: undefined
+sidebar_label: Grandchild A
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/docs/parent-event/01-child-event/01-grandchild-a.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Grandchild A
+
+undefined
+
+
+
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}}} />
+
+
+"
+`;
+
+exports[`generateEventDocs (nested oneOf) should generate nested documentation correctly 4`] = `
+"---
+title: Grandchild B
+description: undefined
+sidebar_label: Grandchild B
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/docs/parent-event/01-child-event/02-grandchild-b.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Grandchild B
+
+undefined
+
+
+
+<SchemaViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}} />
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}} />
+
+
+"
+`;

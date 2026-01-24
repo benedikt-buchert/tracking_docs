@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/nested/child-event.json",
+  "title": "Child Event",
+  "type": "object",
+  "oneOf": [
+    { "$ref": "./grandchild-a.json" },
+    { "$ref": "./grandchild-b.json" }
+  ]
+}

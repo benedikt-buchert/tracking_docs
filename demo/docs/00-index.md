@@ -1,5 +1,5 @@
 ---
-title: Home
+title: Welcome
 slug: /
 ---
 
@@ -9,6 +9,6 @@ This site documents event schemas and tracking guidance.
 
 Start with the documentation:
 
-- [Tracking docs](/events/complex-event)
+- [Tracking docs](/event-reference/complex-event)
 
 If you reached this page from a broken link, please open an issue on GitHub.

@@ -46,17 +46,18 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          exclude: ['**/partials'],
           sidebarPath: './sidebars.js',
           routeBasePath: '/',
-          lastVersion: '1.1.1',
+          lastVersion: '1.2.0',
           includeCurrentVersion: !isProduction,
           versions: {
             ...(!isProduction && {
               current: {
-                            label: 'Next 🚧',
-                            path: 'next',
-                            banner: 'unreleased',
-                          },
+                label: 'Next 🚧',
+                path: 'next',
+                banner: 'unreleased',
+              },
             }),
           },
         },
@@ -108,8 +109,16 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
-                to: '/events/complex-event',
+                label: 'Example event',
+                to: '/event-reference/complex-event',
+              },
+              {
+                label: 'GTM Data Layer Documentation',
+                to: 'https://developers.google.com/tag-platform/tag-manager/datalayer#tag-manager',
+              },
+              {
+                label: 'docusaurus docs',
+                to: 'https://docusaurus.io/docs',
               },
             ],
           },
@@ -124,23 +133,17 @@ const config = {
                 label: 'Discord',
                 href: 'https://discordapp.com/invite/docusaurus',
               },
-              {
-                label: 'X',
-                href: 'https://x.com/docusaurus',
-              },
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Benedikt Buchert Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
       },
     }),
-  plugins: [
-    'docusaurus-plugin-generate-schema-docs',
-  ],
+  plugins: ['docusaurus-plugin-generate-schema-docs'],
 };
 
 export default config;

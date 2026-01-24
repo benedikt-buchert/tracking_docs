@@ -1,83 +1,69 @@
+/**
+ * Recursively builds a single, default example object from a JSON schema.
+ * It prefers explicit examples, consts, or defaults. For choices (`oneOf`/`anyOf`),
+ * it defaults to the first option.
+ *
+ * @param {object} schema The schema to build an example from.
+ * @returns {object|undefined} The generated example.
+ */
 const buildExampleFromSchema = (schema) => {
-    const buildValue = (prop) => {
-        if (!prop) return undefined;
+  if (!schema) return undefined;
 
-        // 1. Prefer explicit examples or constants if available
-        if (prop.examples && prop.examples.length) return prop.examples[0];
-        if (prop.const !== undefined) return prop.const;
-        if (prop.default !== undefined) return prop.default;
+  // For choices, default to the first option.
+  if (schema.oneOf?.length > 0) {
+    return buildExampleFromSchema(schema.oneOf[0]);
+  }
+  if (schema.anyOf?.length > 0) {
+    return buildExampleFromSchema(schema.anyOf[0]);
+  }
 
-        const type = Array.isArray(prop.type) ? prop.type[0] : prop.type;
+  // Prefer const, explicit examples, or default values.
+  if (typeof schema.const !== 'undefined') return schema.const;
+  if (schema.examples?.length > 0) return schema.examples[0];
+  if (typeof schema.default !== 'undefined') return schema.default;
 
-        if (type === 'object')
-        {
-            if (prop.properties)
-            {
-                const obj = {};
-                Object.entries(prop.properties).forEach(([k, v]) => {
-                    const val = buildValue(v);
-                    // Only add the property if it has a valid value (not undefined)
-                    if (val !== undefined)
-                    {
-                        obj[k] = val;
-                    }
-                });
+  let type = Array.isArray(schema.type) ? schema.type[0] : schema.type;
+  if (!type && schema.properties) {
+    type = 'object';
+  }
 
-                // If the object ends up having no keys, consider it "empty" and return undefined
-                if (Object.keys(obj).length === 0) return undefined;
-                return obj;
-            }
-            // Object with no properties defined
-            return undefined;
+  if (type === 'object') {
+    if (schema.properties) {
+      const obj = {};
+      Object.entries(schema.properties).forEach(([key, propSchema]) => {
+        const value = buildExampleFromSchema(propSchema);
+        if (typeof value !== 'undefined') {
+          obj[key] = value;
         }
-
-        if (type === 'array')
-        {
-            if (prop.items)
-            {
-                const itemVal = buildValue(prop.items);
-                // If the inner item is valid, return it as an array
-                if (itemVal !== undefined)
-                {
-                    return [itemVal];
-                }
-            }
-            // Empty array or array of undefined items
-            return undefined;
-        }
-
-        switch (type)
-        {
-            case 'string': return '';
-            case 'integer':
-            case 'number': return 0;
-            case 'boolean': return false;
-            default: return undefined;
-        }
-    };
-
-    // If the schema provides a top-level examples array with an object, prefer it
-    if (schema && schema.examples && schema.examples.length)
-    {
-        const first = schema.examples[0];
-        if (typeof first === 'object' && first !== null) return first;
+      });
+      // Return undefined for objects that end up empty.
+      return Object.keys(obj).length > 0 ? obj : undefined;
     }
+    // No properties defined, treat as an empty object (which we filter out).
+    return undefined;
+  }
 
-    // Otherwise, build from properties
-    if (schema && schema.properties)
-    {
-        const out = {};
-        Object.entries(schema.properties).forEach(([k, p]) => {
-            const val = buildValue(p);
-            // Only add top-level keys if they are not undefined
-            if (val !== undefined)
-            {
-                out[k] = val;
-            }
-        });
-        return out;
+  if (type === 'array') {
+    if (schema.items) {
+      const itemValue = buildExampleFromSchema(schema.items);
+      // Only return an array if the item schema generates a value.
+      return typeof itemValue !== 'undefined' ? [itemValue] : undefined;
     }
+    return undefined; // No items defined.
+  }
 
-    return {};
-}
+  // Return placeholder values for primitive types if no other value is found.
+  switch (type) {
+    case 'string':
+      return '';
+    case 'integer':
+    case 'number':
+      return 0;
+    case 'boolean':
+      return false;
+    default:
+      return undefined;
+  }
+};
+
 export default buildExampleFromSchema;

@@ -1,8 +1,10 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "components/referenced.json",
-    "title": "Referenced Component",
-    "type": "object",
-    "properties": { "prop": { "type": "string", "examples": ["component prop"] } },
-    "required": ["prop"]
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "components/referenced.json",
+  "title": "Referenced Component",
+  "type": "object",
+  "properties": {
+    "prop": { "type": "string", "examples": ["component prop"] }
+  },
+  "required": ["prop"]
 }

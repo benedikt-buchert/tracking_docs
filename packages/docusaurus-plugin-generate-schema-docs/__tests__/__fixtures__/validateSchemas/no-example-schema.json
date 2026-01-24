@@ -1,12 +1,12 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "no-valid-example-schema",
-    "title": "No Valid Example Schema",
-    "type": "object",
-    "properties": {
-        "some_prop": {
-            "description": "This property has no type or example, so it won't be in the generated example."
-        }
-    },
-    "required": ["some_prop"]
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "no-valid-example-schema",
+  "title": "No Valid Example Schema",
+  "type": "object",
+  "properties": {
+    "some_prop": {
+      "description": "This property has no type or example, so it won't be in the generated example."
+    }
+  },
+  "required": ["some_prop"]
 }

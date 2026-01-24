@@ -1,3 +1,6 @@
 import React from 'react';
 
-module.exports = ({ as, children }) => React.createElement(as, null, children);
+const MockHeading = ({ as, children }) =>
+  React.createElement(as, null, children);
+MockHeading.displayName = 'MockHeading';
+module.exports = MockHeading;

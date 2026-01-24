@@ -1,87 +1,149 @@
-import fs from 'fs';
 import path from 'path';
-import loadSchema from './helpers/loadSchema';
-import processSchema from './helpers/processSchema';
-import MdxTemplate from './helpers/mdx-template.js';
+import fs from 'fs';
 import { getPathsForVersion } from './helpers/path-helpers.js';
+import { readSchemas, writeDoc, createDir } from './helpers/file-system.js';
+import { processOneOfSchema, slugify } from './helpers/schema-processing.js';
+import SchemaDocTemplate from './helpers/schema-doc-template.js';
+import ChoiceIndexTemplate from './helpers/choice-index-template.js';
+import processSchema from './helpers/processSchema.js';
+
+async function generateAndWriteDoc(
+  filePath,
+  schema,
+  eventName,
+  outputDir,
+  options,
+  alreadyMergedSchema = null,
+) {
+  const { organizationName, projectName, siteDir } = options;
+  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
+  const PARTIALS_DIR = path.join(siteDir, 'docs/partials');
+
+  const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
+
+  // Check for partials
+  const topPartialPath = path.join(PARTIALS_DIR, `${eventName}.mdx`);
+  const bottomPartialPath = path.join(PARTIALS_DIR, `${eventName}_bottom.mdx`);
+
+  let topPartialImport = '';
+  let topPartialComponent = '';
+  if (fs.existsSync(topPartialPath)) {
+    topPartialImport = `import TopPartial from '@site/docs/partials/${eventName}.mdx';`;
+    topPartialComponent = '<TopPartial />';
+  }
+
+  let bottomPartialImport = '';
+  let bottomPartialComponent = '';
+  if (fs.existsSync(bottomPartialPath)) {
+    bottomPartialImport = `import BottomPartial from '@site/docs/partials/${eventName}_bottom.mdx';`;
+    bottomPartialComponent = '<BottomPartial />';
+  }
+
+  const editUrl = `${baseEditUrl}/${path.relative(
+    path.join(siteDir, '..'),
+    filePath,
+  )}`;
+
+  const mdxContent = SchemaDocTemplate({
+    schema,
+    mergedSchema,
+    editUrl,
+    file: path.basename(filePath),
+    topPartialImport,
+    bottomPartialImport,
+    topPartialComponent,
+    bottomPartialComponent,
+  });
+
+  const outputFilename = path.basename(filePath).replace('.json', '.mdx');
+  writeDoc(outputDir, outputFilename, mdxContent);
+}
+
+async function generateOneOfDocs(
+  eventName,
+  schema,
+  filePath,
+  outputDir,
+  options,
+) {
+  const eventOutputDir = path.join(outputDir, eventName);
+  createDir(eventOutputDir);
+
+  const processed = await processOneOfSchema(schema, filePath);
+
+  const indexPageContent = ChoiceIndexTemplate({
+    schema,
+    processedOptions: processed,
+  });
+  writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
+
+  for (const [
+    index,
+    { slug, schema: processedSchema },
+  ] of processed.entries()) {
+    const subChoiceType = processedSchema.oneOf ? 'oneOf' : null;
+    const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
+
+    if (subChoiceType) {
+      const tempFilePath = path.join(eventOutputDir, `${slug}.json`);
+      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
+      await generateOneOfDocs(
+        prefixedSlug,
+        processedSchema,
+        tempFilePath,
+        eventOutputDir,
+        options,
+      );
+      fs.unlinkSync(tempFilePath);
+    } else {
+      const tempFilePath = path.join(eventOutputDir, `${prefixedSlug}.json`);
+      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
+      await generateAndWriteDoc(
+        tempFilePath,
+        processedSchema,
+        slug,
+        eventOutputDir,
+        options,
+        processedSchema,
+      );
+      fs.unlinkSync(tempFilePath);
+    }
+  }
+}
 
 export default async function generateEventDocs(options) {
-    const { organizationName, projectName, siteDir, version, url } = options || {};
+  const { siteDir, version, url } = options || {};
+  const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
 
-    const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
+  createDir(outputDir);
+  const schemas = readSchemas(schemaDir);
 
-    const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
-    // CONFIGURATION
-    const SCHEMA_DIR = schemaDir; // Where your JSON files are
-    const OUTPUT_DIR = outputDir; // Where MDX goes
-    const PARTIALS_DIR = path.join(siteDir, 'docs/partials'); // Where your partials are
+  console.log(`🚀 Generating documentation for ${schemas.length} schemas...`);
 
-    // Ensure output dir exists
-    if (!fs.existsSync(OUTPUT_DIR))
-    {
-        fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+  for (const { fileName, filePath, schema } of schemas) {
+    const eventName = fileName.replace('.json', '');
+
+    if (version) {
+      const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
+      if (version !== 'current') {
+        schema.$id = `${baseUrl}/schemas/${version}/${fileName}`;
+      } else {
+        schema.$id = `${baseUrl}/schemas/next/${fileName}`;
+      }
     }
 
-    // Read all JSON files
-    const files = fs.readdirSync(SCHEMA_DIR).filter(file => file.endsWith('.json'));
-
-    console.log(`🚀 Generating documentation for ${files.length} schemas...`);
-
-    for (const file of files)
-    {
-        const filePath = path.join(SCHEMA_DIR, file);
-        const schema = loadSchema(filePath);
-
-        // Update the $id of the schema in memory for documentation generation
-        // This doesn't modify the file on disk - that's handled by update-schema-ids
-        if (version) {
-            const baseUrl = url.endsWith('/') ? url.slice(0, -1) : url;
-            if (version !== 'current') {
-                schema.$id = `${baseUrl}/schemas/${version}/${file}`;
-            } else {
-                schema.$id = `${baseUrl}/schemas/next/${file}`;
-            }
-        }
-
-        const mergedSchema = await processSchema(filePath);
-        const eventName = file.replace('.json', '');
-
-        // Check for partials
-        const topPartialPath = path.join(PARTIALS_DIR, `${eventName}.mdx`);
-        const bottomPartialPath = path.join(PARTIALS_DIR, `${eventName}_bottom.mdx`);
-
-        let topPartialImport = '';
-        let topPartialComponent = '';
-        if (fs.existsSync(topPartialPath)) {
-            topPartialImport = `import TopPartial from '@site/docs/partials/${eventName}.mdx';`;
-            topPartialComponent = '<TopPartial />';
-        }
-
-        let bottomPartialImport = '';
-        let bottomPartialComponent = '';
-        if (fs.existsSync(bottomPartialPath)) {
-            bottomPartialImport = `import BottomPartial from '@site/docs/partials/${eventName}_bottom.mdx';`;
-            bottomPartialComponent = '<BottomPartial />';
-        }
-
-        const editUrl = `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
-
-        const mdxContent = MdxTemplate({
-            schema,
-            mergedSchema,
-            editUrl,
-            file,
-            topPartialImport,
-            bottomPartialImport,
-            topPartialComponent,
-            bottomPartialComponent
-        });
-
-        // Write the .mdx file
-        const outputFilename = file.replace('.json', '.mdx');
-        fs.writeFileSync(path.join(OUTPUT_DIR, outputFilename), mdxContent);
-        console.log(`✅ Generated docs/events/${outputFilename}`);
+    if (schema.oneOf) {
+      await generateOneOfDocs(eventName, schema, filePath, outputDir, options);
+    } else {
+      await generateAndWriteDoc(
+        filePath,
+        schema,
+        eventName,
+        outputDir,
+        options,
+      );
     }
+  }
 
-    console.log('🎉 Documentation generation complete!');
+  console.log('🎉 Documentation generation complete!');
 }

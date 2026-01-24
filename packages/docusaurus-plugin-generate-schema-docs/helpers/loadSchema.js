@@ -6,6 +6,6 @@ import fs from 'fs';
  * @returns {object} The parsed JSON schema.
  */
 export default function loadSchema(filePath) {
-    const rawContent = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(rawContent);
+  const rawContent = fs.readFileSync(filePath, 'utf-8');
+  return JSON.parse(rawContent);
 }

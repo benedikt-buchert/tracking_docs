@@ -22,20 +22,12 @@
         "value": {
           "type": "number",
           "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
-          "examples": [
-            30.03,
-            99.99,
-            45.50
-          ]
+          "examples": [30.03, 99.99, 45.5]
         },
         "currency": {
           "type": "string",
           "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
-          "examples": [
-            "USD",
-            "EUR",
-            "GBP"
-          ]
+          "examples": ["USD", "EUR", "GBP"]
         },
         "items": {
           "type": "array",
@@ -46,10 +38,7 @@
           }
         }
       },
-      "required": [
-        "currency",
-        "items"
-      ]
+      "required": ["currency", "items"]
     }
   }
 }

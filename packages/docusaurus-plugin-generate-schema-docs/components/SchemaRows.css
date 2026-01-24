@@ -1,28 +1,250 @@
 .required-row {
-    background-color: rgba(255, 0, 0, 0.05);
+  background-color: rgba(var(--ifm-color-danger-rgb), 0.05);
 }
 
 .constraint-code {
-    white-space: pre-wrap;
-    margin-right: 4px;
-    display: inline-block;
-    margin-bottom: 4px;
+  white-space: pre-wrap;
+  margin-right: 4px;
+  display: inline-block;
+  margin-bottom: 4px;
 }
 
 .constraint-code.required {
-    font-weight: bold;
-    color: #c7254e;
-    /* A reddish color */
-    background-color: #f9f2f4;
-    padding: 2px 4px;
-    border-radius: 4px;
+  font-weight: bold;
+  color: var(--ifm-color-danger-dark);
+  background-color: var(--ifm-color-danger-lightest);
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 .nested-table-container {
-    padding-left: 20px;
-    border-left: 4px solid #eee;
+  padding-left: 1.25rem;
+  border-left: 0.25rem solid var(--ifm-table-border-color);
 }
 
 .schema-json-viewer {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
+}
+
+/* --- Property Name and Container Symbol Styles --- */
+
+.property-name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.container-symbol {
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.9em;
+  color: var(--ifm-color-emphasis-600);
+  font-weight: bold;
+  margin-left: -0.55em;
+}
+
+/* --- Organigram Connector Line Styles --- */
+
+/*
+ * Strategy:
+ * - ::before = vertical line from parent (top to bottom, or top to 50% for last items)
+ * - ::after = horizontal connector (from vertical line to property name)
+ * - background-image = parent-to-child lines (from 50% down) + continuing ancestor lines
+ */
+
+/* Base positioning */
+td[class*='level-'],
+td.has-children {
+  position: relative;
+}
+
+/*
+ * VERTICAL LINE (::before)
+ * Connects this row to its parent and siblings.
+ * Runs from top to bottom (or to 50% for last items in group).
+ */
+td[class*='level-']::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 1px solid var(--ifm-table-border-color);
+}
+
+/* Last items: stop vertical line at middle */
+td.is-last[class*='level-']::before {
+  bottom: 50%;
+}
+
+/*
+ * HORIZONTAL CONNECTOR (::after)
+ * Connects vertical line to the property name.
+ */
+td[class*='level-']::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  height: 0;
+  width: 0.75rem;
+  border-bottom: 1px solid var(--ifm-table-border-color);
+}
+
+/* --- Level-based positioning --- */
+
+td.level-1::before,
+td.level-1::after {
+  left: 0.5rem;
+}
+
+td.level-2::before,
+td.level-2::after {
+  left: 1.75rem;
+}
+
+td.level-3::before,
+td.level-3::after {
+  left: 3rem;
+}
+
+td.level-4::before,
+td.level-4::after {
+  left: 4.25rem;
+}
+
+td.level-5::before,
+td.level-5::after {
+  left: 5.5rem;
+}
+
+td.level-6::before,
+td.level-6::after {
+  left: 6.75rem;
+}
+
+/*
+ * Note: Parent-to-child lines and continuing ancestor lines are now
+ * handled via inline styles in PropertyRow.js using background gradients.
+ * This allows dynamic combination of multiple line levels.
+ */
+
+/* --- Choice Row Styles --- */
+
+.choice-row {
+  background-color: var(--ifm-table-stripe-background);
+}
+
+.choice-row:hover {
+  background-color: var(--ifm-hover-overlay);
+}
+
+.choice-row-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.choice-row-header input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.choice-row-description {
+  margin-left: 28px;
+  font-size: 0.9em;
+  color: var(--ifm-color-secondary-darkest);
+}
+.choice-row-header-description {
+  font-size: 0.9em;
+  color: var(--ifm-color-secondary-darkest);
+}
+
+.choice-row-header-headline {
+  margin-bottom: 0px;
+}
+
+.choice-row-toggle {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.75rem;
+  border: 1px solid var(--ifm-color-emphasis-400);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.choice-row-toggle.radio {
+  border-radius: 50%;
+}
+
+.choice-row-toggle.checkbox {
+  border-radius: 0.25rem;
+}
+
+.choice-row-toggle.checkbox::after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.radio {
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.choice-row-toggle.radio::after {
+  content: '';
+  position: absolute;
+  display: none;
+  border-radius: 50%;
+  background-color: var(--ifm-color-primary);
+  width: 0.5em;
+  height: 0.5em;
+  left: 22%;
+  top: 22%;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.radio::after {
+  display: block;
+}
+
+.choice-row-header input:checked + .choice-row-toggle.checkbox {
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.choice-row-header input:checked + .choice-row-toggle.checkbox::after {
+  display: block;
+  left: 0.29em;
+  top: 0.125rem;
+  width: 0.1875rem;
+  height: 0.4375rem;
+  border: solid var(--ifm-color-primary);
+  border-width: 0 0.125rem 0.125rem 0;
+  transform: rotate(45deg);
+}
+
+/* --- Example CodeBlock Styles --- */
+
+.schema-examples {
+  margin: 0;
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  /* Override theme defaults to make it blend into the table cell */
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.schema-examples pre,
+.schema-examples code {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Hide the copy button within the examples code block */
+.schema-examples button {
+  display: none;
 }

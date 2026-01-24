@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/complex-event.json",
+  "title": "Complex Event with Validation Constraints",
+  "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
+  "type": "object",
+  "required": [
+    "event",
+    "user_data",
+    "string_constraints",
+    "number_constraints"
+  ],
+  "allOf": [
+    {
+      "$ref": "./components/dataLayer.json"
+    }
+  ],
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "user_update",
+      "description": "The event name.",
+      "examples": ["user_update"]
+    },
+    "timestamp": {
+      "type": "integer",
+      "description": "Unix timestamp of the event.",
+      "examples": [16788922]
+    },
+    "user_data": {
+      "type": "object",
+      "description": "Container for user information.",
+      "required": ["user_id", "attributes"],
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Unique User ID.",
+          "examples": ["U_999"]
+        },
+        "is_active": {
+          "type": "boolean",
+          "description": "Status of the user.",
+          "examples": [true]
+        },
+        "attributes": {
+          "type": "object",
+          "description": "Nested generic attributes.",
+          "properties": {
+            "segment": {
+              "type": "string",
+              "description": "Marketing segment.",
+              "examples": ["premium"]
+            },
+            "score": {
+              "type": "number",
+              "description": "Engagement score.",
+              "examples": [95]
+            }
+          }
+        },
+        "addresses": {
+          "type": "array",
+          "description": "List of user addresses.",
+          "items": {
+            "type": "object",
+            "required": ["city", "zip"],
+            "properties": {
+              "street": {
+                "type": "string",
+                "examples": ["123 Main St"]
+              },
+              "city": {
+                "type": "string",
+                "examples": ["New York"]
+              },
+              "zip": {
+                "type": "string",
+                "examples": ["10001"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "string_constraints": {
+      "type": "string",
+      "description": "A string with various constraints.",
+      "minLength": 2,
+      "maxLength": 10,
+      "pattern": "^[a-z]+$",
+      "format": "hostname",
+      "examples": ["example"]
+    },
+    "number_constraints": {
+      "type": "number",
+      "description": "A number with various constraints.",
+      "minimum": 10,
+      "maximum": 100,
+      "multipleOf": 5,
+      "examples": [50]
+    },
+    "exclusive_number_constraints": {
+      "type": "number",
+      "description": "A number with exclusive constraints.",
+      "exclusiveMinimum": 10,
+      "exclusiveMaximum": 100,
+      "examples": [50]
+    },
+    "array_constraints": {
+      "type": "array",
+      "description": "An array with various constraints.",
+      "minItems": 1,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      },
+      "examples": [["a", "b"]]
+    },
+    "contains_array_constraints": {
+      "type": "array",
+      "description": "An array with contains constraints.",
+      "contains": {
+        "type": "integer"
+      },
+      "minContains": 1,
+      "maxContains": 2,
+      "examples": [[1, "text", 2]]
+    },
+    "object_constraints": {
+      "type": "object",
+      "description": "An object with various constraints.",
+      "minProperties": 1,
+      "maxProperties": 3,
+      "additionalProperties": false,
+      "propertyNames": {
+        "pattern": "^[a-z0-9_]+$"
+      },
+      "properties": {
+        "prop_a": {
+          "type": "string",
+          "examples": ["some_value"]
+        },
+        "prop_b": {
+          "type": "string",
+          "examples": ["another_value"]
+        }
+      },
+      "examples": [
+        {
+          "prop_a": "some_value",
+          "prop_b": "another_value"
+        }
+      ]
+    },
+    "dependent_required_constraint": {
+      "type": "object",
+      "description": "An object with dependent required properties.",
+      "dependentRequired": {
+        "credit_card": ["billing_address"]
+      },
+      "properties": {
+        "credit_card": {
+          "type": "number",
+          "examples": [1234567890123456]
+        },
+        "billing_address": {
+          "type": "string",
+          "examples": ["123 Billing Address, Anytown, USA"]
+        }
+      },
+      "examples": [
+        {
+          "credit_card": 1234567890123456,
+          "billing_address": "123 Billing Address, Anytown, USA"
+        }
+      ]
+    },
+    "enum_constraint": {
+      "type": "string",
+      "description": "A property with an enum constraint.",
+      "enum": ["admin", "editor", "viewer"],
+      "examples": ["admin"]
+    },
+    "const_constraint": {
+      "type": "string",
+      "description": "A property that must have a constant value.",
+      "const": "must_be_this",
+      "examples": ["must_be_this"]
+    }
+  }
+}

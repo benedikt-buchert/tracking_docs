@@ -87,8 +87,8 @@ To enable versioning, you need to:
 1.  **Enable Docusaurus Versioning**: Follow the [Docusaurus documentation](https://docusaurus.io/docs/versioning) to enable versioning for your site. This typically involves creating a `versions.json` file.
 
 2.  **Organize Your Schemas**: Create a versioned directory structure for your schemas. Instead of placing your schemas in `static/schemas`, you should have:
-    *   `static/schemas/next`: For the "current" or "next" version of your schemas.
-    *   `static/schemas/<version>`: For each version of your schemas (e.g., `static/schemas/1.1.1`).
+    - `static/schemas/next`: For the "current" or "next" version of your schemas.
+    - `static/schemas/<version>`: For each version of your schemas (e.g., `static/schemas/1.1.1`).
 
 When versioning is enabled, the plugin will automatically detect the `versions.json` file and generate documentation for each version, as well as for the `current` version.
 
@@ -106,13 +106,12 @@ This is done automatically by the plugin. However, if you need to update the `$i
 
 You can provide additional content to the generated documentation pages by creating partial files. Partials are Markdown files that can be automatically included in the generated pages.
 
-
 ### Naming Convention
 
 Partials must be named after the schema file they correspond to. For a schema named `my-event.json`, the partials would be:
 
-*   `my-event.mdx`: This partial is rendered directly after the schema's main description.
-*   `my-event_bottom.mdx`: This partial is rendered at the very bottom of the page.
+- `my-event.mdx`: This partial is rendered directly after the schema's main description.
+- `my-event_bottom.mdx`: This partial is rendered at the very bottom of the page.
 
 ### Location
 
@@ -122,8 +121,8 @@ Place your partial files in the `/docs/partials` directory at the root of your d
 
 If you have a schema `add-to-cart-event.json`, you can create the following files:
 
-*   `docs/partials/add-to-cart-event.mdx`: For content to appear after the description.
-*   `docs/partials/add-to-cart-event_bottom.mdx`: For content to appear at the bottom.
+- `docs/partials/add-to-cart-event.mdx`: For content to appear after the description.
+- `docs/partials/add-to-cart-event_bottom.mdx`: For content to appear at the bottom.
 
 ## Contributing
 

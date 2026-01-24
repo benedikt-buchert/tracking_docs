@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/purchase-event.json",
+  "title": "Purchase Event",
+  "description": "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "./components/dataLayer.json"
+    }
+  ],
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "purchase",
+      "description": "The name of the event indicating a purchase has occurred."
+    },
+    "ecommerce": {
+      "type": "object",
+      "description": "Ecommerce related data for the purchase event.",
+      "properties": {
+        "transaction_id": {
+          "type": "string",
+          "description": "The unique ID of a transaction. The transaction_id parameter helps avoid duplicate transaction recording.",
+          "examples": ["T_12345", "TXN_20231205_001"]
+        },
+        "value": {
+          "type": "number",
+          "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
+          "examples": [72.05, 99.99, 150.5]
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
+          "minLength": 3,
+          "maxLength": 3,
+          "examples": ["USD", "EUR", "GBP"]
+        },
+        "coupon": {
+          "type": "string",
+          "description": "The coupon/code associated with the event. Event-level and item-level coupon parameters are independent.",
+          "examples": ["SUMMER_SALE", "WELCOME15"]
+        },
+        "shipping": {
+          "type": "number",
+          "description": "The shipping cost associated with the transaction.",
+          "examples": [5.99, 10, 0]
+        },
+        "tax": {
+          "type": "number",
+          "description": "The tax associated with the transaction.",
+          "examples": [3.6, 7.5, 0]
+        },
+        "customer_type": {
+          "type": "string",
+          "enum": ["new", "returning"],
+          "description": "Whether this is from a new or returning customer. 'new' = customer with no purchase in the specified time window (default 540 days). 'returning' = customer with purchase in the specified time window.",
+          "examples": ["new", "returning"]
+        },
+        "items": {
+          "type": "array",
+          "description": "The products purchased in the transaction.",
+          "minItems": 1,
+          "items": {
+            "$ref": "./components/product.json"
+          }
+        }
+      },
+      "required": ["transaction_id", "value", "currency", "items"]
+    }
+  }
+}
