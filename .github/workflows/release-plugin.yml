@@ -37,13 +37,13 @@ jobs:
 
       - name: Update package version
         run: |
-          VERSION=$(echo ${{ github.ref_name }})
-          npm --prefix packages/docusaurus-plugin-generate-schema-docs version $VERSION --no-git-tag-version
+          npm --prefix packages/docusaurus-plugin-generate-schema-docs version ${{ github.ref_name }} --no-git-tag-version
 
       - name: Commit and push package.json
         run: |
           git add packages/docusaurus-plugin-generate-schema-docs/package.json
-          git commit -m "chore(release): update plugin version to plugin-v$(echo ${{ github.ref_name }} | sed 's/refs\/tags\/plugin-v//') [skip ci]"
+          git commit -m "chore(release): update plugin version to ${{ github.ref_name }} [skip ci]"
+          git pull origin main --rebase
           git push origin HEAD:main
 
       - name: Create GitHub Release
