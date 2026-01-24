@@ -3,7 +3,7 @@ import path from 'path';
 
 describe('schema-processing', () => {
   describe('processOneOfSchema', () => {
-    it('should merge oneOf options with the root schema', () => {
+    it('should merge oneOf options with the root schema', async () => {
       const rootSchema = {
         title: 'Root',
         description: 'Root description',
@@ -28,7 +28,7 @@ describe('schema-processing', () => {
       };
 
       const filePath = '/path/to/schema.json';
-      const result = processOneOfSchema(rootSchema, filePath);
+      const result = await processOneOfSchema(rootSchema, filePath);
 
       expect(result).toHaveLength(2);
 
@@ -48,7 +48,7 @@ describe('schema-processing', () => {
       expect(result[1].slug).toBe('option-2');
     });
 
-    it('should use option $id when available', () => {
+    it('should use option $id when available', async () => {
       const rootSchema = {
         $id: 'root.json',
         title: 'Root',
@@ -60,11 +60,11 @@ describe('schema-processing', () => {
         ],
       };
       const filePath = '/path/to/schema.json';
-      const result = processOneOfSchema(rootSchema, filePath);
+      const result = await processOneOfSchema(rootSchema, filePath);
       expect(result[0].schema.$id).toBe('option1.json');
     });
 
-    it('should generate a new $id when option $id is not available', () => {
+    it('should generate a new $id when option $id is not available', async () => {
       const rootSchema = {
         $id: 'root.json',
         title: 'Root',
@@ -75,7 +75,7 @@ describe('schema-processing', () => {
         ],
       };
       const filePath = '/path/to/schema.json';
-      const result = processOneOfSchema(rootSchema, filePath);
+      const result = await processOneOfSchema(rootSchema, filePath);
       expect(result[0].schema.$id).toBe('root.json#option-1');
     });
   });

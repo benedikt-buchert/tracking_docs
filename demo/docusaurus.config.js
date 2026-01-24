@@ -46,6 +46,7 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          exclude: ['**/partials'],
           sidebarPath: './sidebars.js',
           routeBasePath: '/',
           lastVersion: '1.2.0',

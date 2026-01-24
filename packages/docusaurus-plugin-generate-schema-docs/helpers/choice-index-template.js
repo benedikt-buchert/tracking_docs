@@ -1,7 +1,5 @@
-import { slugify } from './schema-processing.js';
-
 export default function ChoiceIndexTemplate(data) {
-  const { schema, choiceType } = data;
+  const { schema, processedOptions } = data;
 
   return `---
 title: ${schema.title}
@@ -15,11 +13,8 @@ ${schema.description}
 
 Please select one of the following options:
 
-${schema[choiceType]
-  .map(
-    (optionSchema) =>
-      `- [${optionSchema.title}](./${slugify(optionSchema.title)})`,
-  )
+${processedOptions
+  .map((option) => `- [${option.schema.title}](./${option.slug})`)
   .join('\n')}
 
 <SchemaJsonViewer schema={${JSON.stringify(schema)}} />

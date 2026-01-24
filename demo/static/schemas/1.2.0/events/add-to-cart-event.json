@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/add-to-cart-event.json",
+  "title": "Add to Cart Event",
+  "description": "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "./components/dataLayer.json"
+    }
+  ],
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "add_to_cart",
+      "description": "The name of the event indicating a add_to_cart has occurred."
+    },
+    "ecommerce": {
+      "type": "object",
+      "description": "Ecommerce related data for the purchase event.",
+      "properties": {
+        "value": {
+          "type": "number",
+          "description": "The monetary value of the event. Set value to the sum of (price * quantity) for all items in items.",
+          "examples": [30.03, 99.99, 45.5]
+        },
+        "currency": {
+          "type": "string",
+          "description": "The currency of the items in ISO 4217 three-letter format. Required when value is set.",
+          "examples": ["USD", "EUR", "GBP"]
+        },
+        "items": {
+          "type": "array",
+          "description": "The products added to the cart.",
+          "minItems": 1,
+          "items": {
+            "$ref": "./components/product.json"
+          }
+        }
+      },
+      "required": ["currency", "items"]
+    }
+  }
+}

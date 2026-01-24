@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/event-reference.json",
+  "title": "Event Reference",
+  "description": "A dataLayer event for GTM",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "./events/complex-event.json"
+    },
+    {
+      "$ref": "./events/purchase-event.json"
+    },
+    {
+      "$ref": "./events/add-to-cart-event.json"
+    },
+    {
+      "$ref": "./events/root-any-of-event.json"
+    },
+    {
+      "$ref": "./events/root-choice-event.json"
+    },
+    {
+      "$ref": "./events/choice-event.json"
+    }
+  ]
+}

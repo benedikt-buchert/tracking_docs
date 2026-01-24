@@ -13,12 +13,13 @@ async function generateAndWriteDoc(
   eventName,
   outputDir,
   options,
+  alreadyMergedSchema = null,
 ) {
   const { organizationName, projectName, siteDir } = options;
   const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
   const PARTIALS_DIR = path.join(siteDir, 'docs/partials');
 
-  const mergedSchema = await processSchema(filePath);
+  const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
 
   // Check for partials
   const topPartialPath = path.join(PARTIALS_DIR, `${eventName}.mdx`);
@@ -58,6 +59,58 @@ async function generateAndWriteDoc(
   writeDoc(outputDir, outputFilename, mdxContent);
 }
 
+async function generateOneOfDocs(
+  eventName,
+  schema,
+  filePath,
+  outputDir,
+  options,
+) {
+  const eventOutputDir = path.join(outputDir, eventName);
+  createDir(eventOutputDir);
+
+  const processed = await processOneOfSchema(schema, filePath);
+
+  const indexPageContent = ChoiceIndexTemplate({
+    schema,
+    processedOptions: processed,
+  });
+  writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
+
+  for (const [
+    index,
+    { slug, schema: processedSchema },
+  ] of processed.entries()) {
+    const subChoiceType = processedSchema.oneOf ? 'oneOf' : null;
+    const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
+
+    if (subChoiceType) {
+      const tempFilePath = path.join(eventOutputDir, `${slug}.json`);
+      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
+      await generateOneOfDocs(
+        prefixedSlug,
+        processedSchema,
+        tempFilePath,
+        eventOutputDir,
+        options,
+      );
+      fs.unlinkSync(tempFilePath);
+    } else {
+      const tempFilePath = path.join(eventOutputDir, `${prefixedSlug}.json`);
+      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
+      await generateAndWriteDoc(
+        tempFilePath,
+        processedSchema,
+        slug,
+        eventOutputDir,
+        options,
+        processedSchema,
+      );
+      fs.unlinkSync(tempFilePath);
+    }
+  }
+}
+
 export default async function generateEventDocs(options) {
   const { siteDir, version, url } = options || {};
   const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
@@ -79,32 +132,8 @@ export default async function generateEventDocs(options) {
       }
     }
 
-    const choiceType = schema.oneOf ? 'oneOf' : null;
-
-    if (choiceType) {
-      const eventOutputDir = path.join(outputDir, eventName);
-      createDir(eventOutputDir);
-
-      const indexPageContent = ChoiceIndexTemplate({ schema, choiceType });
-      writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
-
-      const processed = processOneOfSchema(schema, filePath);
-      for (const { slug, schema: processedSchema } of processed) {
-        const tempFilePath = path.join(eventOutputDir, `${slug}.json`);
-        fs.writeFileSync(
-          tempFilePath,
-          JSON.stringify(processedSchema, null, 2),
-        );
-
-        await generateAndWriteDoc(
-          tempFilePath,
-          processedSchema,
-          slug,
-          eventOutputDir,
-          options,
-        );
-        fs.unlinkSync(tempFilePath);
-      }
+    if (schema.oneOf) {
+      await generateOneOfDocs(eventName, schema, filePath, outputDir, options);
     } else {
       await generateAndWriteDoc(
         filePath,

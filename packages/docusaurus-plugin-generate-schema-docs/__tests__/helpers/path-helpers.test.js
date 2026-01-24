@@ -9,7 +9,7 @@ describe('getPathsForVersion', () => {
     const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
     expect(schemaDir).toBe(path.join(siteDir, 'static/schemas', version));
     expect(outputDir).toBe(
-      path.join(siteDir, 'versioned_docs', `version-${version}`, 'events'),
+      path.join(siteDir, 'versioned_docs', `version-${version}`),
     );
   });
 
@@ -17,18 +17,18 @@ describe('getPathsForVersion', () => {
     const version = 'current';
     const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
     expect(schemaDir).toBe(path.join(siteDir, 'static/schemas', 'next'));
-    expect(outputDir).toBe(path.join(siteDir, 'docs/events'));
+    expect(outputDir).toBe(path.join(siteDir, 'docs'));
   });
 
   it('should return paths for a non-versioned site', () => {
     const { schemaDir, outputDir } = getPathsForVersion(null, siteDir);
     expect(schemaDir).toBe(path.join(siteDir, 'static/schemas'));
-    expect(outputDir).toBe(path.join(siteDir, 'docs/events'));
+    expect(outputDir).toBe(path.join(siteDir, 'docs'));
   });
 
   it('should handle undefined version', () => {
     const { schemaDir, outputDir } = getPathsForVersion(undefined, siteDir);
     expect(schemaDir).toBe(path.join(siteDir, 'static/schemas'));
-    expect(outputDir).toBe(path.join(siteDir, 'docs/events'));
+    expect(outputDir).toBe(path.join(siteDir, 'docs'));
   });
 });

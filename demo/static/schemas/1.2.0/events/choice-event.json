@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/choice-event.json",
+  "title": "Choice Event",
+  "description": "An example event that uses oneOf and anyOf.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "one_of_event"
+    },
+    "user_id": {
+      "description": "The user's ID.",
+      "oneOf": [
+        {
+          "type": "string",
+          "title": "User ID as String",
+          "description": "The user's ID as a string.",
+          "examples": ["user-123"]
+        },
+        {
+          "type": "integer",
+          "title": "User ID as Integer",
+          "description": "The user's ID as an integer.",
+          "examples": [123]
+        }
+      ]
+    },
+    "payment_method": {
+      "description": "The user's payment method.",
+      "type": "object",
+      "anyOf": [
+        {
+          "title": "Credit Card",
+          "type": "object",
+          "properties": {
+            "payment_type": {
+              "type": "string",
+              "enum": ["credit_card", "debit_card"],
+              "examples": ["credit_card"]
+            },
+            "card_number": {
+              "type": "string",
+              "examples": ["1234-5678-9012-3456"]
+            },
+            "expiry_date": {
+              "type": "string",
+              "examples": ["12/26"]
+            }
+          },
+          "required": ["card_number", "expiry_date"]
+        },
+        {
+          "title": "PayPal",
+          "type": "object",
+          "properties": {
+            "payment_type": {
+              "type": "string",
+              "const": "paypal"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "examples": ["test@example.com"]
+            }
+          },
+          "required": ["email"]
+        }
+      ]
+    }
+  },
+  "required": ["event", "user_id", "payment_method"]
+}

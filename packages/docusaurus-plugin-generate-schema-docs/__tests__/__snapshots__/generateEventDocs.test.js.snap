@@ -103,7 +103,7 @@ exports[`generateEventDocs (non-versioned) should generate documentation correct
 title: Option A
 description: "An example event that has oneOf at the root level."
 sidebar_label: Option A
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/docs/events/root-choice-event/option-a.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/docs/root-choice-event/01-option-a.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
@@ -129,7 +129,7 @@ exports[`generateEventDocs (non-versioned) should generate documentation correct
 title: Option B
 description: "An example event that has oneOf at the root level."
 sidebar_label: Option B
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/docs/events/root-choice-event/option-b.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/docs/root-choice-event/02-option-b.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';

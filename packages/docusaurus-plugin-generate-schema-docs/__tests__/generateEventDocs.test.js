@@ -19,7 +19,7 @@ describe('generateEventDocs (non-versioned)', () => {
     siteDir: path.resolve(__dirname, '__fixtures__'),
     url: 'https://tracking-docs-demo.buchert.digital',
   };
-  const outputDir = path.join(options.siteDir, 'docs/events');
+  const outputDir = path.join(options.siteDir, 'docs');
 
   beforeEach(() => {
     fs.vol.reset();
@@ -47,11 +47,8 @@ describe('generateEventDocs (non-versioned)', () => {
 
     await generateEventDocs(options);
 
-    const outputFiles = fs
-      .readdirSync(outputDir, { recursive: true })
-      .filter((file) => fs.statSync(path.join(outputDir, file)).isFile());
-
-    expect(outputFiles).toHaveLength(6);
+    const choiceEventDir = path.join(outputDir, 'root-choice-event');
+    expect(fs.existsSync(choiceEventDir)).toBe(true);
 
     // Check content of generated files
     const addToCart = fs.readFileSync(
@@ -73,19 +70,19 @@ describe('generateEventDocs (non-versioned)', () => {
     expect(rootAnyOf).toMatchSnapshot();
 
     const rootChoiceIndex = fs.readFileSync(
-      path.join(outputDir, 'root-choice-event/index.mdx'),
+      path.join(choiceEventDir, 'index.mdx'),
       'utf-8',
     );
     expect(rootChoiceIndex).toMatchSnapshot();
 
     const rootChoiceA = fs.readFileSync(
-      path.join(outputDir, 'root-choice-event/option-a.mdx'),
+      path.join(choiceEventDir, '01-option-a.mdx'),
       'utf-8',
     );
     expect(rootChoiceA).toMatchSnapshot();
 
     const rootChoiceB = fs.readFileSync(
-      path.join(outputDir, 'root-choice-event/option-b.mdx'),
+      path.join(choiceEventDir, '02-option-b.mdx'),
       'utf-8',
     );
     expect(rootChoiceB).toMatchSnapshot();

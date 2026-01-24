@@ -1,4 +1,5 @@
 import path from 'path';
+import processSchema from './processSchema.js';
 
 export function slugify(text) {
   if (!text) {
@@ -29,29 +30,39 @@ export function fixRefs(obj, basePath) {
   }
 }
 
-export function processOneOfSchema(schema, filePath) {
+export async function processOneOfSchema(schema, filePath) {
   const processedSchemas = [];
   const choiceType = schema.oneOf ? 'oneOf' : null;
 
   if (choiceType) {
-    for (const optionSchema of schema[choiceType]) {
-      const slug = slugify(optionSchema.title);
-      const newSchema = {
-        ...schema,
-        ...optionSchema,
-        properties: {
-          ...schema.properties,
-          ...optionSchema.properties,
-        },
+    const parentWithoutChoice = { ...schema };
+    delete parentWithoutChoice[choiceType];
+
+    for (const option of schema[choiceType]) {
+      let resolvedOption = option;
+      if (option.$ref && !option.$ref.startsWith('#')) {
+        const refPath = path.resolve(path.dirname(filePath), option.$ref);
+        resolvedOption = await processSchema(refPath);
+      }
+
+      // Merge the parent schema with the resolved option schema
+      const newSchema = { ...parentWithoutChoice, ...resolvedOption };
+      newSchema.properties = {
+        ...parentWithoutChoice.properties,
+        ...resolvedOption.properties,
       };
-      if (!optionSchema.$id) {
+
+      let slug;
+      const hadId = resolvedOption.$id && resolvedOption.$id.endsWith('.json');
+      if (hadId) {
+        slug = path.basename(resolvedOption.$id, '.json');
+      } else {
+        slug = slugify(newSchema.title);
+      }
+
+      if (!hadId) {
         newSchema.$id = `${schema.$id}#${slug}`;
       }
-      delete newSchema.oneOf;
-      delete newSchema.anyOf;
-      delete newSchema.allOf;
-
-      fixRefs(newSchema, path.dirname(filePath));
 
       processedSchemas.push({
         slug,

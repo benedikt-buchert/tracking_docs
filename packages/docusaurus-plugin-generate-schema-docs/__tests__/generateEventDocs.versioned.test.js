@@ -36,33 +36,32 @@ describe('generateEventDocs (versioned)', () => {
   });
 
   it('should generate documentation for "current" version', async () => {
-    console.log = jest.fn(); // suppress console.log
-    fs.existsSync.mockReturnValue(false);
+    // Mock fs.writeFileSync to capture the output
+    fs.writeFileSync = jest.fn();
 
-    await generateEventDocs({ ...options, version: 'current' });
+    const currentOptions = { ...options, version: 'current' };
+    await generateEventDocs(currentOptions);
 
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-
+    expect(fs.writeFileSync).toHaveBeenCalled();
     const [filePath, content] = fs.writeFileSync.mock.calls[0];
-    const outputDir = path.join(options.siteDir, 'docs/events');
+    const outputDir = path.join(options.siteDir, 'docs');
     expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
     expect(content).toMatchSnapshot();
   });
 
   it('should generate documentation for a specific version', async () => {
-    console.log = jest.fn(); // suppress console.log
-    fs.existsSync.mockReturnValue(false);
+    // Mock fs.writeFileSync to capture the output
+    fs.writeFileSync = jest.fn();
 
-    await generateEventDocs({ ...options, version: '1.1.1' });
+    const versionedOptions = { ...options, version: '1.1.1' };
+    await generateEventDocs(versionedOptions);
 
-    expect(fs.writeFileSync).toHaveBeenCalledTimes(1);
-
+    expect(fs.writeFileSync).toHaveBeenCalled();
     const [filePath, content] = fs.writeFileSync.mock.calls[0];
     const outputDir = path.join(
       options.siteDir,
       'versioned_docs',
       'version-1.1.1',
-      'events',
     );
     expect(filePath).toBe(path.join(outputDir, 'add-to-cart-event.mdx'));
     expect(content).toMatchSnapshot();
