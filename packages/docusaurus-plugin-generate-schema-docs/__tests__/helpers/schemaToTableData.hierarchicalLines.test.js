@@ -404,6 +404,51 @@ describe('schemaToTableData - hierarchical lines', () => {
       const optionRow = choiceRow.options[0].rows[0];
       expect(optionRow.continuingLevels).toBeDefined();
     });
+
+    // NEW TEST CASE START
+    it('sets isLastInGroup correctly based on option position (visual tree line fix)', () => {
+      const schema = {
+        properties: {
+          payment_method: {
+            type: 'object',
+            anyOf: [
+              {
+                title: 'Credit Card', // Not the last option
+                type: 'object',
+                properties: {
+                  expiry_date: { type: 'string' }, // Should NOT be last in group visually
+                },
+              },
+              {
+                title: 'PayPal', // The last option
+                type: 'object',
+                properties: {
+                  email: { type: 'string' }, // Should be last in group visually
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const tableData = schemaToTableData(schema);
+      const choiceRow = tableData.find((row) => row.type === 'choice');
+
+      const creditCardOption = choiceRow.options[0];
+      const payPalOption = choiceRow.options[1];
+
+      const expiryRow = creditCardOption.rows.find(
+        (r) => r.name === 'expiry_date',
+      );
+      const emailRow = payPalOption.rows.find((r) => r.name === 'email');
+
+      // Credit Card is not the last option, so its properties shouldn't close the visual branch
+      expect(expiryRow.isLastInGroup).toBe(false);
+
+      // PayPal is the last option, so its property should close the branch
+      expect(emailRow.isLastInGroup).toBe(true);
+    });
+    // NEW TEST CASE END
   });
 
   describe('complex nested schema', () => {

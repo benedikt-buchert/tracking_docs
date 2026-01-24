@@ -8,8 +8,13 @@ function processOptions(
   requiredArray = [],
   continuingLevels = [],
 ) {
-  return choices.map((optionSchema) => {
+  return choices.map((optionSchema, index) => {
     const optionTitle = optionSchema.title || 'Option';
+
+    // Determine if this is the last option in the list.
+    // If it is NOT the last option, its children must not close the visual tree branch.
+    const isLastOption = index === choices.length - 1;
+
     let optionRows = [];
 
     // This is a primitive type (string, number, etc.) within a choice
@@ -33,7 +38,7 @@ function processOptions(
         description: optionSchema.description,
         example: optionSchema.examples || optionSchema.example,
         constraints: constraints,
-        isLastInGroup: true,
+        isLastInGroup: isLastOption, // Updated: Uses the calculated flag instead of always true
         hasChildren: false,
         containerType: null,
         continuingLevels: [...continuingLevels],
@@ -47,6 +52,7 @@ function processOptions(
         level,
         isNestedInProperty ? [] : path,
         continuingLevels,
+        isLastOption,
       );
     }
 
@@ -63,6 +69,7 @@ export function schemaToTableData(
   level = 0,
   path = [],
   parentContinuingLevels = [],
+  isLastOption = true,
 ) {
   const flatRows = [];
 
@@ -110,8 +117,14 @@ export function schemaToTableData(
         const propSchema = subSchema.properties[name];
         const newPath = [...currentPath, name];
 
-        const isLast =
+        const isLastProp =
           index === visiblePropKeys.length - 1 && !hasSiblingChoices;
+
+        // Updated Logic:
+        // A property is visually "last" only if it is the last property
+        // AND (it is deeper in the hierarchy OR the parent option itself is the last one).
+        const isLast = isLastProp && (currentLevel !== level || isLastOption);
+
         const isChoiceWrapper = !!(propSchema.oneOf || propSchema.anyOf);
 
         // Determine if this property has children and what type
