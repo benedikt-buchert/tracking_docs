@@ -44,7 +44,7 @@ jobs:
         run: |
           git add packages/docusaurus-plugin-generate-schema-docs/package.json
           git commit -m "chore(release): update plugin version to plugin-v$(echo ${{ github.ref_name }} | sed 's/refs\/tags\/plugin-v//') [skip ci]"
-          git push
+          git push origin HEAD:main
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
