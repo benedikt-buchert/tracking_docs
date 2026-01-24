@@ -56,6 +56,8 @@ export async function processOneOfSchema(schema, filePath) {
       const hadId = resolvedOption.$id && resolvedOption.$id.endsWith('.json');
       if (hadId) {
         slug = path.basename(resolvedOption.$id, '.json');
+      } else if (resolvedOption.$anchor) {
+        slug = resolvedOption.$anchor;
       } else {
         slug = slugify(newSchema.title);
       }

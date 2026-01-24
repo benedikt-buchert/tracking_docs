@@ -94,10 +94,10 @@ A special behavior is triggered when `oneOf` is used at the root level of a sche
 
 For example, given a schema `my-event.json` with a `oneOf` at the root, where each item in the `oneOf` array is a reference to another schema file (e.g., `option-a.json`, `option-b.json`), the plugin will generate the following structure:
 
--   `docs/events/my-event/`: A directory for the parent schema.
--   `docs/events/my-event/index.mdx`: An index page for `my-event`.
--   `docs/events/my-event/option-a.mdx`: A page for the first option.
--   `docs/events/my-event/option-b.mdx`: A page for the second option.
+- `docs/events/my-event/`: A directory for the parent schema.
+- `docs/events/my-event/index.mdx`: An index page for `my-event`.
+- `docs/events/my-event/option-a.mdx`: A page for the first option.
+- `docs/events/my-event/option-b.mdx`: A page for the second option.
 
 This creates a nested navigation structure in Docusaurus, which is useful for grouping related events or entities under a single menu item.
 
