@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/components/product.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/components/product.json",
   "title": "A Product",
   "description": "A product object representing an item for use within a purchase event, based on Google Analytics 4 ecommerce event specifications.",
   "type": "object",

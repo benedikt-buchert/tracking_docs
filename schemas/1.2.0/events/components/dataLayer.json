@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/components/dataLayer.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/components/dataLayer.json",
   "title": "dataLayer",
   "description": "Schema for the object structure pushed to the dataLayer.",
   "type": "object",

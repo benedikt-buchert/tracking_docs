@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.1.1/complex-event.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/complex-event.json",
   "title": "Complex Event with Validation Constraints",
   "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
   "type": "object",
