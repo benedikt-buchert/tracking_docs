@@ -11,8 +11,8 @@ An example event that has oneOf at the root level.
 
 Please select one of the following options:
 
-- [Option A](./option-a)
-- [Option B](./option-b)
+- [Option A](./option_a)
+- [Option B](./option_b)
 
 <SchemaJsonViewer
   schema={{
@@ -21,9 +21,11 @@ Please select one of the following options:
     title: "Root Choice Event",
     description: "An example event that has oneOf at the root level.",
     type: "object",
+    required: ["$schema"],
     oneOf: [
       {
         title: "Option A",
+        $anchor: "option_a",
         description: "This is the description for Param A.",
         type: "object",
         properties: {
@@ -33,6 +35,7 @@ Please select one of the following options:
       },
       {
         title: "Option B",
+        $anchor: "option_b",
         type: "object",
         properties: {
           event: { type: "string", const: "option_b" },
@@ -40,6 +43,12 @@ Please select one of the following options:
         },
       },
     ],
-    properties: {},
+    properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/root-choice-event.json",
+      },
+    },
   }}
 />

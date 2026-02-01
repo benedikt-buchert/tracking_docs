@@ -21,6 +21,11 @@ An example event that uses oneOf and anyOf.
     type: "object",
     required: ["event", "user_id", "payment_method"],
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/choice-event.json",
+      },
       event: { type: "string", const: "one_of_event" },
       user_id: {
         description: "The user's ID.",
@@ -87,6 +92,11 @@ An example event that uses oneOf and anyOf.
     type: "object",
     required: ["event", "user_id", "payment_method"],
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/choice-event.json",
+      },
       event: { type: "string", const: "one_of_event" },
       user_id: {
         description: "The user's ID.",

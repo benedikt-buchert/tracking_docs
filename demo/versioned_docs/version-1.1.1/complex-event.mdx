@@ -29,7 +29,7 @@ A generic event demonstrating various validation constraints and recursive docum
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },

@@ -9,6 +9,8 @@ const validateSchemas = async (schemaPath) => {
   const ajv = new Ajv2020();
   addFormats(ajv);
   ajv.addKeyword('x-gtm-clear');
+  // see https://github.com/ajv-validator/ajv/issues/1854
+  ajv.addKeyword('$anchor');
 
   const getAllFiles = (dir, allFiles = []) => {
     const files = fs.readdirSync(dir);

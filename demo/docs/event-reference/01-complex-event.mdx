@@ -21,6 +21,7 @@ A generic event demonstrating various validation constraints and recursive docum
       "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
     type: "object",
     required: [
+      "$schema",
       "event",
       "number_constraints",
       "string_constraints",
@@ -29,7 +30,7 @@ A generic event demonstrating various validation constraints and recursive docum
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -41,6 +42,11 @@ A generic event demonstrating various validation constraints and recursive docum
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/complex-event.json",
+      },
       event: {
         type: "string",
         const: "user_update",
@@ -200,6 +206,7 @@ A generic event demonstrating various validation constraints and recursive docum
       "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
     type: "object",
     required: [
+      "$schema",
       "event",
       "number_constraints",
       "string_constraints",
@@ -208,7 +215,7 @@ A generic event demonstrating various validation constraints and recursive docum
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -220,6 +227,11 @@ A generic event demonstrating various validation constraints and recursive docum
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/complex-event.json",
+      },
       event: {
         type: "string",
         const: "user_update",

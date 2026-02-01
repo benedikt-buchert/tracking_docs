@@ -20,11 +20,11 @@ A purchase event fires when a user completes a purchase. Based on Google Analyti
     description:
       "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
     type: "object",
-    required: ["event"],
+    required: ["$schema", "event"],
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -36,6 +36,11 @@ A purchase event fires when a user completes a purchase. Based on Google Analyti
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/purchase-event.json",
+      },
       event: {
         type: "string",
         const: "purchase",
@@ -272,11 +277,11 @@ A purchase event fires when a user completes a purchase. Based on Google Analyti
     description:
       "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
     type: "object",
-    required: ["event"],
+    required: ["$schema", "event"],
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -288,6 +293,11 @@ A purchase event fires when a user completes a purchase. Based on Google Analyti
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        type: "string",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/purchase-event.json",
+      },
       event: {
         type: "string",
         const: "purchase",

@@ -24,7 +24,7 @@ A purchase event fires when a user completes a purchase. Based on Google Analyti
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },

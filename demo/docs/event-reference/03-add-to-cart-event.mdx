@@ -24,11 +24,11 @@ An add_to_cart event fires when a user adds one or more items to their shopping 
     description:
       "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
     type: "object",
-    required: ["event"],
+    required: ["$schema", "event"],
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -40,6 +40,11 @@ An add_to_cart event fires when a user adds one or more items to their shopping 
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/add-to-cart-event.json",
+        type: "string",
+      },
       event: {
         type: "string",
         const: "add_to_cart",
@@ -245,11 +250,11 @@ An add_to_cart event fires when a user adds one or more items to their shopping 
     description:
       "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
     type: "object",
-    required: ["event"],
+    required: ["$schema", "event"],
     $defs: {
       strictObject: {
         type: "object",
-        propertyNames: { maxLength: 40, pattern: "^[a-z0-9_]+$" },
+        propertyNames: { maxLength: 40, pattern: "^(\\$schema)|[a-z0-9_]+$" },
         additionalProperties: {
           anyOf: [
             { $ref: "#/allOf/0/$defs/strictObject" },
@@ -261,6 +266,11 @@ An add_to_cart event fires when a user adds one or more items to their shopping 
     },
     $ref: "#/allOf/0/$defs/strictObject",
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/events/add-to-cart-event.json",
+        type: "string",
+      },
       event: {
         type: "string",
         const: "add_to_cart",

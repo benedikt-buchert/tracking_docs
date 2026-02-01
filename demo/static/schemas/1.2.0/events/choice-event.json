@@ -5,6 +5,10 @@
   "description": "An example event that uses oneOf and anyOf.",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/choice-event.json"
+    },
     "event": {
       "type": "string",
       "const": "one_of_event"

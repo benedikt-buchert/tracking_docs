@@ -5,10 +5,11 @@
   "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
   "type": "object",
   "required": [
+    "$schema",
     "event",
-    "user_data",
+    "number_constraints",
     "string_constraints",
-    "number_constraints"
+    "user_data"
   ],
   "allOf": [
     {
@@ -16,6 +17,10 @@
     }
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/complex-event.json"
+    },
     "event": {
       "type": "string",
       "const": "user_update",
