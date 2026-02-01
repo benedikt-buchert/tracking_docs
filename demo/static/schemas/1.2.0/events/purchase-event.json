@@ -10,6 +10,10 @@
     }
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/purchase-event.json"
+    },
     "event": {
       "type": "string",
       "const": "purchase",
@@ -68,5 +72,6 @@
       },
       "required": ["transaction_id", "value", "currency", "items"]
     }
-  }
+  },
+  "required": ["$schema", "event"]
 }

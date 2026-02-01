@@ -10,6 +10,10 @@
     }
   ],
   "properties": {
+    "$schema": {
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/add-to-cart-event.json",
+      "type": "string"
+    },
     "event": {
       "type": "string",
       "const": "add_to_cart",
@@ -40,5 +44,6 @@
       },
       "required": ["currency", "items"]
     }
-  }
+  },
+  "required": ["$schema", "event"]
 }

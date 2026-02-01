@@ -19,10 +19,16 @@ An example event that has oneOf at the root level.
     title: "Option B",
     description: "An example event that has oneOf at the root level.",
     type: "object",
+    required: ["$schema"],
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json",
+      },
       event: { type: "string", const: "option_b" },
       param_b: { type: "integer", examples: [123] },
     },
+    anchor: "option_b",
   }}
 />
 <SchemaJsonViewer
@@ -32,9 +38,15 @@ An example event that has oneOf at the root level.
     title: "Option B",
     description: "An example event that has oneOf at the root level.",
     type: "object",
+    required: ["$schema"],
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json",
+      },
       event: { type: "string", const: "option_b" },
       param_b: { type: "integer", examples: [123] },
     },
+    anchor: "option_b",
   }}
 />

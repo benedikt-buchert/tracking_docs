@@ -19,10 +19,16 @@ This is the description for Param A.
     title: "Option A",
     description: "This is the description for Param A.",
     type: "object",
+    required: ["$schema"],
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json",
+      },
       event: { type: "string", const: "option_a" },
       param_a: { type: "string", examples: ["example_a"] },
     },
+    anchor: "option_a",
   }}
 />
 <SchemaJsonViewer
@@ -32,9 +38,15 @@ This is the description for Param A.
     title: "Option A",
     description: "This is the description for Param A.",
     type: "object",
+    required: ["$schema"],
     properties: {
+      $schema: {
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json",
+      },
       event: { type: "string", const: "option_a" },
       param_a: { type: "string", examples: ["example_a"] },
     },
+    anchor: "option_a",
   }}
 />

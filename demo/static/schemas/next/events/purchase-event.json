@@ -10,6 +10,10 @@
     }
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/purchase-event.json"
+    },
     "event": {
       "type": "string",
       "const": "purchase",
@@ -44,7 +48,7 @@
         "shipping": {
           "type": "number",
           "description": "The shipping cost associated with the transaction.",
-          "examples": [5.99, 10.0, 0]
+          "examples": [5.99, 10, 0]
         },
         "tax": {
           "type": "number",
@@ -68,5 +72,6 @@
       },
       "required": ["transaction_id", "value", "currency", "items"]
     }
-  }
+  },
+  "required": ["$schema", "event"]
 }
