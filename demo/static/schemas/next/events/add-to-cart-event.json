@@ -6,6 +6,7 @@
   "type": "object",
   "properties": {
     "$schema": {
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
       "const": "https://tracking-docs-demo.buchert.digital/schemas/events/add-to-cart-event.json",
       "type": "string"
     },
