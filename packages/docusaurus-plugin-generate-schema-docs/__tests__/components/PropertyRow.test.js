@@ -37,7 +37,7 @@ describe('PropertyRow', () => {
       required: true,
       propertyType: 'string',
       description: '',
-      example: '',
+      examples: [],
       constraints: ['required'],
       path: ['name'],
     };
