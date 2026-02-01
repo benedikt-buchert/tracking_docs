@@ -1,5 +1,21 @@
 import { getConstraints } from './getConstraints';
 
+function getExample(propSchema) {
+  if (propSchema.examples) {
+    return propSchema.examples;
+  }
+  if (propSchema.example) {
+    return propSchema.example;
+  }
+  if (Object.prototype.hasOwnProperty.call(propSchema, 'const')) {
+    return [propSchema.const];
+  }
+  if (Object.prototype.hasOwnProperty.call(propSchema, 'default')) {
+    return [propSchema.default];
+  }
+  return undefined;
+}
+
 function processOptions(
   choices,
   level,
@@ -36,7 +52,7 @@ function processOptions(
         required: isRequired,
         propertyType: optionSchema.type,
         description: optionSchema.description,
-        example: optionSchema.examples || optionSchema.example,
+        example: getExample(optionSchema),
         constraints: constraints,
         isLastInGroup: isLastOption, // Updated: Uses the calculated flag instead of always true
         hasChildren: false,
@@ -201,7 +217,7 @@ export function schemaToTableData(
             propertyType:
               propSchema.type || (propSchema.enum ? 'enum' : 'object'),
             description: propSchema.description,
-            example: propSchema.examples || propSchema.example,
+            example: getExample(propSchema),
             constraints,
             isLastInGroup: isLast,
             hasChildren,
@@ -296,7 +312,7 @@ export function schemaToTableData(
         required: false,
         propertyType: subSchema.type,
         description: subSchema.description,
-        example: subSchema.examples || subSchema.example,
+        example: getExample(subSchema),
         constraints: getConstraints(subSchema),
         isLastInGroup: true,
         hasChildren: false,

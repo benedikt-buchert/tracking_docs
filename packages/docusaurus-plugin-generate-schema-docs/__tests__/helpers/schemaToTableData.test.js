@@ -219,4 +219,32 @@ describe('schemaToTableData', () => {
     expect(paramD.name).toBe('param_d');
     expect(paramD.level).toBe(0); // This is the core of the test
   });
+
+  it('uses "const" as example if "examples" and "example" are not present', () => {
+    const schema = {
+      properties: {
+        prop_with_const: {
+          type: 'string',
+          const: 'const-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].example).toEqual(['const-value']);
+  });
+
+  it('uses "default" as example if "examples", "example", and "const" are not present', () => {
+    const schema = {
+      properties: {
+        prop_with_default: {
+          type: 'string',
+          default: 'default-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].example).toEqual(['default-value']);
+  });
 });
