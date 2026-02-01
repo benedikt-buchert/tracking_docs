@@ -198,7 +198,7 @@ describe('schemaToTableData', () => {
     };
 
     const tableData = schemaToTableData(schema);
-    expect(tableData[0].example).toEqual(['const-value']);
+    expect(tableData[0].examples).toEqual(['const-value']);
   });
 
   it('uses "default" as example if "examples", "example", and "const" are not present', () => {
@@ -212,6 +212,6 @@ describe('schemaToTableData', () => {
     };
 
     const tableData = schemaToTableData(schema);
-    expect(tableData[0].example).toEqual(['default-value']);
+    expect(tableData[0].examples).toEqual(['default-value']);
   });
 });

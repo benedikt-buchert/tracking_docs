@@ -248,3 +248,9 @@ td.level-6::after {
 .schema-examples button {
   display: none;
 }
+
+/* Force long unbreakable words to wrap in examples */
+.schema-examples pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
