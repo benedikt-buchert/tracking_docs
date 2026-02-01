@@ -148,7 +148,45 @@ describe('schemaToTableData', () => {
     };
 
     const tableData = schemaToTableData(schema);
-    expect(tableData[0].example).toBe('singular-example');
+    expect(tableData[0].example).toEqual(['singular-example']);
+  });
+
+  it('uses "const" as the only example when present', () => {
+    const schema = {
+      properties: {
+        prop_with_all: {
+          type: 'string',
+          examples: ['example1', 'example2'],
+          example: 'example3',
+          const: 'const-value',
+          default: 'default-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].example).toEqual(['const-value']);
+  });
+
+  it('aggregates "examples", "example", and "default" when "const" is not present', () => {
+    const schema = {
+      properties: {
+        prop_with_all: {
+          type: 'string',
+          examples: ['example1', 'example2'],
+          example: 'example3',
+          default: 'default-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].example).toEqual([
+      'example1',
+      'example2',
+      'example3',
+      'default-value',
+    ]);
   });
 
   it('handles "oneOf" nested inside a property', () => {
