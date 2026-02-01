@@ -1,30 +1,5 @@
 import { getConstraints } from './getConstraints';
-
-function getExample(propSchema) {
-  if (Object.prototype.hasOwnProperty.call(propSchema, 'const')) {
-    return [propSchema.const];
-  }
-
-  const examples = [];
-
-  if (propSchema.examples) {
-    examples.push(...propSchema.examples);
-  }
-
-  if (propSchema.example) {
-    if (!examples.includes(propSchema.example)) {
-      examples.push(propSchema.example);
-    }
-  }
-
-  if (Object.prototype.hasOwnProperty.call(propSchema, 'default')) {
-    if (!examples.includes(propSchema.default)) {
-      examples.push(propSchema.default);
-    }
-  }
-
-  return examples.length > 0 ? examples : undefined;
-}
+import { getExamples as getExample } from './example-helper';
 
 function processOptions(
   choices,

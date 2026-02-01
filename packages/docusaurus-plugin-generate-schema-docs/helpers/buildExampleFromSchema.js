@@ -1,3 +1,5 @@
+import { getSingleExampleValue } from './example-helper';
+
 /**
  * Recursively builds a single, default example object from a JSON schema.
  * It prefers explicit examples, consts, or defaults. For choices (`oneOf`/`anyOf`),
@@ -17,10 +19,10 @@ const buildExampleFromSchema = (schema) => {
     return buildExampleFromSchema(schema.anyOf[0]);
   }
 
-  // Prefer const, explicit examples, or default values.
-  if (typeof schema.const !== 'undefined') return schema.const;
-  if (schema.examples?.length > 0) return schema.examples[0];
-  if (typeof schema.default !== 'undefined') return schema.default;
+  const exampleValue = getSingleExampleValue(schema);
+  if (typeof exampleValue !== 'undefined') {
+    return exampleValue;
+  }
 
   let type = Array.isArray(schema.type) ? schema.type[0] : schema.type;
   if (!type && schema.properties) {
