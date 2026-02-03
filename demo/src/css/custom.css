@@ -1,9 +1,0 @@
-table code {
-  white-space: pre-wrap; /* Allows wrapping */
-  word-break: break-word; /* Breaks long words/URLs if necessary */
-  min-width: auto; /* Prevents cell from forcing width */
-}
-
-table td {
-  min-width: 5.3rem;
-}
