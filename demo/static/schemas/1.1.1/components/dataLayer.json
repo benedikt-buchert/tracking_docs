@@ -31,7 +31,7 @@
       "type": "object",
       "propertyNames": {
         "maxLength": 40,
-        "pattern": "^[a-z0-9_]+$"
+        "pattern": "^(\\$schema)|[a-z0-9_]+$"
       },
       "additionalProperties": {
         "anyOf": [

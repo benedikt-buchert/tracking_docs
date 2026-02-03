@@ -1,0 +1,27 @@
+.tableWrapper {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.tableWrapper code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-width: auto;
+}
+
+.tableWrapper td {
+  min-width: 5.3rem;
+}
+
+.noWordWrap code {
+  white-space: pre;
+  word-break: normal;
+}
+
+.buttonGroup {
+  position: absolute;
+  right: 0;
+  top: -2.7rem;
+  display: flex;
+  gap: 0.5rem;
+}

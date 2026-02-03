@@ -118,39 +118,6 @@ describe('schemaToTableData', () => {
     expect(choiceRow.choiceType).toBe('oneOf');
   });
 
-  it('correctly processes the "examples" array', () => {
-    const schema = {
-      properties: {
-        prop_with_examples: {
-          type: 'string',
-          examples: ['first-example', 'second-example'],
-        },
-      },
-    };
-
-    const tableData = schemaToTableData(schema);
-
-    expect(tableData).toHaveLength(1);
-    const propRow = tableData[0];
-
-    expect(propRow.name).toBe('prop_with_examples');
-    expect(propRow.example).toEqual(['first-example', 'second-example']);
-  });
-
-  it('handles singular "example" if "examples" is not present', () => {
-    const schema = {
-      properties: {
-        prop_with_example: {
-          type: 'string',
-          example: 'singular-example',
-        },
-      },
-    };
-
-    const tableData = schemaToTableData(schema);
-    expect(tableData[0].example).toBe('singular-example');
-  });
-
   it('handles "oneOf" nested inside a property', () => {
     const schema = {
       properties: {
@@ -218,5 +185,33 @@ describe('schemaToTableData', () => {
     const paramD = optionD.rows[0];
     expect(paramD.name).toBe('param_d');
     expect(paramD.level).toBe(0); // This is the core of the test
+  });
+
+  it('uses "const" as example if "examples" and "example" are not present', () => {
+    const schema = {
+      properties: {
+        prop_with_const: {
+          type: 'string',
+          const: 'const-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].examples).toEqual(['const-value']);
+  });
+
+  it('uses "default" as example if "examples", "example", and "const" are not present', () => {
+    const schema = {
+      properties: {
+        prop_with_default: {
+          type: 'string',
+          default: 'default-value',
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+    expect(tableData[0].examples).toEqual(['default-value']);
   });
 });

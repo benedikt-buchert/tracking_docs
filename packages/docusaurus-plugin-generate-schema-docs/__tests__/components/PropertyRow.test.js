@@ -11,7 +11,7 @@ describe('PropertyRow', () => {
       required: false,
       propertyType: 'string',
       description: 'The name of the user.',
-      example: 'John Doe',
+      examples: ['John Doe'],
       constraints: [],
       path: ['name'],
     };
@@ -27,7 +27,7 @@ describe('PropertyRow', () => {
     expect(getByText('name')).toBeInTheDocument();
     expect(getByText('string')).toBeInTheDocument();
     expect(getByText('The name of the user.')).toBeInTheDocument();
-    expect(getByText('John Doe')).toBeInTheDocument();
+    expect(getByText('"John Doe"')).toBeInTheDocument();
   });
 
   it('marks required properties', () => {
@@ -37,7 +37,7 @@ describe('PropertyRow', () => {
       required: true,
       propertyType: 'string',
       description: '',
-      example: '',
+      examples: [],
       constraints: ['required'],
       path: ['name'],
     };
@@ -86,7 +86,7 @@ describe('PropertyRow', () => {
       required: false,
       propertyType: 'string',
       description: '',
-      example: 'foo',
+      examples: ['foo'],
       constraints: [],
       path: ['name'],
     };
@@ -98,7 +98,7 @@ describe('PropertyRow', () => {
         </tbody>
       </table>,
     );
-    expect(getByText('foo')).toBeInTheDocument();
+    expect(getByText('"foo"')).toBeInTheDocument();
   });
 
   it('does not render anything for empty constraints', () => {

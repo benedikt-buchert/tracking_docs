@@ -4,6 +4,11 @@
   "title": "Event Reference",
   "description": "A dataLayer event for GTM",
   "type": "object",
+  "allOf": [
+    {
+      "$ref": "./events/components/dataLayer.json"
+    }
+  ],
   "oneOf": [
     {
       "$ref": "./events/complex-event.json"

@@ -2,8 +2,7 @@
 title: Root Choice Event
 description: "An example event that has oneOf at the root level."
 ---
-
-import SchemaJsonViewer from "@theme/SchemaJsonViewer";
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 
 # Root Choice Event
 
@@ -11,35 +10,7 @@ An example event that has oneOf at the root level.
 
 Please select one of the following options:
 
-- [Option A](./option-a)
-- [Option B](./option-b)
+- [Option A](./option_a)
+- [Option B](./option_b)
 
-<SchemaJsonViewer
-  schema={{
-    $schema: "https://json-schema.org/draft/2020-12/schema",
-    $id: "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json",
-    title: "Root Choice Event",
-    description: "An example event that has oneOf at the root level.",
-    type: "object",
-    oneOf: [
-      {
-        title: "Option A",
-        description: "This is the description for Param A.",
-        type: "object",
-        properties: {
-          event: { type: "string", const: "option_a" },
-          param_a: { type: "string", examples: ["example_a"] },
-        },
-      },
-      {
-        title: "Option B",
-        type: "object",
-        properties: {
-          event: { type: "string", const: "option_b" },
-          param_b: { type: "integer", examples: [123] },
-        },
-      },
-    ],
-    properties: {},
-  }}
-/>
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json","title":"Root Choice Event","description":"An example event that has oneOf at the root level.","type":"object","allOf":[{"$ref":"./events/components/dataLayer.json"}],"required":["$schema"],"oneOf":[{"title":"Option A","$anchor":"option_a","description":"This is the description for Param A.","type":"object","properties":{"event":{"type":"string","const":"option_a"},"param_a":{"type":"string","examples":["example_a"]}}},{"title":"Option B","$anchor":"option_b","type":"object","properties":{"event":{"type":"string","const":"option_b"},"param_b":{"type":"integer","examples":[123]}}}],"properties":{"$schema":{"type":"string","description":"Defines the structure of the event. This can be used to validate an event against the schema provided.","const":"https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/root-choice-event.json"}}}} />

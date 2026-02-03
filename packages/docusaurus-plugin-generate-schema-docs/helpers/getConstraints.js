@@ -15,6 +15,7 @@ const constraintHandlers = {
   format: (val) => `format: ${val}`,
   minContains: (val) => `minContains: ${val}`,
   maxContains: (val) => `maxContains: ${val}`,
+  default: (val) => `default: ${JSON.stringify(val)}`,
 
   // Special-cased constraints
   pattern: (val) => `pattern: /${val}/`,

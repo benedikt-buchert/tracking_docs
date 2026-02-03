@@ -3,25 +3,15 @@ import clsx from 'clsx';
 import CodeBlock from '@theme/CodeBlock';
 
 /**
- * Formats an example value into a string for display in a CodeBlock.
- * - Objects are stringified with indentation.
- * - Arrays are joined by newlines.
- * @param {any} example The example to format.
- * @returns {string}
+ * Formats a single example value into a string for display in a CodeBlock.
+ * @param {any} singleEx The example to format.
+ * @returns {string|null}
  */
-const formatExample = (example) => {
-  if (typeof example === 'undefined' || example === null) return '';
-  if (Array.isArray(example)) {
-    return example
-      .map((ex) =>
-        typeof ex === 'object' ? JSON.stringify(ex, null, 2) : String(ex),
-      )
-      .join('\n');
-  }
-  if (typeof example === 'object') {
-    return JSON.stringify(example, null, 2);
-  }
-  return String(example);
+const formatExample = (singleEx) => {
+  if (typeof singleEx === 'undefined' || singleEx === null) return null;
+  if (typeof singleEx === 'object') return JSON.stringify(singleEx, null, 2);
+  if (typeof singleEx === 'string') return JSON.stringify(singleEx);
+  return String(singleEx);
 };
 
 /**
@@ -47,7 +37,7 @@ export default function PropertyRow({ row, isLastInGroup }) {
     required,
     propertyType,
     description,
-    example,
+    examples,
     constraints,
     hasChildren,
     containerType,
@@ -65,7 +55,6 @@ export default function PropertyRow({ row, isLastInGroup }) {
   const [firstConstraint, ...remainingConstraints] = hasConstraints
     ? constraints
     : [null];
-  const formattedExample = formatExample(example);
 
   // Generate background gradients for:
   // 1. Parent-to-child line (from 50% down) - for elements with children
@@ -154,11 +143,21 @@ export default function PropertyRow({ row, isLastInGroup }) {
         </td>
 
         <td rowSpan={rowSpan}>
-          {formattedExample && (
-            <CodeBlock language="json" className="schema-examples">
-              {formattedExample}
-            </CodeBlock>
-          )}
+          {examples &&
+            examples.map((ex, i) => {
+              const formatted = formatExample(ex);
+              return (
+                formatted && (
+                  <CodeBlock
+                    key={i}
+                    language="json"
+                    className="schema-examples"
+                  >
+                    {formatted}
+                  </CodeBlock>
+                )
+              );
+            })}
         </td>
         <td rowSpan={rowSpan}>{description || ''}</td>
       </tr>

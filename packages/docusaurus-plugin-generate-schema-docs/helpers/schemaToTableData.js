@@ -1,4 +1,5 @@
 import { getConstraints } from './getConstraints';
+import { getExamples } from './example-helper';
 
 function processOptions(
   choices,
@@ -36,7 +37,7 @@ function processOptions(
         required: isRequired,
         propertyType: optionSchema.type,
         description: optionSchema.description,
-        example: optionSchema.examples || optionSchema.example,
+        examples: getExamples(optionSchema),
         constraints: constraints,
         isLastInGroup: isLastOption, // Updated: Uses the calculated flag instead of always true
         hasChildren: false,
@@ -201,7 +202,7 @@ export function schemaToTableData(
             propertyType:
               propSchema.type || (propSchema.enum ? 'enum' : 'object'),
             description: propSchema.description,
-            example: propSchema.examples || propSchema.example,
+            examples: getExamples(propSchema),
             constraints,
             isLastInGroup: isLast,
             hasChildren,
@@ -296,7 +297,7 @@ export function schemaToTableData(
         required: false,
         propertyType: subSchema.type,
         description: subSchema.description,
-        example: subSchema.examples || subSchema.example,
+        examples: getExamples(subSchema),
         constraints: getConstraints(subSchema),
         isLastInGroup: true,
         hasChildren: false,

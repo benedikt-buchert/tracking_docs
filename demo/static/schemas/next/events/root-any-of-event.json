@@ -5,11 +5,17 @@
   "description": "An example event that has anyOf at the root level.",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/root-any-of-event.json"
+    },
     "event": {
       "type": "string",
       "const": "any_of_event"
     }
   },
+  "required": ["$schema", "event"],
   "anyOf": [
     {
       "title": "Has Param C",
