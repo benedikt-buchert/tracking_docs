@@ -1,6 +1,6 @@
 {
   "tutorialSidebar": [
-    "index",
+    "intro",
     {
       "type": "category",
       "label": "Event Reference",
