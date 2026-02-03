@@ -4,12 +4,12 @@
   "title": "Add to Cart Event",
   "description": "An add_to_cart event fires when a user adds one or more items to their shopping cart. Based on Google Analytics 4 ecommerce event specifications.",
   "type": "object",
-  "allOf": [
-    {
-      "$ref": "./components/dataLayer.json"
-    }
-  ],
   "properties": {
+    "$schema": {
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/add-to-cart-event.json",
+      "type": "string"
+    },
     "event": {
       "type": "string",
       "const": "add_to_cart",
@@ -40,5 +40,6 @@
       },
       "required": ["currency", "items"]
     }
-  }
+  },
+  "required": ["$schema", "event"]
 }

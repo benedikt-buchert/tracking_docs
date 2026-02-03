@@ -5,17 +5,18 @@
   "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
   "type": "object",
   "required": [
+    "$schema",
     "event",
-    "user_data",
+    "number_constraints",
     "string_constraints",
-    "number_constraints"
-  ],
-  "allOf": [
-    {
-      "$ref": "./components/dataLayer.json"
-    }
+    "user_data"
   ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/complex-event.json"
+    },
     "event": {
       "type": "string",
       "const": "user_update",

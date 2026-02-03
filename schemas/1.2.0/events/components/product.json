@@ -93,7 +93,8 @@
     "quantity": {
       "type": "number",
       "description": "The item quantity. If not set, quantity is set to 1.",
-      "examples": [1, 2, 3]
+      "examples": [1, 2, 3],
+      "default": 1
     },
     "promotion_id": {
       "type": "string",

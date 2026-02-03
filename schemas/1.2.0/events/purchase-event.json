@@ -4,12 +4,12 @@
   "title": "Purchase Event",
   "description": "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
   "type": "object",
-  "allOf": [
-    {
-      "$ref": "./components/dataLayer.json"
-    }
-  ],
   "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/purchase-event.json"
+    },
     "event": {
       "type": "string",
       "const": "purchase",
@@ -68,5 +68,6 @@
       },
       "required": ["transaction_id", "value", "currency", "items"]
     }
-  }
+  },
+  "required": ["$schema", "event"]
 }

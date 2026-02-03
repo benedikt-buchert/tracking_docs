@@ -3,35 +3,52 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/root-choice-event.json",
   "title": "Root Choice Event",
   "description": "An example event that has oneOf at the root level.",
-  "oneOf": [
+  "allOf": [
     {
-      "title": "Option A",
-      "description": "This is the description for Param A.",
       "type": "object",
       "properties": {
-        "event": {
+        "$schema": {
           "type": "string",
-          "const": "option_a"
-        },
-        "param_a": {
-          "type": "string",
-          "examples": ["example_a"]
+          "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+          "const": "https://tracking-docs-demo.buchert.digital/schemas/events/root-choice-event.json"
         }
-      }
+      },
+      "required": ["$schema"]
     },
     {
-      "title": "Option B",
-      "type": "object",
-      "properties": {
-        "event": {
-          "type": "string",
-          "const": "option_b"
+      "oneOf": [
+        {
+          "title": "Option A",
+          "$anchor": "option_a",
+          "description": "This is the description for Param A.",
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "option_a"
+            },
+            "param_a": {
+              "type": "string",
+              "examples": ["example_a"]
+            }
+          }
         },
-        "param_b": {
-          "type": "integer",
-          "examples": [123]
+        {
+          "title": "Option B",
+          "$anchor": "option_b",
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "option_b"
+            },
+            "param_b": {
+              "type": "integer",
+              "examples": [123]
+            }
+          }
         }
-      }
+      ]
     }
   ]
 }
