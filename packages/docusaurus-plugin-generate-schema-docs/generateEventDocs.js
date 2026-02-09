@@ -15,7 +15,7 @@ async function generateAndWriteDoc(
   options,
   alreadyMergedSchema = null,
 ) {
-  const { organizationName, projectName, siteDir } = options;
+  const { organizationName, projectName, siteDir, dataLayerName } = options;
   const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
   const PARTIALS_DIR = path.join(siteDir, 'docs/partials');
 
@@ -53,6 +53,7 @@ async function generateAndWriteDoc(
     bottomPartialImport,
     topPartialComponent,
     bottomPartialComponent,
+    dataLayerName,
   });
 
   const outputFilename = path.basename(filePath).replace('.json', '.mdx');

@@ -5,10 +5,17 @@ import validateSchemas from './validateSchemas.js';
 import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
 
-export default async function (context) {
+export default async function (context, options) {
   const { siteDir } = context;
+  const { dataLayerName } = options;
   const { organizationName, projectName, url } = context.siteConfig;
-  const options = { organizationName, projectName, siteDir, url };
+  const newOptions = {
+    organizationName,
+    projectName,
+    siteDir,
+    url,
+    dataLayerName,
+  };
   const versionsJsonPath = path.join(siteDir, 'versions.json');
   const isVersioned = fs.existsSync(versionsJsonPath);
 
@@ -40,11 +47,11 @@ export default async function (context) {
             fs.readFileSync(versionsJsonPath, 'utf8'),
           );
           for (const version of versions) {
-            await generateEventDocs({ ...options, version });
+            await generateEventDocs({ ...newOptions, version });
           }
-          await generateEventDocs({ ...options, version: 'current' });
+          await generateEventDocs({ ...newOptions, version: 'current' });
         } else {
-          await generateEventDocs(options);
+          await generateEventDocs(newOptions);
         }
       });
 
@@ -105,7 +112,7 @@ export default async function (context) {
 
         // Generate documentation for the new version
         console.log(`📝 Generating documentation for version ${version}...`);
-        await generateEventDocs({ ...options, version });
+        await generateEventDocs({ ...newOptions, version });
 
         console.log(`\n✅ Version ${version} created successfully!`);
         console.log(`\nNext steps:`);
@@ -132,11 +139,11 @@ export default async function (context) {
       if (isVersioned) {
         const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
         for (const version of versions) {
-          await generateEventDocs({ ...options, version });
+          await generateEventDocs({ ...newOptions, version });
         }
-        await generateEventDocs({ ...options, version: 'current' });
+        await generateEventDocs({ ...newOptions, version: 'current' });
       } else {
-        await generateEventDocs(options);
+        await generateEventDocs(newOptions);
       }
     },
 

@@ -39,7 +39,10 @@ This is a child event with an anchor.
 
 
 
-<SchemaViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-with-anchor","title":"Child Event Anchor","description":"This is a child event with an anchor.","type":"object","$anchor":"child-event-with-anchor","properties":{"property_a":{"type":"string"}}}} />
+<SchemaViewer
+  schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-with-anchor","title":"Child Event Anchor","description":"This is a child event with an anchor.","type":"object","$anchor":"child-event-with-anchor","properties":{"property_a":{"type":"string"}}}}
+  
+/>
 <SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-with-anchor","title":"Child Event Anchor","description":"This is a child event with an anchor.","type":"object","$anchor":"child-event-with-anchor","properties":{"property_a":{"type":"string"}}}} />
 
 
@@ -65,7 +68,10 @@ This is a child event with only a title.
 
 
 
-<SchemaViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-title","title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}} />
+<SchemaViewer
+  schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-title","title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}}
+  
+/>
 <SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json#child-event-title","title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}} />
 
 

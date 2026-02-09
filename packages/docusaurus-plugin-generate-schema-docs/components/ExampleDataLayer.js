@@ -5,7 +5,7 @@ import TabItem from '@theme/TabItem';
 import Heading from '@theme/Heading';
 import { schemaToExamples } from '../helpers/schemaToExamples';
 
-const generateCodeSnippet = (example, schema) => {
+const generateCodeSnippet = (example, schema, dataLayerName = 'dataLayer') => {
   const clearableProperties = findClearableProperties(schema || {});
   let codeSnippet = '';
   const propertiesToClear = clearableProperties.filter(
@@ -17,14 +17,22 @@ const generateCodeSnippet = (example, schema) => {
     propertiesToClear.forEach((prop) => {
       resetObject[prop] = null;
     });
-    codeSnippet += `window.dataLayer.push(${JSON.stringify(resetObject, null, 2)});\n`;
+    codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
+      resetObject,
+      null,
+      2,
+    )});\n`;
   }
 
-  codeSnippet += `window.dataLayer.push(${JSON.stringify(example, null, 2)});`;
+  codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
+    example,
+    null,
+    2,
+  )});`;
   return codeSnippet;
 };
 
-export default function ExampleDataLayer({ schema }) {
+export default function ExampleDataLayer({ schema, dataLayerName }) {
   const exampleGroups = schemaToExamples(schema);
 
   if (!exampleGroups || exampleGroups.length === 0) {
@@ -36,6 +44,7 @@ export default function ExampleDataLayer({ schema }) {
     const codeSnippet = generateCodeSnippet(
       exampleGroups[0].options[0].example,
       schema,
+      dataLayerName,
     );
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
   }
@@ -51,7 +60,7 @@ export default function ExampleDataLayer({ schema }) {
             {group.options.map(({ title, example }, index) => (
               <TabItem value={index} label={title} key={index}>
                 <CodeBlock language="javascript">
-                  {generateCodeSnippet(example, schema)}
+                  {generateCodeSnippet(example, schema, dataLayerName)}
                 </CodeBlock>
               </TabItem>
             ))}

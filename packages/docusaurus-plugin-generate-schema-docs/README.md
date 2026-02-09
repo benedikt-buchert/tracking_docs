@@ -29,12 +29,15 @@ npm install --save docusaurus-plugin-generate-schema-docs
           'docusaurus-plugin-generate-schema-docs',
           {
             // Options if any
+            dataLayerName: 'customDataLayer',
           },
         ],
       ],
       // ...
     };
     ```
+
+    The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
 
 2.  Place your JSON schemas in the `schemas` directory at the root of your project.
 
