@@ -9,7 +9,8 @@ export default async function (context, options) {
   const { siteDir } = context;
   const { dataLayerName } = options;
   const { organizationName, projectName, url } = context.siteConfig;
-  const newOptions = {
+
+  const pluginOptions = {
     organizationName,
     projectName,
     siteDir,
@@ -47,11 +48,12 @@ export default async function (context, options) {
             fs.readFileSync(versionsJsonPath, 'utf8'),
           );
           for (const version of versions) {
-            await generateEventDocs({ ...newOptions, version });
+            // FIX 3: Removed 'newOptions' and used the consolidated pluginOptions
+            await generateEventDocs({ ...pluginOptions, version });
           }
-          await generateEventDocs({ ...newOptions, version: 'current' });
+          await generateEventDocs({ ...pluginOptions, version: 'current' });
         } else {
-          await generateEventDocs(newOptions);
+          await generateEventDocs(pluginOptions);
         }
       });
 
@@ -139,11 +141,11 @@ export default async function (context, options) {
       if (isVersioned) {
         const versions = JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
         for (const version of versions) {
-          await generateEventDocs({ ...newOptions, version });
+          await generateEventDocs({ ...pluginOptions, version });
         }
-        await generateEventDocs({ ...newOptions, version: 'current' });
+        await generateEventDocs({ ...pluginOptions, version: 'current' });
       } else {
-        await generateEventDocs(newOptions);
+        await generateEventDocs(pluginOptions);
       }
     },
 
