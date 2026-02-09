@@ -114,7 +114,7 @@ export default async function (context, options) {
 
         // Generate documentation for the new version
         console.log(`📝 Generating documentation for version ${version}...`);
-        await generateEventDocs({ ...newOptions, version });
+        await generateEventDocs({ ...pluginOptions, version });
 
         console.log(`\n✅ Version ${version} created successfully!`);
         console.log(`\nNext steps:`);
