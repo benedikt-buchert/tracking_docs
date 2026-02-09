@@ -68,6 +68,19 @@ describe('ExampleDataLayer', () => {
     // Let snapshot testing verify the complex content of each tab
     expect(container).toMatchSnapshot();
   });
+
+  it('should use the provided dataLayerName', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+    const { getByText } = render(
+      <ExampleDataLayer schema={schema} dataLayerName="customDataLayer" />,
+    );
+    expect(getByText(/window.customDataLayer.push/)).toBeInTheDocument();
+  });
 });
 
 describe('findClearableProperties', () => {

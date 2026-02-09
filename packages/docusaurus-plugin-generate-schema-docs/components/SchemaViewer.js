@@ -3,7 +3,7 @@ import Heading from '@theme/Heading';
 import ExampleDataLayer from './ExampleDataLayer';
 import PropertiesTable from './PropertiesTable';
 
-export default function SchemaViewer({ schema }) {
+export default function SchemaViewer({ schema, dataLayerName }) {
   const hasOneOfAnyOf =
     schema.oneOf ||
     schema.anyOf ||
@@ -18,7 +18,7 @@ export default function SchemaViewer({ schema }) {
   return (
     <div>
       <Heading as="h2">{exampleTitle}</Heading>
-      <ExampleDataLayer schema={schema} />
+      <ExampleDataLayer schema={schema} dataLayerName={dataLayerName} />
 
       <Heading as="h2">Event Properties</Heading>
       <PropertiesTable schema={schema} />
