@@ -1,73 +1,52 @@
+import { createValidator } from './helpers/validator.js';
 import fs from 'fs';
 import path from 'path';
-import buildExampleFromSchema from './helpers/buildExampleFromSchema';
-import Ajv2020 from 'ajv/dist/2020.js';
-import addFormats from 'ajv-formats';
-import processSchema from './helpers/processSchema';
+import processSchema from './helpers/processSchema.js';
+import buildExampleFromSchema from './helpers/buildExampleFromSchema.js';
 
 const validateSchemas = async (schemaPath) => {
-  const ajv = new Ajv2020();
-  addFormats(ajv);
-  ajv.addKeyword('x-gtm-clear');
-  // see https://github.com/ajv-validator/ajv/issues/1854
-  ajv.addKeyword('$anchor');
-
-  const getAllFiles = (dir, allFiles = []) => {
-    const files = fs.readdirSync(dir);
-
-    files.forEach((file) => {
-      const filePath = path.join(dir, file);
-      if (fs.statSync(filePath).isDirectory()) {
-        getAllFiles(filePath, allFiles);
-      } else {
-        if (file.endsWith('.json')) {
-          allFiles.push(filePath);
-        }
-      }
-    });
-    return allFiles;
-  };
-
-  const allSchemaFiles = getAllFiles(schemaPath);
-  for (const file of allSchemaFiles) {
-    const schemaContent = fs.readFileSync(file, 'utf-8');
-    const schema = JSON.parse(schemaContent);
-    ajv.addSchema(schema);
-  }
-
-  const schemaFiles = fs
+  const topLevelSchemaFiles = fs
     .readdirSync(schemaPath)
     .filter((file) => file.endsWith('.json'));
+
   let allValid = true;
-  for (const file of schemaFiles) {
+
+  for (const file of topLevelSchemaFiles) {
     const filePath = path.join(schemaPath, file);
 
-    const mergedSchema = await processSchema(filePath);
+    try {
+      // Build the example data
+      const mergedSchema = await processSchema(filePath);
+      const example_data = buildExampleFromSchema(mergedSchema);
 
-    const example_data = buildExampleFromSchema(mergedSchema);
-
-    if (!example_data) {
-      console.error(`x Schema ${file} does not produce a valid example.`);
-      allValid = false;
-    } else {
-      const originalSchema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      const validate = ajv.getSchema(originalSchema.$id);
-      if (!validate) {
-        console.error(
-          `x Could not find compiled schema for ${originalSchema.$id}`,
-        );
+      if (!example_data) {
+        console.error(`x Schema ${file} does not produce a valid example.`);
         allValid = false;
         continue;
       }
-      if (validate(example_data)) {
+
+      // Load the specific schema we are validating right now
+      const originalSchema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+
+      // Create the validator using the new logic
+      const validate = await createValidator([], originalSchema, schemaPath);
+
+      // Run validation
+      const result = validate(example_data);
+
+      if (result.valid) {
         console.log(`OK Schema ${file} produced a valid example.`);
       } else {
         console.error(`x Schema ${file} example data failed validation:`);
-        console.error(validate.errors);
+        console.error(result.errors);
         allValid = false;
       }
+    } catch (error) {
+      console.error(`x Error processing ${file}:`, error.message);
+      throw error;
     }
   }
+
   return allValid;
 };
 
