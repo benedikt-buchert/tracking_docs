@@ -1,6 +1,5 @@
 import fs from 'fs';
 import path from 'path';
-import loadSchema from './loadSchema';
 
 export function createDir(directory) {
   if (!fs.existsSync(directory)) {
@@ -15,7 +14,7 @@ export function readSchemas(directory) {
 
   return files.map((file) => {
     const filePath = path.join(directory, file);
-    const schema = loadSchema(filePath);
+    const schema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     return {
       fileName: file,
       filePath,

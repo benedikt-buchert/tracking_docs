@@ -42,6 +42,7 @@
     "prettier": "^3.7.4"
   },
   "dependencies": {
-    "@docusaurus/theme-mermaid": "^3.9.2"
+    "@docusaurus/theme-mermaid": "^3.7.0",
+    "ajv-draft-04": "^1.0.0"
   }
 }
