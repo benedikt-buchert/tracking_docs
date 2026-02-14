@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "events/root-choice-event.json",
+  "title": "Root Choice Event",
+  "description": "An example event that has oneOf at the root level.",
+  "allOf": [
+    {
+      "type": "object",
+      "properties": {
+        "$schema": {
+          "type": "string",
+          "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+          "const": "events/root-choice-event.json"
+        }
+      },
+      "required": ["$schema"]
+    },
+    {
+      "oneOf": [
+        {
+          "title": "Option A",
+          "$anchor": "option_a",
+          "description": "This is the description for Param A.",
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "option_a"
+            },
+            "param_a": {
+              "type": "string",
+              "examples": ["example_a"]
+            }
+          }
+        },
+        {
+          "title": "Option B",
+          "$anchor": "option_b",
+          "type": "object",
+          "properties": {
+            "event": {
+              "type": "string",
+              "const": "option_b"
+            },
+            "param_b": {
+              "type": "integer",
+              "examples": [123]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

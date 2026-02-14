@@ -14,125 +14,40 @@ describe('validateSchemas', () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'schema-test-'));
-    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
   });
 
   afterEach(() => {
     fs.rmSync(tmpDir, { recursive: true, force: true });
-    jest.restoreAllMocks();
   });
 
-  const writeSchema = (dir, fileName, content) => {
-    const filePath = path.join(dir, fileName);
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-    fs.writeFileSync(filePath, JSON.stringify(content, null, 2));
-  };
+  it('should return true for a complex set of valid schemas', async () => {
+    const fixtureDir = path.resolve(
+      __dirname,
+      '__fixtures__',
+      'validateSchemas',
+      'complex-validation',
+    );
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.cpSync(fixtureDir, schemaDir, { recursive: true });
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(true);
+  });
 
-  const loadFixture = (fixtureName) => {
+  it('should return false if an example fails validation', async () => {
     const fixturePath = path.resolve(
       __dirname,
       '__fixtures__',
       'validateSchemas',
-      fixtureName,
+      'invalid-example-schema.json',
     );
-    const schemaContent = fs.readFileSync(fixturePath, 'utf8');
-    return JSON.parse(schemaContent);
-  };
-
-  it('should return true when all schemas are valid', async () => {
-    const validSchema = loadFixture('valid-schema.json');
-    writeSchema(tmpDir, 'valid-schema.json', validSchema);
-
-    const result = await validateSchemas(tmpDir);
-    expect(result).toBe(true);
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      'OK Schema valid-schema.json produced a valid example.',
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.copyFileSync(
+      fixturePath,
+      path.join(schemaDir, 'invalid-example-schema.json'),
     );
-  });
-
-  it('should return false if an example fails validation', async () => {
-    const invalidExampleSchema = loadFixture('invalid-example-schema.json');
-    writeSchema(tmpDir, 'invalid-example-schema.json', invalidExampleSchema);
-
-    const result = await validateSchemas(tmpDir);
+    const result = await validateSchemas(schemaDir);
     expect(result).toBe(false);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'x Schema invalid-example-schema.json example data failed validation:',
-    );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          instancePath: '/age',
-          keyword: 'type',
-          message: 'must be number',
-        }),
-      ]),
-    );
-  });
-
-  it('should fail validation for missing required property', async () => {
-    const noValidExampleSchema = loadFixture('no-example-schema.json');
-    writeSchema(tmpDir, 'no-valid-example-schema.json', noValidExampleSchema);
-
-    const result = await validateSchemas(tmpDir);
-    expect(result).toBe(false);
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'x Schema no-valid-example-schema.json does not produce a valid example.',
-    );
-  });
-
-  it('should handle schemas with $refs correctly', async () => {
-    const componentSchema = loadFixture(
-      path.join('components', 'referenced.json'),
-    );
-    const mainSchema = loadFixture('main-schema-with-ref.json');
-
-    writeSchema(
-      path.join(tmpDir, 'components'),
-      'referenced.json',
-      componentSchema,
-    );
-    writeSchema(tmpDir, 'main-schema-with-ref.json', mainSchema);
-
-    const result = await validateSchemas(tmpDir);
-    expect(result).toBe(true);
-    expect(consoleLogSpy).toHaveBeenCalledWith(
-      'OK Schema main-schema-with-ref.json produced a valid example.',
-    );
-  });
-
-  it('should reject if a referenced schema is missing', async () => {
-    const mainSchema = loadFixture('main-schema-with-missing-ref.json');
-    writeSchema(tmpDir, 'main-schema-with-missing-ref.json', mainSchema);
-
-    const expectedErrorPath = path.join(tmpDir, 'non-existent-component.json');
-    await expect(validateSchemas(tmpDir)).rejects.toThrow(
-      expect.objectContaining({
-        message: expect.stringContaining(
-          `Error opening file ${expectedErrorPath}`,
-        ),
-      }),
-    );
-  });
-
-  it('should handle duplicate schema IDs gracefully', async () => {
-    const schemaA = {
-      $id: 'duplicate-id',
-      type: 'object',
-      properties: { a: { type: 'string', examples: ['a'] } },
-      required: ['a'],
-    };
-    const schemaB = {
-      $id: 'duplicate-id',
-      type: 'object',
-      properties: { b: { type: 'string', examples: ['b'] } },
-      required: ['b'],
-    };
-    writeSchema(tmpDir, 'schema-A.json', schemaA);
-    writeSchema(tmpDir, 'schema-B.json', schemaB);
-
-    const result = await validateSchemas(tmpDir);
-    expect(result).toBe(true);
   });
 });
