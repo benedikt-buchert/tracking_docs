@@ -40,9 +40,5 @@
     "jest-environment-jsdom": "^30.2.0",
     "memfs": "^4.51.1",
     "prettier": "^3.7.4"
-  },
-  "dependencies": {
-    "@docusaurus/theme-mermaid": "^3.7.0",
-    "ajv-draft-04": "^1.0.0"
   }
 }
