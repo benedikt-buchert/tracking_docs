@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base", "monorepo:docusaurus"],
+  "extends": ["config:recommended", "monorepo:docusaurus"],
   "dependencyDashboard": true,
   "prCreation": "immediate"
 }
