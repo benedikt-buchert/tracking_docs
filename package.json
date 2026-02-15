@@ -27,7 +27,7 @@
     "@docusaurus/eslint-plugin": "^3.9.2",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^15.0.7",
-    "babel-jest": "^29.7.0",
+    "babel-jest": "^30.0.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jest": "^29.12.1",
