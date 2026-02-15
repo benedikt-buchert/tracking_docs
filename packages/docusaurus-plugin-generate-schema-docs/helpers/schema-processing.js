@@ -15,21 +15,6 @@ export function slugify(text) {
     .replace(/-+$/, ''); // Trim - from end of text
 }
 
-export function fixRefs(obj, basePath) {
-  for (const key in obj) {
-    if (
-      key === '$ref' &&
-      typeof obj[key] === 'string' &&
-      !obj[key].startsWith('#') &&
-      !obj[key].startsWith('http')
-    ) {
-      obj[key] = path.resolve(basePath, obj[key]);
-    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-      fixRefs(obj[key], basePath);
-    }
-  }
-}
-
 export async function processOneOfSchema(schema, filePath) {
   const processedSchemas = [];
   const choiceType = schema.oneOf ? 'oneOf' : null;
