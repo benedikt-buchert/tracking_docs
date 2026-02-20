@@ -15,27 +15,31 @@ async function generateAndWriteDoc(
   options,
   alreadyMergedSchema = null,
 ) {
-  const { organizationName, projectName, siteDir, dataLayerName } = options;
+  const { organizationName, projectName, siteDir, dataLayerName, version } =
+    options;
   const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
-  const PARTIALS_DIR = path.join(siteDir, 'docs/partials');
+
+  const { outputDir: versionOutputDir } = getPathsForVersion(version, siteDir);
+  const PARTIALS_DIR = path.join(versionOutputDir, 'partials');
+  const relativePartialsDir = path.relative(siteDir, PARTIALS_DIR);
 
   const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
 
   // Check for partials
-  const topPartialPath = path.join(PARTIALS_DIR, `${eventName}.mdx`);
-  const bottomPartialPath = path.join(PARTIALS_DIR, `${eventName}_bottom.mdx`);
+  const topPartialPath = path.join(PARTIALS_DIR, `_${eventName}.mdx`);
+  const bottomPartialPath = path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`);
 
   let topPartialImport = '';
   let topPartialComponent = '';
   if (fs.existsSync(topPartialPath)) {
-    topPartialImport = `import TopPartial from '@site/docs/partials/${eventName}.mdx';`;
+    topPartialImport = `import TopPartial from '@site/${relativePartialsDir}/_${eventName}.mdx';`;
     topPartialComponent = '<TopPartial />';
   }
 
   let bottomPartialImport = '';
   let bottomPartialComponent = '';
   if (fs.existsSync(bottomPartialPath)) {
-    bottomPartialImport = `import BottomPartial from '@site/docs/partials/${eventName}_bottom.mdx';`;
+    bottomPartialImport = `import BottomPartial from '@site/${relativePartialsDir}/_${eventName}_bottom.mdx';`;
     bottomPartialComponent = '<BottomPartial />';
   }
 
