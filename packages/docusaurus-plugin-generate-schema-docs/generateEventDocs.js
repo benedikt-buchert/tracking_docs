@@ -14,6 +14,7 @@ async function generateAndWriteDoc(
   outputDir,
   options,
   alreadyMergedSchema = null,
+  editFilePath = null,
 ) {
   const { organizationName, projectName, siteDir, dataLayerName, version } =
     options;
@@ -45,7 +46,7 @@ async function generateAndWriteDoc(
 
   const editUrl = `${baseEditUrl}/${path.relative(
     path.join(siteDir, '..'),
-    filePath,
+    editFilePath || filePath,
   )}`;
 
   const mdxContent = SchemaDocTemplate({
@@ -84,7 +85,7 @@ async function generateOneOfDocs(
 
   for (const [
     index,
-    { slug, schema: processedSchema },
+    { slug, schema: processedSchema, sourceFilePath },
   ] of processed.entries()) {
     const subChoiceType = processedSchema.oneOf ? 'oneOf' : null;
     const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
@@ -95,7 +96,7 @@ async function generateOneOfDocs(
       await generateOneOfDocs(
         prefixedSlug,
         processedSchema,
-        tempFilePath,
+        sourceFilePath || tempFilePath,
         eventOutputDir,
         options,
       );
@@ -110,6 +111,7 @@ async function generateOneOfDocs(
         eventOutputDir,
         options,
         processedSchema,
+        sourceFilePath || filePath,
       );
       fs.unlinkSync(tempFilePath);
     }

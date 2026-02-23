@@ -25,7 +25,7 @@ exports[`generateEventDocs (oneOf with $anchor) should generate documentation us
 title: Child Event Anchor
 description: "This is a child event with an anchor."
 sidebar_label: Child Event Anchor
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/docs/parent-event-anchor/01-child-event-with-anchor.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/static/schemas/parent-event-anchor.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
@@ -54,7 +54,7 @@ exports[`generateEventDocs (oneOf with $anchor) should generate documentation us
 title: Child Event Title
 description: "This is a child event with only a title."
 sidebar_label: Child Event Title
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/docs/parent-event-anchor/02-child-event-title.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/static/schemas/parent-event-anchor.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';

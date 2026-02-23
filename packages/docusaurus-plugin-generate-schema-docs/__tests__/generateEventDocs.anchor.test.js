@@ -61,11 +61,18 @@ describe('generateEventDocs (oneOf with $anchor)', () => {
       'utf-8',
     );
     expect(childWithAnchor).toMatchSnapshot();
+    // Inline oneOf options (using $anchor for slug) must link to the parent schema file
+    expect(childWithAnchor).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/static/schemas/parent-event-anchor.json',
+    );
 
     const childWithTitle = fs.readFileSync(
       path.join(parentDir, '02-child-event-title.mdx'),
       'utf-8',
     );
     expect(childWithTitle).toMatchSnapshot();
+    expect(childWithTitle).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/static/schemas/parent-event-anchor.json',
+    );
   });
 });

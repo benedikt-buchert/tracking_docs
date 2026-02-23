@@ -44,7 +44,7 @@ exports[`generateEventDocs (nested oneOf) should generate nested documentation c
 title: Grandchild A
 description: undefined
 sidebar_label: Grandchild A
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/docs/parent-event/01-child-event/01-grandchild-a.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/child-event.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';
@@ -73,7 +73,7 @@ exports[`generateEventDocs (nested oneOf) should generate nested documentation c
 title: Grandchild B
 description: undefined
 sidebar_label: Grandchild B
-custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/docs/parent-event/01-child-event/02-grandchild-b.json
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/child-event.json
 ---
 
 import SchemaViewer from '@theme/SchemaViewer';

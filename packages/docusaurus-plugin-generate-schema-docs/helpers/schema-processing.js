@@ -25,8 +25,10 @@ export async function processOneOfSchema(schema, filePath) {
 
     for (const option of schema[choiceType]) {
       let resolvedOption = option;
+      let sourceFilePath = null;
       if (option.$ref && !option.$ref.startsWith('#')) {
         const refPath = path.resolve(path.dirname(filePath), option.$ref);
+        sourceFilePath = refPath;
         resolvedOption = await processSchema(refPath);
       }
 
@@ -54,6 +56,7 @@ export async function processOneOfSchema(schema, filePath) {
       processedSchemas.push({
         slug,
         schema: newSchema,
+        sourceFilePath,
       });
     }
   }

@@ -80,11 +80,18 @@ describe('generateEventDocs (non-versioned)', () => {
       'utf-8',
     );
     expect(rootChoiceA).toMatchSnapshot();
+    // Inline oneOf options must link to the parent schema file, not a temp output file
+    expect(rootChoiceA).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-choice-event.json',
+    );
 
     const rootChoiceB = fs.readFileSync(
       path.join(choiceEventDir, '02-option-b.mdx'),
       'utf-8',
     );
     expect(rootChoiceB).toMatchSnapshot();
+    expect(rootChoiceB).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-choice-event.json',
+    );
   });
 });

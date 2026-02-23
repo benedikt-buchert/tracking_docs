@@ -70,11 +70,18 @@ describe('generateEventDocs (nested oneOf)', () => {
       'utf-8',
     );
     expect(grandchildA).toMatchSnapshot();
+    // Nested $ref-based oneOf options must link to the resolved source schema file
+    expect(grandchildA).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/child-event.json',
+    );
 
     const grandchildB = fs.readFileSync(
       path.join(childDir, '02-grandchild-b.mdx'),
       'utf-8',
     );
     expect(grandchildB).toMatchSnapshot();
+    expect(grandchildB).toContain(
+      'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/child-event.json',
+    );
   });
 });
