@@ -19,6 +19,9 @@
     "test": "jest",
     "prettier": "prettier --write ."
   },
+  "overrides": {
+    "minimatch": ">=10.2.1"
+  },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/eslint-parser": "^7.28.5",
