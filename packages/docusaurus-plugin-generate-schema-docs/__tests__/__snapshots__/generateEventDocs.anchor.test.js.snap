@@ -4,6 +4,7 @@ exports[`generateEventDocs (oneOf with $anchor) should generate documentation us
 "---
 title: Parent Event Anchor
 description: "This is a parent event with oneOf."
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_anchor__/static/schemas/parent-event-anchor.json
 ---
 import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 

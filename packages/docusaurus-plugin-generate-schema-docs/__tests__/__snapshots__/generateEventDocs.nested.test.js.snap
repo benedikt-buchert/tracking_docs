@@ -4,6 +4,7 @@ exports[`generateEventDocs (nested oneOf) should generate nested documentation c
 "---
 title: Parent Event
 description: "undefined"
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/parent-event.json
 ---
 import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 
@@ -23,6 +24,7 @@ exports[`generateEventDocs (nested oneOf) should generate nested documentation c
 "---
 title: Child Event
 description: "undefined"
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures_nested__/static/schemas/child-event.json
 ---
 import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 

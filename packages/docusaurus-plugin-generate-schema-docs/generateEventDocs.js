@@ -72,6 +72,10 @@ async function generateOneOfDocs(
   outputDir,
   options,
 ) {
+  const { organizationName, projectName, siteDir } = options;
+  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
+  const editUrl = `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+
   const eventOutputDir = path.join(outputDir, eventName);
   createDir(eventOutputDir);
 
@@ -80,6 +84,7 @@ async function generateOneOfDocs(
   const indexPageContent = ChoiceIndexTemplate({
     schema,
     processedOptions: processed,
+    editUrl,
   });
   writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
 
@@ -96,7 +101,7 @@ async function generateOneOfDocs(
       await generateOneOfDocs(
         prefixedSlug,
         processedSchema,
-        sourceFilePath || tempFilePath,
+        sourceFilePath || filePath,
         eventOutputDir,
         options,
       );

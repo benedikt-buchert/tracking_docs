@@ -91,6 +91,7 @@ exports[`generateEventDocs (non-versioned) should generate documentation correct
 "---
 title: Root Choice Event
 description: "An example event that has oneOf at the root level."
+custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-choice-event.json
 ---
 import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 

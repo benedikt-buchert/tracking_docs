@@ -1,9 +1,10 @@
 export default function ChoiceIndexTemplate(data) {
-  const { schema, processedOptions } = data;
+  const { schema, processedOptions, editUrl } = data;
 
   return `---
 title: ${schema.title}
 description: "${schema.description}"
+custom_edit_url: ${editUrl}
 ---
 import SchemaJsonViewer from '@theme/SchemaJsonViewer';
 
