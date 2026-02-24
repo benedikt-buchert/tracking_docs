@@ -32,14 +32,14 @@ jobs:
       - name: Run lint
         run: npm run lint
 
+      - name: Run tests
+        run: npm test
+
       - name: Generate docs
         run: npm run gen-docs
 
       - name: Run build
         run: npm run build
-
-      - name: Run tests
-        run: npm test
 
       - name: Validate Schemas
         run: npm run validate-schemas
