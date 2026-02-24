@@ -28,8 +28,8 @@ export default function updateSchemaIds(siteDir, url, version = null) {
     ? [version]
     : JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
 
-  for (const version of versions) {
-    const schemaDir = path.join(siteDir, 'static/schemas', version);
+  for (const v of versions) {
+    const schemaDir = path.join(siteDir, 'static/schemas', v);
     if (!fs.existsSync(schemaDir)) {
       continue;
     }
@@ -41,7 +41,7 @@ export default function updateSchemaIds(siteDir, url, version = null) {
       const relativePath = path.relative(path.join(siteDir, 'static'), file);
       schema.$id = `${baseUrl}/${relativePath.replace(/\\/g, '/')}`;
       fs.writeFileSync(file, JSON.stringify(schema, null, 2));
-      console.log(`Updated $id for ${file} in version ${version}`);
+      console.log(`Updated $id for ${file} in version ${v}`);
     }
   }
 }
