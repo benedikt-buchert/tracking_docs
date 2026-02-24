@@ -12,13 +12,12 @@ function buildEditUrl(organizationName, projectName, siteDir, filePath) {
   return `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
 }
 
-function resolvePartial(partialPath, relativePartialsDir, name, suffix = '') {
+function resolvePartial(partialPath, relativePartialsDir, componentPrefix) {
   if (!fs.existsSync(partialPath)) return { import: '', component: '' };
-  const componentName = suffix ? `${name}${suffix}Partial` : `${name}Partial`;
-  const fileName = suffix ? `_${name}_${suffix.toLowerCase()}.mdx` : `_${name}.mdx`;
+  const fileName = path.basename(partialPath);
   return {
-    import: `import ${componentName} from '@site/${relativePartialsDir}/${fileName}';`,
-    component: `<${componentName} />`,
+    import: `import ${componentPrefix} from '@site/${relativePartialsDir}/${fileName}';`,
+    component: `<${componentPrefix} />`,
   };
 }
 
@@ -41,10 +40,23 @@ async function generateAndWriteDoc(
   const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
 
   // Check for partials
-  const top = resolvePartial(path.join(PARTIALS_DIR, `_${eventName}.mdx`), relativePartialsDir, 'Top');
-  const bottom = resolvePartial(path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`), relativePartialsDir, 'Bottom');
+  const top = resolvePartial(
+    path.join(PARTIALS_DIR, `_${eventName}.mdx`),
+    relativePartialsDir,
+    'TopPartial',
+  );
+  const bottom = resolvePartial(
+    path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`),
+    relativePartialsDir,
+    'BottomPartial',
+  );
 
-  const editUrl = buildEditUrl(organizationName, projectName, siteDir, editFilePath || filePath);
+  const editUrl = buildEditUrl(
+    organizationName,
+    projectName,
+    siteDir,
+    editFilePath || filePath,
+  );
 
   const mdxContent = SchemaDocTemplate({
     schema,
@@ -70,7 +82,12 @@ async function generateOneOfDocs(
   options,
 ) {
   const { organizationName, projectName, siteDir } = options;
-  const editUrl = buildEditUrl(organizationName, projectName, siteDir, filePath);
+  const editUrl = buildEditUrl(
+    organizationName,
+    projectName,
+    siteDir,
+    filePath,
+  );
 
   const eventOutputDir = path.join(outputDir, eventName);
   createDir(eventOutputDir);
