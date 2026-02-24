@@ -26,31 +26,18 @@ function createAjvInstance(schemas, mainSchema, schemaPath) {
     return JSON.parse(schemaContent);
   };
 
-  const options = { allErrors: true, schemas: schemas };
+  const options = { allErrors: true, schemas: schemas, strict: false, loadSchema };
 
   let ajv;
   if (schemaVersion?.includes('2020-12')) {
-    options.strict = false;
-    options.loadSchema = loadSchema;
     ajv = new Ajv2020(options);
   } else if (schemaVersion?.includes('2019-09')) {
-    options.strict = false;
-    options.loadSchema = loadSchema;
     ajv = new Ajv2019(options);
-  } else if (schemaVersion?.includes('draft-07')) {
-    options.strict = false;
-    options.loadSchema = loadSchema;
-    ajv = new Ajv(options);
-  } else if (schemaVersion?.includes('draft-06')) {
-    options.strict = false;
-    options.loadSchema = loadSchema;
-    ajv = new Ajv(options);
   } else if (schemaVersion?.includes('draft-04')) {
     ajv = new AjvDraft4();
     schemas.forEach((s) => ajv.addSchema(s));
   } else {
-    options.strict = false;
-    options.loadSchema = loadSchema;
+    // covers draft-07, draft-06, and unknown versions
     ajv = new Ajv(options);
   }
 

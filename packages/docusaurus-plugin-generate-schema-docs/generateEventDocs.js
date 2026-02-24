@@ -7,6 +7,21 @@ import SchemaDocTemplate from './helpers/schema-doc-template.js';
 import ChoiceIndexTemplate from './helpers/choice-index-template.js';
 import processSchema from './helpers/processSchema.js';
 
+function buildEditUrl(organizationName, projectName, siteDir, filePath) {
+  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
+  return `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+}
+
+function resolvePartial(partialPath, relativePartialsDir, name, suffix = '') {
+  if (!fs.existsSync(partialPath)) return { import: '', component: '' };
+  const componentName = suffix ? `${name}${suffix}Partial` : `${name}Partial`;
+  const fileName = suffix ? `_${name}_${suffix.toLowerCase()}.mdx` : `_${name}.mdx`;
+  return {
+    import: `import ${componentName} from '@site/${relativePartialsDir}/${fileName}';`,
+    component: `<${componentName} />`,
+  };
+}
+
 async function generateAndWriteDoc(
   filePath,
   schema,
@@ -18,7 +33,6 @@ async function generateAndWriteDoc(
 ) {
   const { organizationName, projectName, siteDir, dataLayerName, version } =
     options;
-  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
 
   const { outputDir: versionOutputDir } = getPathsForVersion(version, siteDir);
   const PARTIALS_DIR = path.join(versionOutputDir, 'partials');
@@ -27,37 +41,20 @@ async function generateAndWriteDoc(
   const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
 
   // Check for partials
-  const topPartialPath = path.join(PARTIALS_DIR, `_${eventName}.mdx`);
-  const bottomPartialPath = path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`);
+  const top = resolvePartial(path.join(PARTIALS_DIR, `_${eventName}.mdx`), relativePartialsDir, 'Top');
+  const bottom = resolvePartial(path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`), relativePartialsDir, 'Bottom');
 
-  let topPartialImport = '';
-  let topPartialComponent = '';
-  if (fs.existsSync(topPartialPath)) {
-    topPartialImport = `import TopPartial from '@site/${relativePartialsDir}/_${eventName}.mdx';`;
-    topPartialComponent = '<TopPartial />';
-  }
-
-  let bottomPartialImport = '';
-  let bottomPartialComponent = '';
-  if (fs.existsSync(bottomPartialPath)) {
-    bottomPartialImport = `import BottomPartial from '@site/${relativePartialsDir}/_${eventName}_bottom.mdx';`;
-    bottomPartialComponent = '<BottomPartial />';
-  }
-
-  const editUrl = `${baseEditUrl}/${path.relative(
-    path.join(siteDir, '..'),
-    editFilePath || filePath,
-  )}`;
+  const editUrl = buildEditUrl(organizationName, projectName, siteDir, editFilePath || filePath);
 
   const mdxContent = SchemaDocTemplate({
     schema,
     mergedSchema,
     editUrl,
     file: path.basename(filePath),
-    topPartialImport,
-    bottomPartialImport,
-    topPartialComponent,
-    bottomPartialComponent,
+    topPartialImport: top.import,
+    bottomPartialImport: bottom.import,
+    topPartialComponent: top.component,
+    bottomPartialComponent: bottom.component,
     dataLayerName,
   });
 
@@ -73,8 +70,7 @@ async function generateOneOfDocs(
   options,
 ) {
   const { organizationName, projectName, siteDir } = options;
-  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
-  const editUrl = `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+  const editUrl = buildEditUrl(organizationName, projectName, siteDir, filePath);
 
   const eventOutputDir = path.join(outputDir, eventName);
   createDir(eventOutputDir);

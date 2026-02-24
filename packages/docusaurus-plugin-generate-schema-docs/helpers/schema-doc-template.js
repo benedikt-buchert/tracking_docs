@@ -8,6 +8,7 @@ export default function MdxTemplate(data) {
     bottomPartialImport,
     topPartialComponent,
     bottomPartialComponent,
+    dataLayerName,
   } = data;
 
   return `---
@@ -30,11 +31,7 @@ ${topPartialComponent}
 
 <SchemaViewer
   schema={${JSON.stringify(mergedSchema)}}
-  ${
-    data.dataLayerName && data.dataLayerName !== 'undefined'
-      ? ` dataLayerName={'${data.dataLayerName}'}`
-      : ''
-  }
+  ${dataLayerName ? ` dataLayerName={'${dataLayerName}'}` : ''}
 />
 <SchemaJsonViewer schema={${JSON.stringify(schema)}} />
 
