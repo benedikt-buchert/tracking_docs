@@ -31,7 +31,7 @@ ${topPartialComponent}
 <SchemaViewer
   schema={${JSON.stringify(mergedSchema)}}
   ${
-    data.dataLayerName && data.dataLayerName !== 'undefined'
+    data.dataLayerName
       ? ` dataLayerName={'${data.dataLayerName}'}`
       : ''
   }
