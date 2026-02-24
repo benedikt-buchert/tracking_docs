@@ -71,10 +71,6 @@ function createAjvInstance(schemas, mainSchema, schemaPath) {
  * @returns {function(object): {valid: boolean, errors: object[]}} A function that takes data and returns a validation result.
  */
 export async function createValidator(schemas, mainSchema, schemaPath) {
-  if (!mainSchema) {
-    mainSchema = schemas;
-    schemas = [mainSchema];
-  }
   const ajv = createAjvInstance(schemas, mainSchema, schemaPath);
 
   let validate;

@@ -12,7 +12,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 'test' });
 
     expect(result.valid).toBe(true);
@@ -30,7 +30,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 123 });
 
     expect(result.valid).toBe(false);
@@ -49,7 +49,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 'test' });
 
     expect(result.valid).toBe(true);
@@ -68,7 +68,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 'test' });
 
     expect(result.valid).toBe(true);
@@ -87,7 +87,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 'test' });
 
     expect(result.valid).toBe(true);
@@ -106,7 +106,7 @@ describe('createValidator', () => {
       required: ['name'],
     };
 
-    const validator = await createValidator(schema);
+    const validator = await createValidator([], schema);
     const result = validator({ name: 'test' });
 
     expect(result.valid).toBe(true);
