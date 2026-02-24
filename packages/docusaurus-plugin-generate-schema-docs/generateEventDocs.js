@@ -96,8 +96,6 @@ async function generateOneOfDocs(
     const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
 
     if (subChoiceType) {
-      const tempFilePath = path.join(eventOutputDir, `${slug}.json`);
-      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
       await generateOneOfDocs(
         prefixedSlug,
         processedSchema,
@@ -105,12 +103,9 @@ async function generateOneOfDocs(
         eventOutputDir,
         options,
       );
-      fs.unlinkSync(tempFilePath);
     } else {
-      const tempFilePath = path.join(eventOutputDir, `${prefixedSlug}.json`);
-      fs.writeFileSync(tempFilePath, JSON.stringify(processedSchema, null, 2));
       await generateAndWriteDoc(
-        tempFilePath,
+        `${prefixedSlug}.json`,
         processedSchema,
         slug,
         eventOutputDir,
@@ -118,7 +113,6 @@ async function generateOneOfDocs(
         processedSchema,
         sourceFilePath || filePath,
       );
-      fs.unlinkSync(tempFilePath);
     }
   }
 }
