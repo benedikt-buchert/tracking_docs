@@ -26,7 +26,12 @@ function createAjvInstance(schemas, mainSchema, schemaPath) {
     return JSON.parse(schemaContent);
   };
 
-  const options = { allErrors: true, schemas: schemas, strict: false, loadSchema };
+  const options = {
+    allErrors: true,
+    schemas: schemas,
+    strict: false,
+    loadSchema,
+  };
 
   let ajv;
   if (schemaVersion?.includes('2020-12')) {

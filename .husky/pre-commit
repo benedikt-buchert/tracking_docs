@@ -1,3 +1,4 @@
 npm run test
 npm run validate-schemas
 npm run eslint:fix
+npm run lint
