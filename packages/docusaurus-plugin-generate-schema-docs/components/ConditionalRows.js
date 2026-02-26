@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import SchemaRows from './SchemaRows';
-import Heading from '@theme/Heading';
 import clsx from 'clsx';
 import { getContinuingLinesStyle } from '../helpers/continuingLinesStyle';
 
@@ -9,9 +8,8 @@ import { getContinuingLinesStyle } from '../helpers/continuingLinesStyle';
  * that integrate directly into the main table body.
  *
  * Structure:
- * 1. Header row: "Conditional Properties"
- * 2. Condition (if) rows: always visible, info-styled
- * 3. Branch toggles (then/else): radio-style, foldable
+ * 1. Condition (if) rows: always visible, info-styled
+ * 2. Branch toggles (then/else): radio-style, foldable
  */
 export default function ConditionalRows({ row }) {
   const { condition, branches, level = 0, continuingLevels = [] } = row;
@@ -21,15 +19,6 @@ export default function ConditionalRows({ row }) {
 
   return (
     <>
-      {/* Header row */}
-      <tr>
-        <td colSpan={5} style={continuingLinesStyle}>
-          <Heading as="h4" className="conditional-header-headline">
-            Conditional Properties
-          </Heading>
-        </td>
-      </tr>
-
       {/* Condition (if) section - always visible */}
       <tr className="conditional-condition-header">
         <td colSpan={5} style={continuingLinesStyle}>

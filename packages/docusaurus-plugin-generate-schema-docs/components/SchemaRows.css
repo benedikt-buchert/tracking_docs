@@ -227,10 +227,6 @@ td.level-6::after {
 
 /* --- Conditional Row Styles --- */
 
-.conditional-header-headline {
-  margin-bottom: 0px;
-}
-
 .conditional-condition-header {
   background-color: rgba(var(--ifm-color-info-rgb), 0.08);
 }

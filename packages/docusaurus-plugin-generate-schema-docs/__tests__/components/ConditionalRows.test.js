@@ -13,14 +13,6 @@ jest.mock('../../components/SchemaRows', () => {
   return MockSchemaRows;
 });
 
-jest.mock('@theme/Heading', () => {
-  const MockHeading = ({ as: Component, children, ...props }) => (
-    <Component {...props}>{children}</Component>
-  );
-  MockHeading.displayName = 'MockHeading';
-  return MockHeading;
-});
-
 describe('ConditionalRows', () => {
   const conditionalRow = {
     type: 'conditional',
@@ -45,18 +37,6 @@ describe('ConditionalRows', () => {
       },
     ],
   };
-
-  it('renders "Conditional Properties" header', () => {
-    render(
-      <table>
-        <tbody>
-          <ConditionalRows row={conditionalRow} />
-        </tbody>
-      </table>,
-    );
-
-    expect(screen.getByText('Conditional Properties')).toBeInTheDocument();
-  });
 
   it('renders condition (if) rows always visible', () => {
     render(
