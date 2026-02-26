@@ -30,6 +30,9 @@
     },
     {
       "$ref": "./events/conditional-event.json"
+    },
+    {
+      "$ref": "./events/nested-conditional-event.json"
     }
   ]
 }
