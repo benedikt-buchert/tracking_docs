@@ -80,9 +80,11 @@ export default function PropertyRow({ row, isLastInGroup }) {
   }
 
   // Continuing ancestor lines: full-height vertical lines for ancestors with more siblings
-  // Filter to only include levels less than (level - 1) since ::before handles immediate parent
+  // Filter to only include levels less than (level - 1) since ::before handles immediate parent.
+  // Exception: when isLastInGroup is true, ::before stops at 50%, so if level - 1 is
+  // explicitly in continuingLevels, we must draw it via background gradient to fill the gap.
   continuingLevels
-    .filter((lvl) => lvl < level - 1)
+    .filter((lvl) => lvl < level - 1 || (lvl === level - 1 && isLastInGroup))
     .forEach((lvl) => {
       const pos = getLevelPosition(lvl);
       allGradients.push(

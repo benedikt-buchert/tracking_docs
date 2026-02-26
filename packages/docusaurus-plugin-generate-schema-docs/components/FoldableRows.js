@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import SchemaRows from './SchemaRows';
 import Heading from '@theme/Heading';
 import clsx from 'clsx';
@@ -47,6 +47,7 @@ export default function FoldableRows({ row }) {
     level = 0,
     continuingLevels = [],
   } = row;
+  const radioGroupId = useId();
   const [openOneOf, setOpenOneOf] = useState(0); // For oneOf, track the single open index
   const [openAnyOf, setOpenAnyOf] = useState({}); // For anyOf, track each option's state
 
@@ -99,7 +100,11 @@ export default function FoldableRows({ row }) {
               }
               isActive={isActive}
               isRadio={choiceType === 'oneOf'}
-              name={choiceType === 'oneOf' ? row.title : option.title}
+              name={
+                choiceType === 'oneOf'
+                  ? `oneOf-${radioGroupId}`
+                  : `anyOf-${option.title}-${radioGroupId}`
+              }
               continuingLinesStyle={continuingLinesStyle}
             />
             {/* If the option is active, render its rows directly into the table body */}

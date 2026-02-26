@@ -359,6 +359,105 @@ describe('schemaToTableData', () => {
       expect(conditionalRow.branches).toHaveLength(2);
     });
 
+    it('preserves parent continuingLevels in nested conditional branch rows', () => {
+      // Schema where the conditional is NOT the last child - the parent
+      // property has siblings after it, so continuing lines must flow through
+      const schema = {
+        type: 'object',
+        properties: {
+          shipping: {
+            type: 'object',
+            description: 'Shipping details.',
+            properties: {
+              method: {
+                type: 'string',
+                examples: ['express'],
+              },
+            },
+            required: ['method'],
+            if: {
+              properties: { method: { const: 'express' } },
+              required: ['method'],
+            },
+            then: {
+              properties: {
+                priority_level: {
+                  type: 'string',
+                  examples: ['high'],
+                },
+              },
+            },
+            else: {
+              properties: {
+                estimated_days: { type: 'integer', examples: [5] },
+              },
+            },
+          },
+          total: {
+            type: 'number',
+            description: 'Order total.',
+          },
+        },
+      };
+
+      const tableData = schemaToTableData(schema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+
+      // shipping is at level 0 and is NOT the last root property (total follows)
+      // So the conditional row and its branch rows should have level 0
+      // in continuingLevels to draw the parent's continuing line.
+      expect(conditionalRow.continuingLevels).toContain(0);
+
+      const thenBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Then',
+      );
+      const priorityLevel = thenBranch.rows.find(
+        (r) => r.name === 'priority_level',
+      );
+      expect(priorityLevel.continuingLevels).toContain(0);
+
+      const conditionMethod = conditionalRow.condition.rows.find(
+        (r) => r.name === 'method',
+      );
+      expect(conditionMethod.continuingLevels).toContain(0);
+    });
+
+    it('adds parent level to continuingLevels for non-last branches but not the last', () => {
+      // The parent line from shipping must flow through the condition and Then
+      // branch (since Else follows), but NOT through the Else branch (it's the
+      // last branch — nothing follows, so the line should end there).
+      const tableData = schemaToTableData(nestedConditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+
+      // The conditional row itself needs the parent line for its headers
+      expect(conditionalRow.continuingLevels).toContain(0);
+
+      // Then branch rows need the parent line (Else follows after Then)
+      const thenBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Then',
+      );
+      thenBranch.rows.forEach((row) => {
+        expect(row.continuingLevels).toContain(0);
+      });
+
+      // Else branch rows should NOT have the parent line (nothing follows Else)
+      const elseBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Else',
+      );
+      elseBranch.rows.forEach((row) => {
+        expect(row.continuingLevels).not.toContain(0);
+      });
+    });
+
+    it('marks condition (if) rows as not last in group so parent lines continue', () => {
+      const tableData = schemaToTableData(nestedConditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      // Condition rows should never be isLastInGroup because branches follow them
+      conditionalRow.condition.rows.forEach((row) => {
+        expect(row.isLastInGroup).toBe(false);
+      });
+    });
+
     it('correctly calculates isLastInGroup with conditional as last element', () => {
       const tableData = schemaToTableData(conditionalEventSchema);
       // The conditional row should be the last element at root level

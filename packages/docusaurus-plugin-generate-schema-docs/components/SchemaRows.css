@@ -241,6 +241,12 @@ td.level-6::after {
   gap: 0.5rem;
 }
 
+.conditional-info-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  cursor: help;
+}
+
 .conditional-info-icon {
   display: inline-flex;
   align-items: center;
@@ -254,6 +260,40 @@ td.level-6::after {
   font-weight: bold;
   font-style: italic;
   flex-shrink: 0;
+}
+
+.conditional-info-tooltip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 0;
+  background-color: var(--ifm-color-emphasis-800);
+  color: var(--ifm-color-emphasis-0);
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.4;
+  white-space: normal;
+  width: max-content;
+  max-width: 280px;
+  z-index: 10;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.conditional-info-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0.625rem;
+  border: 0.375rem solid transparent;
+  border-top-color: var(--ifm-color-emphasis-800);
+}
+
+.conditional-info-icon-wrapper:hover .conditional-info-tooltip {
+  display: block;
 }
 
 .conditional-condition-description {

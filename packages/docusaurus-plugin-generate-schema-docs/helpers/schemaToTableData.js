@@ -99,16 +99,29 @@ export function schemaToTableData(
     currentPath,
     continuingLevels,
   ) {
+    // The parent's vertical line must continue through condition rows and
+    // non-last branches, but NOT through the last branch (where the line ends).
+    const innerContinuingLevels =
+      currentLevel > 0 && !continuingLevels.includes(currentLevel - 1)
+        ? [...continuingLevels, currentLevel - 1]
+        : [...continuingLevels];
+
     const conditionRows = schemaToTableData(
       subSchema.if,
       currentLevel,
       currentPath,
-      continuingLevels,
+      innerContinuingLevels,
       true,
-    ).map((row) => ({ ...row, isCondition: true }));
+    ).map((row) => ({ ...row, isCondition: true, isLastInGroup: false }));
+
+    const hasThen = !!subSchema.then;
+    const hasElse = !!subSchema.else;
 
     const branches = [];
-    if (subSchema.then) {
+    if (hasThen) {
+      // Then is NOT the last branch if Else exists — use innerContinuingLevels
+      // to keep the parent line flowing. If Then IS the last branch, use original.
+      const thenLevels = hasElse ? innerContinuingLevels : continuingLevels;
       branches.push({
         title: 'Then',
         description: subSchema.then.description,
@@ -116,12 +129,13 @@ export function schemaToTableData(
           subSchema.then,
           currentLevel,
           currentPath,
-          continuingLevels,
+          thenLevels,
           true,
         ),
       });
     }
-    if (subSchema.else) {
+    if (hasElse) {
+      // Else is always the last branch — use original continuingLevels
       branches.push({
         title: 'Else',
         description: subSchema.else.description,
@@ -142,7 +156,7 @@ export function schemaToTableData(
       isLastInGroup: true,
       hasChildren: false,
       containerType: null,
-      continuingLevels: [...continuingLevels],
+      continuingLevels: [...innerContinuingLevels],
       condition: {
         title: 'If',
         description: subSchema.if.description,
@@ -343,8 +357,10 @@ export function schemaToTableData(
             });
           }
 
-          // Handle if/then/else nested inside a property (alongside or after its children)
-          if (isConditionalWrapper) {
+          // Handle if/then/else nested inside a property without its own properties.
+          // When propSchema HAS properties, the recursive buildRows call above
+          // already handles if/then/else via the root-level check at the end of buildRows.
+          if (isConditionalWrapper && !propSchema.properties) {
             buildConditionalRow(
               propSchema,
               currentLevel + 1,

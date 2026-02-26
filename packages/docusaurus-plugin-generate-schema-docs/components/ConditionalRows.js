@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import SchemaRows from './SchemaRows';
 import clsx from 'clsx';
 import { getContinuingLinesStyle } from '../helpers/continuingLinesStyle';
@@ -14,6 +14,7 @@ import { getContinuingLinesStyle } from '../helpers/continuingLinesStyle';
 export default function ConditionalRows({ row }) {
   const { condition, branches, level = 0, continuingLevels = [] } = row;
   const [activeBranch, setActiveBranch] = useState(0);
+  const radioGroupId = useId();
 
   const continuingLinesStyle = getContinuingLinesStyle(continuingLevels, level);
 
@@ -23,7 +24,14 @@ export default function ConditionalRows({ row }) {
       <tr className="conditional-condition-header">
         <td colSpan={5} style={continuingLinesStyle}>
           <span className="conditional-condition-label">
-            <span className="conditional-info-icon">i</span>
+            <span className="conditional-info-icon-wrapper">
+              <span className="conditional-info-icon">i</span>
+              <span className="conditional-info-tooltip">
+                The properties below define the condition. When the condition is
+                met, the &ldquo;Then&rdquo; branch applies. Otherwise, the
+                &ldquo;Else&rdquo; branch applies.
+              </span>
+            </span>
             <strong>If</strong>
           </span>
           {condition.description && (
@@ -45,7 +53,7 @@ export default function ConditionalRows({ row }) {
                 <label className="choice-row-header">
                   <input
                     type="radio"
-                    name={`conditional-${row.path.join('.')}`}
+                    name={`conditional-${radioGroupId}`}
                     checked={isActive}
                     onChange={() => setActiveBranch(index)}
                   />

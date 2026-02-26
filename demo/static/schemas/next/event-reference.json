@@ -33,6 +33,9 @@
     },
     {
       "$ref": "./events/nested-conditional-event.json"
+    },
+    {
+      "$ref": "./events/battle-test-event.json"
     }
   ]
 }
