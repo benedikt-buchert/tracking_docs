@@ -106,7 +106,12 @@ export default function PropertyRow({ row, isLastInGroup }) {
 
   return (
     <>
-      <tr className={clsx(required && 'required-row')}>
+      <tr
+        className={clsx(
+          required && 'required-row',
+          row.isCondition && 'conditional-condition-row',
+        )}
+      >
         <td
           rowSpan={rowSpan}
           style={{ ...indentStyle, ...continuingLinesStyle }}

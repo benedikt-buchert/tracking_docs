@@ -225,6 +225,51 @@ td.level-6::after {
   transform: rotate(45deg);
 }
 
+/* --- Conditional Row Styles --- */
+
+.conditional-header-headline {
+  margin-bottom: 0px;
+}
+
+.conditional-condition-header {
+  background-color: rgba(var(--ifm-color-info-rgb), 0.08);
+}
+
+.conditional-condition-header:hover {
+  background-color: rgba(var(--ifm-color-info-rgb), 0.12);
+}
+
+.conditional-condition-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.conditional-info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  background-color: var(--ifm-color-info);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.conditional-condition-description {
+  margin-left: 1.75rem;
+  font-size: 0.9em;
+  color: var(--ifm-color-secondary-darkest);
+}
+
+.conditional-condition-row {
+  background-color: rgba(var(--ifm-color-info-rgb), 0.04);
+}
+
 /* --- Example CodeBlock Styles --- */
 
 .schema-examples {

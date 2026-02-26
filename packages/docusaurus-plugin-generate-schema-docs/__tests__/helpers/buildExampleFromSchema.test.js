@@ -185,4 +185,53 @@ describe('buildExampleFromSchema', () => {
       },
     });
   });
+
+  it('should handle if/then/else by defaulting to then branch', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['form_submit'] },
+      },
+      if: { properties: { event: { const: 'form_submit' } } },
+      then: {
+        properties: {
+          form_name: { type: 'string', examples: ['contact'] },
+        },
+      },
+      else: {
+        properties: {
+          error_code: { type: 'integer', examples: [404] },
+        },
+      },
+    };
+
+    const example = buildExampleFromSchema(schema);
+    expect(example).toHaveProperty('event', 'form_submit');
+    expect(example).toHaveProperty('form_name', 'contact');
+    expect(example).not.toHaveProperty('error_code');
+  });
+
+  it('should handle nested if/then/else inside a property', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        shipping: {
+          type: 'object',
+          properties: {
+            method: { type: 'string', examples: ['express'] },
+          },
+          if: { properties: { method: { const: 'express' } } },
+          then: {
+            properties: {
+              priority: { type: 'string', examples: ['high'] },
+            },
+          },
+        },
+      },
+    };
+
+    const example = buildExampleFromSchema(schema);
+    expect(example.shipping).toHaveProperty('method', 'express');
+    expect(example.shipping).toHaveProperty('priority', 'high');
+  });
 });

@@ -1,6 +1,8 @@
 import { schemaToTableData } from '../../helpers/schemaToTableData';
 import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
 import rootAnyOfEventSchema from '../__fixtures__/static/schemas/root-any-of-event.json';
+import conditionalEventSchema from '../__fixtures__/static/schemas/conditional-event.json';
+import nestedConditionalEventSchema from '../__fixtures__/static/schemas/nested-conditional-event.json';
 
 describe('schemaToTableData', () => {
   it('handles "oneOf" and "anyOf" correctly for a complex schema', () => {
@@ -213,5 +215,161 @@ describe('schemaToTableData', () => {
 
     const tableData = schemaToTableData(schema);
     expect(tableData[0].examples).toEqual(['default-value']);
+  });
+
+  describe('if/then/else conditional support', () => {
+    it('creates a conditional row for schema with if/then/else at root level', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow).toBeDefined();
+      expect(conditionalRow.level).toBe(0);
+      expect(conditionalRow.condition).toBeDefined();
+      expect(conditionalRow.branches).toBeDefined();
+      expect(conditionalRow.branches).toHaveLength(2); // then + else
+    });
+
+    it('flags condition rows with isCondition: true', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow.condition.rows.length).toBeGreaterThan(0);
+      conditionalRow.condition.rows.forEach((row) => {
+        expect(row.isCondition).toBe(true);
+      });
+    });
+
+    it('processes then branch rows correctly', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      const thenBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Then',
+      );
+      expect(thenBranch).toBeDefined();
+      // then has postal_code + state
+      expect(thenBranch.rows.length).toBe(2);
+      const postalCode = thenBranch.rows.find((r) => r.name === 'postal_code');
+      expect(postalCode).toBeDefined();
+      expect(postalCode.propertyType).toBe('string');
+    });
+
+    it('processes else branch rows correctly', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      const elseBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Else',
+      );
+      expect(elseBranch).toBeDefined();
+      // else has postal_code only
+      expect(elseBranch.rows.length).toBe(1);
+    });
+
+    it('handles if/then without else', () => {
+      const schema = {
+        type: 'object',
+        properties: { status: { type: 'string' } },
+        if: { properties: { status: { const: 'active' } } },
+        then: {
+          properties: { active_since: { type: 'string' } },
+        },
+      };
+      const tableData = schemaToTableData(schema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow).toBeDefined();
+      expect(conditionalRow.branches).toHaveLength(1);
+      expect(conditionalRow.branches[0].title).toBe('Then');
+    });
+
+    it('renders regular properties alongside conditional rows', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      const propRows = tableData.filter((r) => r.type === 'property');
+      // event + country
+      expect(propRows.length).toBe(2);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow).toBeDefined();
+    });
+
+    it('creates nested conditional row inside a property sub-schema', () => {
+      const tableData = schemaToTableData(nestedConditionalEventSchema);
+
+      // Should have event property + shipping property + shipping's children + conditional
+      const shippingProp = tableData.find(
+        (r) => r.type === 'property' && r.name === 'shipping',
+      );
+      expect(shippingProp).toBeDefined();
+      expect(shippingProp.hasChildren).toBe(true);
+
+      // method property at level 1
+      const methodProp = tableData.find(
+        (r) => r.type === 'property' && r.name === 'method',
+      );
+      expect(methodProp).toBeDefined();
+      expect(methodProp.level).toBe(1);
+
+      // Conditional row should be nested at level 1 (inside shipping)
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow).toBeDefined();
+      expect(conditionalRow.level).toBe(1);
+      expect(conditionalRow.branches).toHaveLength(2);
+
+      // Then branch has priority_level
+      const thenBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Then',
+      );
+      expect(thenBranch.rows.length).toBe(1);
+      expect(thenBranch.rows[0].name).toBe('priority_level');
+
+      // Else branch has estimated_days
+      const elseBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Else',
+      );
+      expect(elseBranch.rows.length).toBe(1);
+      expect(elseBranch.rows[0].name).toBe('estimated_days');
+    });
+
+    it('handles if/then/else inside array items', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                kind: { type: 'string' },
+              },
+              if: { properties: { kind: { const: 'digital' } } },
+              then: {
+                properties: {
+                  download_url: { type: 'string' },
+                },
+              },
+              else: {
+                properties: {
+                  weight: { type: 'number' },
+                },
+              },
+            },
+          },
+        },
+      };
+      const tableData = schemaToTableData(schema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow).toBeDefined();
+      // items is at level 0, array items content is at level 1
+      expect(conditionalRow.level).toBe(1);
+      expect(conditionalRow.branches).toHaveLength(2);
+    });
+
+    it('correctly calculates isLastInGroup with conditional as last element', () => {
+      const tableData = schemaToTableData(conditionalEventSchema);
+      // The conditional row should be the last element at root level
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      expect(conditionalRow.isLastInGroup).toBe(true);
+
+      // The last property before conditional should NOT be last in group
+      const countryProp = tableData.find(
+        (r) => r.type === 'property' && r.name === 'country',
+      );
+      expect(countryProp.isLastInGroup).toBe(false);
+    });
   });
 });

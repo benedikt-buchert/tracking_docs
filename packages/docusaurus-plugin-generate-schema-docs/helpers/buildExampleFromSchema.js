@@ -30,6 +30,17 @@ const buildExampleFromSchema = (schema) => {
     return buildExampleFromSchema(merged);
   }
 
+  // For conditionals, default to the 'then' branch and recurse.
+  if (schema.if && schema.then) {
+    const newSchema = { ...schema };
+    const thenBranch = newSchema.then;
+    delete newSchema.if;
+    delete newSchema.then;
+    delete newSchema.else;
+    const merged = mergeJsonSchema({ allOf: [newSchema, thenBranch] });
+    return buildExampleFromSchema(merged);
+  }
+
   // If there's an explicit example, use it.
   const exampleValue = getSingleExampleValue(schema);
   if (typeof exampleValue !== 'undefined') {

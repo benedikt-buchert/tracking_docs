@@ -2,6 +2,7 @@ import React from 'react';
 import './SchemaRows.css';
 import PropertyRow from './PropertyRow';
 import FoldableRows from './FoldableRows';
+import ConditionalRows from './ConditionalRows';
 
 /**
  * Renders the rows of the schema table from a flat `tableData` array.
@@ -17,6 +18,10 @@ export default function SchemaRows({ tableData }) {
 
     if (row.type === 'choice') {
       return <FoldableRows key={key} row={row} />;
+    }
+
+    if (row.type === 'conditional') {
+      return <ConditionalRows key={key} row={row} />;
     }
 
     if (row.type === 'property') {

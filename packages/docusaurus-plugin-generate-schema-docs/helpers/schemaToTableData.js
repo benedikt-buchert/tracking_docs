@@ -81,7 +81,7 @@ export function schemaToTableData(
     ) {
       return false;
     }
-    if (schemaNode.oneOf || schemaNode.anyOf) {
+    if (schemaNode.oneOf || schemaNode.anyOf || schemaNode.if) {
       return false;
     }
     if (
@@ -91,6 +91,65 @@ export function schemaToTableData(
       return true;
     }
     return Object.values(schemaNode.properties).every(isEffectivelyEmpty);
+  }
+
+  function buildConditionalRow(
+    subSchema,
+    currentLevel,
+    currentPath,
+    continuingLevels,
+  ) {
+    const conditionRows = schemaToTableData(
+      subSchema.if,
+      currentLevel,
+      currentPath,
+      continuingLevels,
+      true,
+    ).map((row) => ({ ...row, isCondition: true }));
+
+    const branches = [];
+    if (subSchema.then) {
+      branches.push({
+        title: 'Then',
+        description: subSchema.then.description,
+        rows: schemaToTableData(
+          subSchema.then,
+          currentLevel,
+          currentPath,
+          continuingLevels,
+          true,
+        ),
+      });
+    }
+    if (subSchema.else) {
+      branches.push({
+        title: 'Else',
+        description: subSchema.else.description,
+        rows: schemaToTableData(
+          subSchema.else,
+          currentLevel,
+          currentPath,
+          continuingLevels,
+          true,
+        ),
+      });
+    }
+
+    flatRows.push({
+      type: 'conditional',
+      path: [...currentPath, 'if/then/else'],
+      level: currentLevel,
+      isLastInGroup: true,
+      hasChildren: false,
+      containerType: null,
+      continuingLevels: [...continuingLevels],
+      condition: {
+        title: 'If',
+        description: subSchema.if.description,
+        rows: conditionRows,
+      },
+      branches,
+    });
   }
 
   function buildRows(
@@ -104,7 +163,11 @@ export function schemaToTableData(
 
     if (subSchema.properties) {
       const propKeys = Object.keys(subSchema.properties);
-      const hasSiblingChoices = !!(subSchema.oneOf || subSchema.anyOf);
+      const hasSiblingChoices = !!(
+        subSchema.oneOf ||
+        subSchema.anyOf ||
+        subSchema.if
+      );
 
       // Filter out properties that should be skipped to get accurate count
       const visiblePropKeys = propKeys.filter((name) => {
@@ -127,20 +190,30 @@ export function schemaToTableData(
         const isLast = isLastProp && (currentLevel !== level || isLastOption);
 
         const isChoiceWrapper = !!(propSchema.oneOf || propSchema.anyOf);
+        const isConditionalWrapper = !!(
+          propSchema.if &&
+          (propSchema.then || propSchema.else)
+        );
 
         // Determine if this property has children and what type
         const hasNestedProperties = !!propSchema.properties;
         const hasArrayItems =
-          propSchema.type === 'array' && !!propSchema.items?.properties;
+          propSchema.type === 'array' &&
+          !!(propSchema.items?.properties || propSchema.items?.if);
         const hasNestedChoice = isChoiceWrapper;
+        const hasNestedConditional = isConditionalWrapper;
         const hasChildren =
-          hasNestedProperties || hasArrayItems || hasNestedChoice;
+          hasNestedProperties ||
+          hasArrayItems ||
+          hasNestedChoice ||
+          hasNestedConditional;
 
         // Determine container type for the symbol
         let containerType = null;
         if (
           hasNestedProperties ||
-          (isChoiceWrapper && propSchema.type === 'object')
+          (isChoiceWrapper && propSchema.type === 'object') ||
+          (isConditionalWrapper && propSchema.type === 'object')
         ) {
           containerType = 'object';
         } else if (hasArrayItems) {
@@ -220,15 +293,29 @@ export function schemaToTableData(
             );
           } else if (
             propSchema.type === 'array' &&
-            propSchema.items?.properties
+            (propSchema.items?.properties || propSchema.items?.if)
           ) {
-            buildRows(
-              propSchema.items,
-              currentLevel + 1,
-              [...newPath, '[n]'],
-              propSchema.items.required,
-              childContinuingLevels,
-            );
+            if (propSchema.items.properties) {
+              buildRows(
+                propSchema.items,
+                currentLevel + 1,
+                [...newPath, '[n]'],
+                propSchema.items.required,
+                childContinuingLevels,
+              );
+            }
+            // Handle if/then/else inside array items
+            if (
+              propSchema.items.if &&
+              (propSchema.items.then || propSchema.items.else)
+            ) {
+              buildConditionalRow(
+                propSchema.items,
+                currentLevel + 1,
+                [...newPath, '[n]'],
+                childContinuingLevels,
+              );
+            }
           } else if (isChoiceWrapper) {
             // This handles the "complex" choice property like payment_method.
             // A property row has already been created above, now we add the choice row.
@@ -254,6 +341,16 @@ export function schemaToTableData(
                 childContinuingLevels,
               ),
             });
+          }
+
+          // Handle if/then/else nested inside a property (alongside or after its children)
+          if (isConditionalWrapper) {
+            buildConditionalRow(
+              propSchema,
+              currentLevel + 1,
+              newPath,
+              childContinuingLevels,
+            );
           }
         }
       });
@@ -304,6 +401,16 @@ export function schemaToTableData(
         containerType: null,
         continuingLevels: [...continuingLevels],
       });
+    }
+
+    // Handle if/then/else at the schema root (or sub-schema root)
+    if (subSchema.if && (subSchema.then || subSchema.else)) {
+      buildConditionalRow(
+        subSchema,
+        currentLevel,
+        currentPath,
+        continuingLevels,
+      );
     }
   }
 

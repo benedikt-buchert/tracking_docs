@@ -24,6 +24,16 @@ jest.mock('../../components/FoldableRows', () => {
   return MockFoldableRows;
 });
 
+jest.mock('../../components/ConditionalRows', () => {
+  const MockConditionalRows = (props) => (
+    <tr>
+      <td>Mocked ConditionalRows: {props.row.condition.title}</td>
+    </tr>
+  );
+  MockConditionalRows.displayName = 'MockConditionalRows';
+  return MockConditionalRows;
+});
+
 describe('SchemaRows', () => {
   it('renders a PropertyRow for each property type item in tableData', () => {
     const tableData = [
@@ -106,5 +116,26 @@ describe('SchemaRows', () => {
     expect(getByText('Mocked PropertyRow: prop1')).toBeInTheDocument();
     expect(getByText('Mocked FoldableRows: anyOf')).toBeInTheDocument();
     expect(getByText('Mocked PropertyRow: prop2')).toBeInTheDocument();
+  });
+
+  it('renders a ConditionalRows for conditional type items in tableData', () => {
+    const tableData = [
+      {
+        type: 'conditional',
+        path: ['if/then/else'],
+        condition: { title: 'If', rows: [] },
+        branches: [],
+      },
+    ];
+
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <SchemaRows tableData={tableData} />
+        </tbody>
+      </table>,
+    );
+
+    expect(getByText('Mocked ConditionalRows: If')).toBeInTheDocument();
   });
 });

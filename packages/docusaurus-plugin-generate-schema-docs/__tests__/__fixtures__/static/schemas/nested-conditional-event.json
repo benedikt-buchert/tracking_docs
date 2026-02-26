@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/nested-conditional-event.json",
+  "title": "Nested Conditional Event",
+  "description": "An event with conditional properties nested inside a property.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "order_placed"
+    },
+    "shipping": {
+      "type": "object",
+      "description": "Shipping details.",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "The shipping method.",
+          "examples": ["express"]
+        }
+      },
+      "required": ["method"],
+      "if": {
+        "properties": {
+          "method": { "const": "express" }
+        },
+        "required": ["method"]
+      },
+      "then": {
+        "properties": {
+          "priority_level": {
+            "type": "string",
+            "description": "Express priority level.",
+            "examples": ["high"]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "estimated_days": {
+            "type": "integer",
+            "description": "Estimated delivery days.",
+            "examples": [5]
+          }
+        }
+      }
+    }
+  },
+  "required": ["event", "shipping"]
+}
