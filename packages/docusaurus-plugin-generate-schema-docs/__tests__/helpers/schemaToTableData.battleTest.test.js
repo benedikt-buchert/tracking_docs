@@ -74,7 +74,10 @@ describe('schemaToTableData – battle-test-event integration', () => {
         'fulfillment',
         { hasChildren: true, containerType: 'object', contLvls: [] },
       ],
-      ['discount', { hasChildren: true, containerType: 'object', contLvls: [] }],
+      [
+        'discount',
+        { hasChildren: true, containerType: 'object', contLvls: [] },
+      ],
       [
         'metadata',
         { hasChildren: true, containerType: 'object', contLvls: [] },
