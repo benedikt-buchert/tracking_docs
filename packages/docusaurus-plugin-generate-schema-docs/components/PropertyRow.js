@@ -1,6 +1,7 @@
 import React from 'react';
 import clsx from 'clsx';
 import CodeBlock from '@theme/CodeBlock';
+import { getBracketLinesStyle } from '../helpers/continuingLinesStyle';
 
 /**
  * Formats a single example value into a string for display in a CodeBlock.
@@ -30,7 +31,7 @@ const getContainerSymbol = (containerType) => {
  * All data is passed in via the `row` prop, which comes from `tableData`.
  * This component handles multi-row constraints using `rowSpan`.
  */
-export default function PropertyRow({ row, isLastInGroup }) {
+export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
   const {
     name,
     level,
@@ -42,6 +43,7 @@ export default function PropertyRow({ row, isLastInGroup }) {
     hasChildren,
     containerType,
     continuingLevels = [],
+    groupBrackets = [],
   } = row;
 
   const indentStyle = {
@@ -56,7 +58,7 @@ export default function PropertyRow({ row, isLastInGroup }) {
     ? constraints
     : [null];
 
-  // Generate background gradients for:
+  // Generate background gradients for tree connector lines (left side):
   // 1. Parent-to-child line (from 50% down) - for elements with children
   // 2. Continuing ancestor lines (full height) - for ancestors that have more siblings below
   //
@@ -69,7 +71,6 @@ export default function PropertyRow({ row, isLastInGroup }) {
   const allPositions = [];
 
   // Parent-to-child line: draws from 50% (below symbol) to bottom of cell
-  // Position is at the child's level, which is (level * 20 + 8)px
   if (hasChildren) {
     const childLevelPos = level * 1.25 + 0.5;
     allGradients.push(
@@ -79,12 +80,14 @@ export default function PropertyRow({ row, isLastInGroup }) {
     allPositions.push(`${childLevelPos}rem top`);
   }
 
-  // Continuing ancestor lines: full-height vertical lines for ancestors with more siblings
-  // Filter to only include levels less than (level - 1) since ::before handles immediate parent.
-  // Exception: when isLastInGroup is true, ::before stops at 50%, so if level - 1 is
-  // explicitly in continuingLevels, we must draw it via background gradient to fill the gap.
+  // Continuing ancestor lines: full-height vertical lines for ancestors with more siblings.
+  // Only levels strictly below the immediate parent (< level - 1) are drawn here.
+  // The ::before pseudo-element handles the immediate parent connector at level - 1.
+  // We also require lvl+1 to be in continuingLevels: if the next level up is not continuing
+  // (i.e. the parent was the last sibling), drawing lvl's line would create a stray line at
+  // the same x-position as that parent's elbow.
   continuingLevels
-    .filter((lvl) => lvl < level - 1 || (lvl === level - 1 && isLastInGroup))
+    .filter((lvl) => lvl < level - 1 && continuingLevels.includes(lvl + 1))
     .forEach((lvl) => {
       const pos = getLevelPosition(lvl);
       allGradients.push(
@@ -103,6 +106,10 @@ export default function PropertyRow({ row, isLastInGroup }) {
           backgroundRepeat: 'no-repeat',
         }
       : {};
+
+  // Bracket lines on the right side (description column)
+  const bracketCaps = bracketEnds ? { ending: bracketEnds } : undefined;
+  const bracketStyle = getBracketLinesStyle(groupBrackets, bracketCaps);
 
   const containerSymbol = getContainerSymbol(containerType);
 
@@ -166,7 +173,9 @@ export default function PropertyRow({ row, isLastInGroup }) {
               );
             })}
         </td>
-        <td rowSpan={rowSpan}>{description || ''}</td>
+        <td rowSpan={rowSpan} style={bracketStyle}>
+          {description || ''}
+        </td>
       </tr>
 
       {/* Render subsequent constraints in their own rows */}

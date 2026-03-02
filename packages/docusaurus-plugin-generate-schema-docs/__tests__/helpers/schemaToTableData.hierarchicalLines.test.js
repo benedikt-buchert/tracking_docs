@@ -181,7 +181,7 @@ describe('schemaToTableData - hierarchical lines', () => {
       expect(nameRow.continuingLevels).not.toContain(0);
     });
 
-    it('removes immediate parent level from continuingLevels when item is last', () => {
+    it('preserves ancestor continuingLevels through last children', () => {
       const schema = {
         properties: {
           user_data: {
@@ -211,8 +211,9 @@ describe('schemaToTableData - hierarchical lines', () => {
 
       const tableData = schemaToTableData(schema);
 
-      // addresses is last at level 1, so its children should NOT have level 0 in continuingLevels
-      // because the level 0 line stops at addresses
+      // addresses is last at level 1, but user_data has a sibling (other_field),
+      // so the level 0 line must continue through all of user_data's descendants
+      // to visually connect to other_field in the flat table.
       const streetRow = tableData.find(
         (row) => row.name === 'street' && row.level === 2,
       );
@@ -220,8 +221,8 @@ describe('schemaToTableData - hierarchical lines', () => {
         (row) => row.name === 'city' && row.level === 2,
       );
 
-      expect(streetRow.continuingLevels).not.toContain(0);
-      expect(cityRow.continuingLevels).not.toContain(0);
+      expect(streetRow.continuingLevels).toContain(0);
+      expect(cityRow.continuingLevels).toContain(0);
     });
 
     it('maintains continuingLevels through multiple nesting levels', () => {
@@ -521,11 +522,12 @@ describe('schemaToTableData - hierarchical lines', () => {
       expect(addressesRow.isLastInGroup).toBe(true);
 
       // street: level 2, inside addresses (which is last at level 1)
-      // should NOT have level 0 in continuingLevels because addresses is last
+      // should STILL have level 0 in continuingLevels because user_data has a
+      // sibling (string_field), so the level 0 line continues through descendants
       const streetRow = tableData.find(
         (row) => row.name === 'street' && row.level === 2,
       );
-      expect(streetRow.continuingLevels).not.toContain(0);
+      expect(streetRow.continuingLevels).toContain(0);
 
       // string_field: level 0, no children, IS last
       const stringFieldRow = tableData.find(
@@ -534,6 +536,187 @@ describe('schemaToTableData - hierarchical lines', () => {
       expect(stringFieldRow.hasChildren).toBe(false);
       expect(stringFieldRow.containerType).toBeNull();
       expect(stringFieldRow.isLastInGroup).toBe(true);
+    });
+  });
+
+  describe('conditional rows (if/then/else)', () => {
+    const conditionalSchema = {
+      properties: {
+        method: {
+          type: 'string',
+          enum: ['express', 'standard'],
+        },
+      },
+      required: ['method'],
+      if: {
+        properties: { method: { const: 'express' } },
+        required: ['method'],
+      },
+      then: {
+        description: 'Express shipping',
+        properties: {
+          priority: { type: 'string' },
+          guaranteed_by: { type: 'string', format: 'date' },
+        },
+      },
+      else: {
+        description: 'Standard shipping',
+        properties: {
+          estimated_days: { type: 'integer' },
+        },
+      },
+    };
+
+    it('condition rows are never isLastInGroup (branches always follow)', () => {
+      const tableData = schemaToTableData(conditionalSchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+      conditional.condition.rows.forEach((row) => {
+        expect(row.isLastInGroup).toBe(false);
+      });
+    });
+
+    it('then branch last property is not isLastInGroup when else exists', () => {
+      const tableData = schemaToTableData(conditionalSchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+      const thenBranch = conditional.branches.find((b) => b.title === 'Then');
+      const guaranteedBy = thenBranch.rows.find(
+        (r) => r.name === 'guaranteed_by',
+      );
+      expect(guaranteedBy.isLastInGroup).toBe(false);
+    });
+
+    it('else branch last property IS isLastInGroup (nothing follows)', () => {
+      const tableData = schemaToTableData(conditionalSchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+      const elseBranch = conditional.branches.find((b) => b.title === 'Else');
+      const estimatedDays = elseBranch.rows.find(
+        (r) => r.name === 'estimated_days',
+      );
+      expect(estimatedDays.isLastInGroup).toBe(true);
+    });
+
+    it('then-only conditional marks last then property as isLastInGroup', () => {
+      const thenOnlySchema = {
+        properties: {
+          status: { type: 'string' },
+        },
+        if: {
+          properties: { status: { const: 'active' } },
+        },
+        then: {
+          properties: {
+            expires: { type: 'string' },
+          },
+        },
+      };
+      const tableData = schemaToTableData(thenOnlySchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+      const thenBranch = conditional.branches[0];
+      const expires = thenBranch.rows.find((r) => r.name === 'expires');
+      expect(expires.isLastInGroup).toBe(true);
+    });
+
+    it('properties before a conditional are not isLastInGroup', () => {
+      const tableData = schemaToTableData(conditionalSchema);
+      const methodRow = tableData.find(
+        (r) => r.type === 'property' && r.name === 'method',
+      );
+      expect(methodRow.isLastInGroup).toBe(false);
+    });
+
+    it('does not add spurious ancestor lines when parent is last in group', () => {
+      // Wrap conditionalSchema inside a parent that is the last property
+      const wrappedSchema = {
+        properties: {
+          shipping: {
+            type: 'object',
+            ...conditionalSchema,
+          },
+        },
+      };
+      const tableData = schemaToTableData(wrappedSchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+
+      // shipping is the only/last root property — level 0 should NOT be in
+      // continuingLevels (no root-level siblings to connect to)
+      expect(conditional.continuingLevels).not.toContain(0);
+    });
+
+    it('includes ancestor lines when parent has siblings', () => {
+      const wrappedSchema = {
+        properties: {
+          shipping: {
+            type: 'object',
+            ...conditionalSchema,
+          },
+          total: { type: 'number' },
+        },
+      };
+      const tableData = schemaToTableData(wrappedSchema);
+      const conditional = tableData.find((r) => r.type === 'conditional');
+
+      // shipping is NOT last (total follows) — level 0 should be in
+      // continuingLevels for the root-level tree line
+      expect(conditional.continuingLevels).toContain(0);
+    });
+  });
+
+  describe('complex choice property (oneOf with object options)', () => {
+    it('marks last property in last option as isLastInGroup', () => {
+      const schema = {
+        properties: {
+          contact_method: {
+            description: 'How to reach the user',
+            oneOf: [
+              {
+                title: 'Email Contact',
+                type: 'object',
+                properties: {
+                  channel: { type: 'string', const: 'email' },
+                  email_address: { type: 'string' },
+                },
+                required: ['channel', 'email_address'],
+              },
+              {
+                title: 'SMS Contact',
+                type: 'object',
+                properties: {
+                  channel: { type: 'string', const: 'sms' },
+                  phone_number: { type: 'string' },
+                },
+                required: ['channel', 'phone_number'],
+              },
+            ],
+          },
+          preferences: {
+            type: 'object',
+            properties: {
+              marketing_consent: { type: 'boolean' },
+            },
+          },
+        },
+      };
+
+      const data = schemaToTableData(schema);
+      const choiceRow = data.find((r) => r.type === 'choice');
+      expect(choiceRow).toBeDefined();
+
+      // SMS Contact is the last option
+      const smsOption = choiceRow.options[1];
+      expect(smsOption.title).toBe('SMS Contact');
+
+      const phoneRow = smsOption.rows.find((r) => r.name === 'phone_number');
+      expect(phoneRow).toBeDefined();
+      expect(phoneRow.isLastInGroup).toBe(true);
+
+      // Email Contact is NOT the last option
+      const emailOption = choiceRow.options[0];
+      const emailAddressRow = emailOption.rows.find(
+        (r) => r.name === 'email_address',
+      );
+      expect(emailAddressRow).toBeDefined();
+      // email_address is the last prop in a non-last option — should NOT be isLastInGroup
+      expect(emailAddressRow.isLastInGroup).toBe(false);
     });
   });
 });

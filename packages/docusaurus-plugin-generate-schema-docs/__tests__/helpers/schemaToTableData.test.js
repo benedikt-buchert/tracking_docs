@@ -21,7 +21,7 @@ describe('schemaToTableData', () => {
     expect(eventProp.propertyType).toBe('string');
     expect(eventProp.required).toBe(true);
 
-    // 2. Test 'user_id' property (oneOf)
+    // 2. Test 'user_id' property (oneOf with scalar options — simple choice, no property row)
     const userIdChoice = tableData.find(
       (row) =>
         row.type === 'choice' &&
@@ -135,7 +135,7 @@ describe('schemaToTableData', () => {
 
     const tableData = schemaToTableData(schema);
 
-    // Expect a single 'choice' row that correctly represents the property.
+    // Scalar oneOf options — renders as a single simple choice row (no property row).
     expect(tableData).toHaveLength(1);
 
     const choiceRow = tableData[0];
@@ -422,25 +422,28 @@ describe('schemaToTableData', () => {
       expect(conditionMethod.continuingLevels).toContain(0);
     });
 
-    it('adds parent level to continuingLevels for non-last branches but not the last', () => {
-      // The parent line from shipping must flow through the condition and Then
-      // branch (since Else follows), but NOT through the Else branch (it's the
-      // last branch — nothing follows, so the line should end there).
+    it('does not add spurious parent level to continuingLevels when parent is last in group', () => {
+      // In the nested-conditional-event, shipping is the last root property.
+      // Level 0 should NOT appear in continuingLevels for any conditional
+      // or branch rows — the immediate parent connector is handled at the
+      // component level (ConditionalRows pushes level-1 to ancestorLevels).
       const tableData = schemaToTableData(nestedConditionalEventSchema);
       const conditionalRow = tableData.find((r) => r.type === 'conditional');
 
-      // The conditional row itself needs the parent line for its headers
-      expect(conditionalRow.continuingLevels).toContain(0);
+      // The conditional row should have level 1 (for property sibling lines)
+      // but NOT level 0 (shipping is the last root property)
+      expect(conditionalRow.continuingLevels).toContain(1);
+      expect(conditionalRow.continuingLevels).not.toContain(0);
 
-      // Then branch rows need the parent line (Else follows after Then)
+      // Then branch rows inherit continuingLevels without the parent level
       const thenBranch = conditionalRow.branches.find(
         (b) => b.title === 'Then',
       );
       thenBranch.rows.forEach((row) => {
-        expect(row.continuingLevels).toContain(0);
+        expect(row.continuingLevels).not.toContain(0);
       });
 
-      // Else branch rows should NOT have the parent line (nothing follows Else)
+      // Else branch rows also should NOT have the parent line
       const elseBranch = conditionalRow.branches.find(
         (b) => b.title === 'Else',
       );
@@ -449,12 +452,13 @@ describe('schemaToTableData', () => {
       });
     });
 
-    it('marks condition (if) rows as not last in group so parent lines continue', () => {
+    it('marks condition (if) rows with their natural isLastInGroup values', () => {
       const tableData = schemaToTableData(nestedConditionalEventSchema);
       const conditionalRow = tableData.find((r) => r.type === 'conditional');
-      // Condition rows should never be isLastInGroup because branches follow them
+      // Condition rows keep their natural isLastInGroup so the tree within the
+      // If block is self-contained and doesn't create orphan lines into Then/Else.
       conditionalRow.condition.rows.forEach((row) => {
-        expect(row.isLastInGroup).toBe(false);
+        expect(row.isCondition).toBe(true);
       });
     });
 

@@ -21,7 +21,7 @@ export default function PropertiesTable({ schema }) {
           isEnabled={isWordWrapOn}
         />
       </div>
-      <table>
+      <table className="schema-table">
         <TableHeader />
         <tbody>
           <SchemaRows tableData={tableData} />
