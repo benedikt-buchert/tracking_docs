@@ -1,0 +1,48 @@
+# .github/workflows/sync-gtm.yml
+name: Sync GTM Variables
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  sync-gtm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Or your project's node version
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install GTM CLI
+        run: npm install -g @owntag/gtm-cli
+
+      - name: Authenticate with GTM
+        run: |
+          echo "Authenticating with GTM..."
+          # The GTM_SERVICE_ACCOUNT_KEY secret should be the JSON content of your service account key.
+          # The GTM_ACCOUNT_ID and GTM_CONTAINER_ID should be set as repository variables.
+          echo '${{ secrets.GTM_SERVICE_ACCOUNT_KEY }}' > /tmp/sa-key.json
+          gtm auth login --service-account /tmp/sa-key.json
+          gtm config set defaultAccountId ${{ vars.GTM_ACCOUNT_ID }}
+          gtm config set defaultContainerId ${{ vars.GTM_CONTAINER_ID }}
+          echo "Authentication complete."
+        env:
+          GTM_SERVICE_ACCOUNT_KEY: ${{ secrets.GTM_SERVICE_ACCOUNT_KEY }}
+
+      - name: Run GTM Sync Script
+        run: npm run sync:gtm -- --quiet --json
+
+      - name: Clean up service account key
+        if: always()
+        run: rm /tmp/sa-key.json

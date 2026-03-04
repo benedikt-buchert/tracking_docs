@@ -17,7 +17,8 @@
     "prepare": "husky",
     "eslint:fix": "eslint --fix .",
     "test": "jest",
-    "prettier": "prettier --write ."
+    "prettier": "prettier --write .",
+    "sync:gtm": "node packages/docusaurus-plugin-generate-schema-docs/scripts/sync-gtm.js"
   },
   "overrides": {
     "minimatch": ">=10.2.1"
