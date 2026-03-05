@@ -408,4 +408,40 @@ describe('snippetTargets', () => {
       'purchaseParams.putString("custom_prop", "x");',
     );
   });
+
+  it('maps campaign_details standard params to firebase constants', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'campaign_details',
+        campaign_id: 'cmp_42',
+        aclid: 'aclid_99',
+      },
+      schema: { properties: {} },
+    });
+    const objcSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'campaign_details',
+        campaign_id: 'cmp_42',
+        aclid: 'aclid_99',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.CAMPAIGN_DETAILS)',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.CAMPAIGN_ID, "cmp_42")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.ACLID, "aclid_99")',
+    );
+    expect(objcSnippet).toContain(
+      '[FIRAnalytics logEventWithName:kFIREventCampaignDetails parameters:purchaseParams];',
+    );
+    expect(objcSnippet).toContain('kFIRParameterCampaignID: @"cmp_42"');
+    expect(objcSnippet).toContain('kFIRParameterACLID: @"aclid_99"');
+  });
 });

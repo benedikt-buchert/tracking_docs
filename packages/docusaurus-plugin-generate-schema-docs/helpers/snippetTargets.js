@@ -27,6 +27,11 @@ export const FIREBASE_SNIPPET_SOURCES = [
     url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Param',
     reviewedAt: '2026-03-05',
   },
+  {
+    id: 'firebase-ios-constants-reference',
+    url: 'https://firebase.google.com/docs/reference/ios/firebaseanalytics/api/reference/Constants',
+    reviewedAt: '2026-03-05',
+  },
 ];
 
 const FIREBASE_PREDEFINED_EVENTS = new Set([
@@ -69,11 +74,13 @@ const FIREBASE_PREDEFINED_EVENTS = new Set([
 
 const FIREBASE_PREDEFINED_PARAMS = new Set([
   'achievement_id',
+  'aclid',
   'ad_format',
   'ad_platform',
   'ad_source',
   'affiliation',
   'campaign',
+  'campaign_id',
   'character',
   'content',
   'content_type',
@@ -139,6 +146,7 @@ const FIREBASE_PARAM_ALIASES = {
 };
 
 const FIREBASE_ABBREVIATIONS = {
+  aclid: 'ACLID',
   id: 'ID',
   cp1: 'CP1',
 };
