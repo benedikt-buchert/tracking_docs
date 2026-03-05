@@ -12,103 +12,203 @@ export const FIREBASE_SNIPPET_SOURCES = [
     url: 'https://firebase.google.com/docs/analytics/ios/events',
     reviewedAt: '2026-03-05',
   },
+  {
+    id: 'firebase-analytics-screenviews',
+    url: 'https://firebase.google.com/docs/analytics/screenviews',
+    reviewedAt: '2026-03-05',
+  },
+  {
+    id: 'firebase-android-event-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Event',
+    reviewedAt: '2026-03-05',
+  },
+  {
+    id: 'firebase-android-param-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Param',
+    reviewedAt: '2026-03-05',
+  },
+  {
+    id: 'firebase-ios-constants-reference',
+    url: 'https://firebase.google.com/docs/reference/ios/firebaseanalytics/api/reference/Constants',
+    reviewedAt: '2026-03-05',
+  },
+  {
+    id: 'firebase-android-user-property-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.UserProperty',
+    reviewedAt: '2026-03-05',
+  },
 ];
 
-const FIREBASE_EVENT_CONSTANTS = {
-  purchase: {
-    kotlin: 'FirebaseAnalytics.Event.PURCHASE',
-    java: 'FirebaseAnalytics.Event.PURCHASE',
-    swift: 'AnalyticsEventPurchase',
-    objc: 'kFIREventPurchase',
-  },
+const FIREBASE_PREDEFINED_EVENTS = new Set([
+  'ad_impression',
+  'add_payment_info',
+  'add_shipping_info',
+  'add_to_cart',
+  'add_to_wishlist',
+  'app_open',
+  'begin_checkout',
+  'campaign_details',
+  'earn_virtual_currency',
+  'generate_lead',
+  'in_app_purchase',
+  'join_group',
+  'level_end',
+  'level_start',
+  'level_up',
+  'login',
+  'post_score',
+  'purchase',
+  'refund',
+  'remove_from_cart',
+  'screen_view',
+  'search',
+  'select_content',
+  'select_item',
+  'select_promotion',
+  'share',
+  'sign_up',
+  'spend_virtual_currency',
+  'tutorial_begin',
+  'tutorial_complete',
+  'unlock_achievement',
+  'view_cart',
+  'view_item',
+  'view_item_list',
+  'view_promotion',
+  'view_search_results',
+]);
+
+const FIREBASE_PREDEFINED_PARAMS = new Set([
+  'achievement_id',
+  'aclid',
+  'ad_format',
+  'ad_platform',
+  'ad_source',
+  'ad_unit_name',
+  'affiliation',
+  'campaign',
+  'campaign_id',
+  'character',
+  'content',
+  'content_type',
+  'coupon',
+  'cp1',
+  'creative_name',
+  'creative_format',
+  'creative_slot',
+  'currency',
+  'destination',
+  'discount',
+  'end_date',
+  'extend_session',
+  'flight_number',
+  'free_trial',
+  'group_id',
+  'index',
+  'items',
+  'item_brand',
+  'item_category',
+  'item_category2',
+  'item_category3',
+  'item_category4',
+  'item_category5',
+  'item_id',
+  'item_list_id',
+  'item_list_name',
+  'item_name',
+  'item_variant',
+  'level',
+  'level_name',
+  'location',
+  'location_id',
+  'medium',
+  'method',
+  'marketing_tactic',
+  'number_of_nights',
+  'number_of_passengers',
+  'number_of_rooms',
+  'origin',
+  'payment_type',
+  'price',
+  'price_is_discounted',
+  'product_id',
+  'product_name',
+  'promotion_id',
+  'promotion_name',
+  'quantity',
+  'score',
+  'screen_class',
+  'screen_name',
+  'search_term',
+  'shipping',
+  'shipping_tier',
+  'source',
+  'source_platform',
+  'start_date',
+  'subscription',
+  'success',
+  'tax',
+  'term',
+  'transaction_id',
+  'travel_class',
+  'value',
+  'virtual_currency_name',
+]);
+
+const FIREBASE_PARAM_ALIASES = {
+  firebase_screen: 'screen_name',
+  firebase_screen_class: 'screen_class',
 };
 
 const FIREBASE_PARAM_CONSTANTS = {
-  transaction_id: {
-    kotlin: 'FirebaseAnalytics.Param.TRANSACTION_ID',
-    java: 'FirebaseAnalytics.Param.TRANSACTION_ID',
-    swift: 'AnalyticsParameterTransactionID',
-    objc: 'kFIRParameterTransactionID',
-  },
-  affiliation: {
-    kotlin: 'FirebaseAnalytics.Param.AFFILIATION',
-    java: 'FirebaseAnalytics.Param.AFFILIATION',
-    swift: 'AnalyticsParameterAffiliation',
-    objc: 'kFIRParameterAffiliation',
-  },
-  currency: {
-    kotlin: 'FirebaseAnalytics.Param.CURRENCY',
-    java: 'FirebaseAnalytics.Param.CURRENCY',
-    swift: 'AnalyticsParameterCurrency',
-    objc: 'kFIRParameterCurrency',
-  },
-  value: {
-    kotlin: 'FirebaseAnalytics.Param.VALUE',
-    java: 'FirebaseAnalytics.Param.VALUE',
-    swift: 'AnalyticsParameterValue',
-    objc: 'kFIRParameterValue',
-  },
-  tax: {
-    kotlin: 'FirebaseAnalytics.Param.TAX',
-    java: 'FirebaseAnalytics.Param.TAX',
-    swift: 'AnalyticsParameterTax',
-    objc: 'kFIRParameterTax',
-  },
-  shipping: {
-    kotlin: 'FirebaseAnalytics.Param.SHIPPING',
-    java: 'FirebaseAnalytics.Param.SHIPPING',
-    swift: 'AnalyticsParameterShipping',
-    objc: 'kFIRParameterShipping',
-  },
-  coupon: {
-    kotlin: 'FirebaseAnalytics.Param.COUPON',
-    java: 'FirebaseAnalytics.Param.COUPON',
-    swift: 'AnalyticsParameterCoupon',
-    objc: 'kFIRParameterCoupon',
-  },
-  items: {
-    kotlin: 'FirebaseAnalytics.Param.ITEMS',
-    java: 'FirebaseAnalytics.Param.ITEMS',
-    swift: 'AnalyticsParameterItems',
-    objc: 'kFIRParameterItems',
-  },
-  item_id: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_ID',
-    java: 'FirebaseAnalytics.Param.ITEM_ID',
-    swift: 'AnalyticsParameterItemID',
-    objc: 'kFIRParameterItemID',
-  },
-  item_name: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_NAME',
-    java: 'FirebaseAnalytics.Param.ITEM_NAME',
-    swift: 'AnalyticsParameterItemName',
-    objc: 'kFIRParameterItemName',
-  },
-  item_category: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
-    java: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
-    swift: 'AnalyticsParameterItemCategory',
-    objc: 'kFIRParameterItemCategory',
-  },
-  item_variant: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_VARIANT',
-    java: 'FirebaseAnalytics.Param.ITEM_VARIANT',
-    swift: 'AnalyticsParameterItemVariant',
-    objc: 'kFIRParameterItemVariant',
-  },
-  item_brand: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_BRAND',
-    java: 'FirebaseAnalytics.Param.ITEM_BRAND',
-    swift: 'AnalyticsParameterItemBrand',
-    objc: 'kFIRParameterItemBrand',
-  },
-  price: {
-    kotlin: 'FirebaseAnalytics.Param.PRICE',
-    java: 'FirebaseAnalytics.Param.PRICE',
-    swift: 'AnalyticsParameterPrice',
-    objc: 'kFIRParameterPrice',
+  aclid: {
+    kotlin: 'FirebaseAnalytics.Param.ACLID',
+    java: 'FirebaseAnalytics.Param.ACLID',
+    swift: 'AnalyticsParameterAdNetworkClickID',
+    objc: 'kFIRParameterAdNetworkClickID',
   },
 };
+
+const FIREBASE_USER_PROPERTY_CONSTANTS = {
+  allow_personalized_ads: {
+    kotlin: 'FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS',
+    java: 'FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS',
+    swift: 'AnalyticsUserPropertyAllowAdPersonalizationSignals',
+    objc: 'kFIRUserPropertyAllowAdPersonalizationSignals',
+  },
+  sign_up_method: {
+    kotlin: 'FirebaseAnalytics.UserProperty.SIGN_UP_METHOD',
+    java: 'FirebaseAnalytics.UserProperty.SIGN_UP_METHOD',
+    swift: 'AnalyticsUserPropertySignUpMethod',
+    objc: 'kFIRUserPropertySignUpMethod',
+  },
+};
+
+const FIREBASE_USER_PROPERTY_ALIASES = {
+  allow_ad_personalization_signals: 'allow_personalized_ads',
+};
+
+const FIREBASE_ABBREVIATIONS = {
+  aclid: 'ACLID',
+  id: 'ID',
+  cp1: 'CP1',
+};
+
+function toFirebaseUpperSnake(key) {
+  return key.toUpperCase();
+}
+
+function toFirebasePascalCase(key) {
+  return key
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => {
+      const abbreviation = FIREBASE_ABBREVIATIONS[segment.toLowerCase()];
+      if (abbreviation) return abbreviation;
+      return segment.charAt(0).toUpperCase() + segment.slice(1);
+    })
+    .join('');
+}
 
 export const findClearableProperties = (schema) => {
   if (!schema || !schema.properties) return [];
@@ -166,6 +266,7 @@ function toFirebaseParamEntries(example) {
   const entries = [];
   Object.entries(example || {}).forEach(([key, value]) => {
     if (key === 'event' || key === '$schema' || value === undefined) return;
+    if (key === 'user_properties') return;
 
     // dataLayer payloads often wrap GA4 params under "ecommerce";
     // Firebase events expect those params directly at top level.
@@ -183,15 +284,47 @@ function toFirebaseParamEntries(example) {
   return entries;
 }
 
+function toFirebaseUserPropertyEntries(example) {
+  if (!isPlainObject(example?.user_properties)) return [];
+  return Object.entries(example.user_properties).filter(
+    ([, value]) => value !== undefined,
+  );
+}
+
 function getFirebaseEventExpression(eventName, platform) {
-  const known = FIREBASE_EVENT_CONSTANTS[eventName]?.[platform];
-  if (known) return known;
+  if (FIREBASE_PREDEFINED_EVENTS.has(eventName)) {
+    const upper = toFirebaseUpperSnake(eventName);
+    const pascal = toFirebasePascalCase(eventName);
+    if (platform === 'kotlin' || platform === 'java') {
+      return `FirebaseAnalytics.Event.${upper}`;
+    }
+    if (platform === 'swift') return `AnalyticsEvent${pascal}`;
+    if (platform === 'objc') return `kFIREvent${pascal}`;
+  }
   if (platform === 'objc') return `@"${escapeObjCString(eventName)}"`;
   return JSON.stringify(eventName);
 }
 
 function getFirebaseParamExpression(key, platform) {
-  const known = FIREBASE_PARAM_CONSTANTS[key]?.[platform];
+  const canonicalKey = FIREBASE_PARAM_ALIASES[key] || key;
+  const known = FIREBASE_PARAM_CONSTANTS[canonicalKey]?.[platform];
+  if (known) return known;
+  if (FIREBASE_PREDEFINED_PARAMS.has(canonicalKey)) {
+    const upper = toFirebaseUpperSnake(canonicalKey);
+    const pascal = toFirebasePascalCase(canonicalKey);
+    if (platform === 'kotlin' || platform === 'java') {
+      return `FirebaseAnalytics.Param.${upper}`;
+    }
+    if (platform === 'swift') return `AnalyticsParameter${pascal}`;
+    if (platform === 'objc') return `kFIRParameter${pascal}`;
+  }
+  if (platform === 'objc') return `@"${escapeObjCString(key)}"`;
+  return JSON.stringify(key);
+}
+
+function getFirebaseUserPropertyExpression(key, platform) {
+  const canonicalKey = FIREBASE_USER_PROPERTY_ALIASES[key] || key;
+  const known = FIREBASE_USER_PROPERTY_CONSTANTS[canonicalKey]?.[platform];
   if (known) return known;
   if (platform === 'objc') return `@"${escapeObjCString(key)}"`;
   return JSON.stringify(key);
@@ -212,6 +345,27 @@ function resolveTypedFirebaseValue(rawValue) {
   }
   if (rawValue === null) {
     return { kind: 'string', value: 'null', usedJsonFallback: true };
+  }
+  return {
+    kind: 'string',
+    value: JSON.stringify(rawValue),
+    usedJsonFallback: true,
+  };
+}
+
+function resolveTypedFirebaseUserPropertyValue(rawValue) {
+  if (rawValue === null) {
+    return { kind: 'null', value: null, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'string') {
+    return { kind: 'string', value: rawValue, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'number' || typeof rawValue === 'boolean') {
+    return {
+      kind: 'string',
+      value: String(rawValue),
+      usedJsonFallback: false,
+    };
   }
   return {
     kind: 'string',
@@ -377,15 +531,31 @@ function resolveFirebaseEvent(example) {
     });
   });
 
+  const userProperties = toFirebaseUserPropertyEntries(example).map(
+    ([key, rawValue]) => {
+      const typed = resolveTypedFirebaseUserPropertyValue(rawValue);
+      return {
+        key,
+        kind: typed.kind,
+        value: typed.value,
+        usedJsonFallback: typed.usedJsonFallback,
+      };
+    },
+  );
+
   return {
     eventName,
     params,
-    usedFallback: params.some((p) => p.usedJsonFallback),
+    userProperties,
+    usedFallback:
+      params.some((p) => p.usedJsonFallback) ||
+      userProperties.some((p) => p.usedJsonFallback),
   };
 }
 
 function generateAndroidKotlinFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'kotlin');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
@@ -400,6 +570,16 @@ function generateAndroidKotlinFirebaseSnippet({ example }) {
 
   if (itemBundles) {
     lines.push(...itemBundles.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'kotlin');
+    const valueExpr =
+      property.kind === 'null' ? 'null' : JSON.stringify(property.value);
+    lines.push(`firebaseAnalytics.setUserProperty(${keyExpr}, ${valueExpr})`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -427,7 +607,8 @@ function generateAndroidKotlinFirebaseSnippet({ example }) {
 }
 
 function generateAndroidJavaFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'java');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
@@ -442,6 +623,16 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
 
   if (itemBundles) {
     lines.push(...itemBundles.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'java');
+    const valueExpr =
+      property.kind === 'null' ? 'null' : JSON.stringify(property.value);
+    lines.push(`mFirebaseAnalytics.setUserProperty(${keyExpr}, ${valueExpr});`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -471,7 +662,8 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
 }
 
 function generateIosSwiftFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'swift');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
@@ -485,6 +677,16 @@ function generateIosSwiftFirebaseSnippet({ example }) {
 
   if (swiftItems) {
     lines.push(...swiftItems.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'swift');
+    const valueExpr =
+      property.kind === 'null' ? 'nil' : JSON.stringify(property.value);
+    lines.push(`Analytics.setUserProperty(${valueExpr}, forName: ${keyExpr})`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -519,7 +721,8 @@ function escapeObjCString(value) {
 }
 
 function generateIosObjcFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'objc');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
@@ -533,6 +736,22 @@ function generateIosObjcFirebaseSnippet({ example }) {
 
   if (objcItems) {
     lines.push(...objcItems.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'objc');
+    if (property.kind === 'null') {
+      lines.push(
+        `[FIRAnalytics setUserPropertyString:nil forName:${keyExpr}];`,
+      );
+      return;
+    }
+    lines.push(
+      `[FIRAnalytics setUserPropertyString:@"${escapeObjCString(property.value)}" forName:${keyExpr}];`,
+    );
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
