@@ -20,7 +20,9 @@ export const generateWebDataLayerSnippet = (
   dataLayerName = 'dataLayer',
 ) => {
   const clearableProperties = findClearableProperties(schema || {});
-  const propertiesToClear = clearableProperties.filter((prop) => prop in example);
+  const propertiesToClear = clearableProperties.filter(
+    (prop) => prop in example,
+  );
 
   let codeSnippet = '';
   if (propertiesToClear.length > 0) {
