@@ -145,6 +145,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ['java', 'kotlin', 'swift', 'objectivec'],
       },
     }),
   plugins: ['docusaurus-plugin-generate-schema-docs'],
