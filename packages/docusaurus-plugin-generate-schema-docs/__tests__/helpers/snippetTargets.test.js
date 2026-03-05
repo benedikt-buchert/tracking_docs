@@ -404,9 +404,7 @@ describe('snippetTargets', () => {
     expect(javaSnippet).toContain(
       'mFirebaseAnalytics.logEvent("my_custom_event", eventParams);',
     );
-    expect(javaSnippet).toContain(
-      'eventParams.putString("custom_prop", "x");',
-    );
+    expect(javaSnippet).toContain('eventParams.putString("custom_prop", "x");');
   });
 
   it('maps campaign_details standard params to firebase constants', () => {
