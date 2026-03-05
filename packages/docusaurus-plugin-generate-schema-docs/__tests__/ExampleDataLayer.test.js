@@ -185,7 +185,7 @@ describe('target selection helpers', () => {
   });
 
   it('reads target from hash', () => {
-    window.location.hash = '#target=android-firebase-java-sdk';
+    window.location.hash = '#target-android-firebase-java-sdk';
     expect(readHashTarget()).toBe('android-firebase-java-sdk');
   });
 
@@ -217,7 +217,7 @@ describe('target selection helpers', () => {
     expect(replaceSpy).toHaveBeenCalled();
     const lastCallUrl =
       replaceSpy.mock.calls[replaceSpy.mock.calls.length - 1][2];
-    expect(lastCallUrl).toContain('#target=android-firebase-kotlin-sdk');
+    expect(lastCallUrl).toContain('#target-android-firebase-kotlin-sdk');
     expect(lastCallUrl).not.toContain('?target=android-firebase-kotlin-sdk');
 
     window.history.replaceState = originalReplaceState;
@@ -229,7 +229,7 @@ describe('target selection helpers', () => {
       { id: 'android-firebase-java-sdk' },
     ];
     window.localStorage.setItem(TARGET_STORAGE_KEY, 'web-datalayer-js');
-    window.location.hash = '#target=android-firebase-java-sdk';
+    window.location.hash = '#target-android-firebase-java-sdk';
 
     expect(resolveInitialTargetId(targets)).toBe('android-firebase-java-sdk');
   });
@@ -239,14 +239,14 @@ describe('target selection helpers', () => {
       { id: 'web-datalayer-js' },
       { id: 'android-firebase-java-sdk' },
     ];
-    window.location.hash = '#target=unknown';
+    window.location.hash = '#target-unknown';
 
     expect(resolveInitialTargetId(targets)).toBe('web-datalayer-js');
   });
 
   it('ignores malformed targets and still resolves a valid initial target', () => {
     const targets = [undefined, {}, { id: 'android-firebase-kotlin-sdk' }];
-    window.location.hash = '#target=android-firebase-kotlin-sdk';
+    window.location.hash = '#target-android-firebase-kotlin-sdk';
     expect(resolveInitialTargetId(targets)).toBe('android-firebase-kotlin-sdk');
   });
 });

@@ -9,14 +9,21 @@ import {
 } from '../helpers/exampleModel';
 
 const TARGET_HASH_KEY = 'target';
+const TARGET_HASH_PREFIX = `${TARGET_HASH_KEY}-`;
 const TARGET_STORAGE_KEY = 'tracking-docs-selected-target';
+
+function parseHashTarget(rawHash = '') {
+  const raw = rawHash.startsWith('#') ? rawHash.substring(1) : rawHash;
+  if (!raw) return null;
+  if (raw.startsWith(TARGET_HASH_PREFIX)) {
+    return raw.substring(TARGET_HASH_PREFIX.length) || null;
+  }
+  return null;
+}
 
 function readHashTarget() {
   if (typeof window === 'undefined') return null;
-  const raw = window.location.hash || '';
-  const query = raw.startsWith('#') ? raw.substring(1) : raw;
-  const params = new URLSearchParams(query);
-  return params.get(TARGET_HASH_KEY);
+  return parseHashTarget(window.location.hash || '');
 }
 
 function readSearchTarget(search = '') {
@@ -29,14 +36,10 @@ function readSearchTarget(search = '') {
 function persistTarget(targetId) {
   if (typeof window === 'undefined') return;
   window.localStorage.setItem(TARGET_STORAGE_KEY, targetId);
-
-  const query = (window.location.hash || '').replace(/^#/, '');
-  const params = new URLSearchParams(query);
-  params.set(TARGET_HASH_KEY, targetId);
   window.history.replaceState(
     null,
     '',
-    `${window.location.pathname}${window.location.search}#${params.toString()}`,
+    `${window.location.pathname}${window.location.search}#${TARGET_HASH_PREFIX}${targetId}`,
   );
 }
 
@@ -97,10 +100,6 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
       try {
         window.localStorage.setItem(TARGET_STORAGE_KEY, targetFromSearch);
 
-        const hashQuery = (window.location.hash || '').replace(/^#/, '');
-        const hashParams = new URLSearchParams(hashQuery);
-        hashParams.set(TARGET_HASH_KEY, targetFromSearch);
-
         const searchParams = new URLSearchParams(window.location.search);
         searchParams.delete(TARGET_HASH_KEY);
         const remainingSearch = searchParams.toString();
@@ -110,7 +109,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
           window.history,
           null,
           '',
-          `${window.location.pathname}${searchPart}#${hashParams.toString()}`,
+          `${window.location.pathname}${searchPart}#${TARGET_HASH_PREFIX}${targetFromSearch}`,
         );
       } finally {
         isSyncing = false;
@@ -198,7 +197,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
       <Tabs defaultValue={targetId} queryString={TARGET_HASH_KEY}>
         {safeTargets.map((target) => (
           <TabItem value={target.id} label={target.label} key={target.id}>
-            <span id={`${TARGET_HASH_KEY}=${target.id}`} />
+            <span id={`${TARGET_HASH_PREFIX}${target.id}`} />
             {renderVariantGroups(target.id)}
           </TabItem>
         ))}
