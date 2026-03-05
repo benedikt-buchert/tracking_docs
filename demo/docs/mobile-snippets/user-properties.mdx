@@ -1,0 +1,65 @@
+---
+title: User Properties
+sidebar_label: User Properties
+description: Android and iOS Firebase snippets for setting user properties.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# User Properties
+
+<Tabs>
+<TabItem value="kotlin" label="Android Kotlin" default>
+
+```kotlin
+firebaseAnalytics.setUserProperty(
+  FirebaseAnalytics.UserProperty.SIGN_UP_METHOD,
+  "email"
+)
+firebaseAnalytics.setUserProperty(
+  FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS,
+  "false"
+)
+```
+
+</TabItem>
+<TabItem value="java" label="Android Java">
+
+```java
+mFirebaseAnalytics.setUserProperty(
+  FirebaseAnalytics.UserProperty.SIGN_UP_METHOD,
+  "email"
+);
+mFirebaseAnalytics.setUserProperty(
+  FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS,
+  "false"
+);
+```
+
+</TabItem>
+<TabItem value="swift" label="iOS Swift">
+
+```swift
+Analytics.setUserProperty(
+  "email",
+  forName: AnalyticsUserPropertySignUpMethod
+)
+Analytics.setUserProperty(
+  "false",
+  forName: AnalyticsUserPropertyAllowAdPersonalizationSignals
+)
+```
+
+</TabItem>
+<TabItem value="objc" label="iOS Obj-C">
+
+```objectivec
+[FIRAnalytics setUserPropertyString:@"email"
+                            forName:kFIRUserPropertySignUpMethod];
+[FIRAnalytics setUserPropertyString:@"false"
+                            forName:kFIRUserPropertyAllowAdPersonalizationSignals];
+```
+
+</TabItem>
+</Tabs>

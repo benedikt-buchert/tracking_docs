@@ -1,0 +1,55 @@
+---
+title: Screen View Event
+sidebar_label: Screen View
+description: Android and iOS Firebase snippets for screen_view.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Screen View Event
+
+<Tabs>
+<TabItem value="kotlin" label="Android Kotlin" default>
+
+```kotlin
+firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {
+  param(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout")
+  param(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity")
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Android Java">
+
+```java
+Bundle params = new Bundle();
+params.putString(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout");
+params.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity");
+mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, params);
+```
+
+</TabItem>
+<TabItem value="swift" label="iOS Swift">
+
+```swift
+let params: [String: Any] = [
+  AnalyticsParameterScreenName: "Checkout",
+  AnalyticsParameterScreenClass: "CheckoutViewController"
+]
+Analytics.logEvent(AnalyticsEventScreenView, parameters: params)
+```
+
+</TabItem>
+<TabItem value="objc" label="iOS Obj-C">
+
+```objectivec
+NSMutableDictionary *params = [@{
+  kFIRParameterScreenName: @"Checkout",
+  kFIRParameterScreenClass: @"CheckoutViewController"
+} mutableCopy];
+[FIRAnalytics logEventWithName:kFIREventScreenView parameters:params];
+```
+
+</TabItem>
+</Tabs>

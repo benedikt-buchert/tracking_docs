@@ -1,0 +1,75 @@
+---
+title: In-App Purchase Event
+sidebar_label: In-App Purchase
+description: Android and iOS Firebase snippets for in_app_purchase and commerce parameters.
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# In-App Purchase Event
+
+<Tabs>
+<TabItem value="kotlin" label="Android Kotlin" default>
+
+```kotlin
+firebaseAnalytics.logEvent(FirebaseAnalytics.Event.IN_APP_PURCHASE) {
+  param(FirebaseAnalytics.Param.PRODUCT_ID, "sku_premium")
+  param(FirebaseAnalytics.Param.PRODUCT_NAME, "Premium Plan")
+  param(FirebaseAnalytics.Param.CURRENCY, "USD")
+  param(FirebaseAnalytics.Param.VALUE, 9.99)
+  param(FirebaseAnalytics.Param.SUBSCRIPTION, 1L)
+  param(FirebaseAnalytics.Param.FREE_TRIAL, 0L)
+  param(FirebaseAnalytics.Param.PRICE_IS_DISCOUNTED, 1L)
+}
+```
+
+</TabItem>
+<TabItem value="java" label="Android Java">
+
+```java
+Bundle params = new Bundle();
+params.putString(FirebaseAnalytics.Param.PRODUCT_ID, "sku_premium");
+params.putString(FirebaseAnalytics.Param.PRODUCT_NAME, "Premium Plan");
+params.putString(FirebaseAnalytics.Param.CURRENCY, "USD");
+params.putDouble(FirebaseAnalytics.Param.VALUE, 9.99);
+params.putLong(FirebaseAnalytics.Param.SUBSCRIPTION, 1L);
+params.putLong(FirebaseAnalytics.Param.FREE_TRIAL, 0L);
+params.putLong(FirebaseAnalytics.Param.PRICE_IS_DISCOUNTED, 1L);
+mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.IN_APP_PURCHASE, params);
+```
+
+</TabItem>
+<TabItem value="swift" label="iOS Swift">
+
+```swift
+let params: [String: Any] = [
+  AnalyticsParameterProductID: "sku_premium",
+  AnalyticsParameterProductName: "Premium Plan",
+  AnalyticsParameterCurrency: "USD",
+  AnalyticsParameterValue: 9.99,
+  AnalyticsParameterSubscription: 1,
+  AnalyticsParameterFreeTrial: 0,
+  AnalyticsParameterPriceIsDiscounted: 1
+]
+Analytics.logEvent(AnalyticsEventInAppPurchase, parameters: params)
+```
+
+</TabItem>
+<TabItem value="objc" label="iOS Obj-C">
+
+```objectivec
+NSMutableDictionary *params = [@{
+  kFIRParameterProductID: @"sku_premium",
+  kFIRParameterProductName: @"Premium Plan",
+  kFIRParameterCurrency: @"USD",
+  kFIRParameterValue: @(9.99),
+  kFIRParameterSubscription: @(1),
+  kFIRParameterFreeTrial: @(0),
+  kFIRParameterPriceIsDiscounted: @(1)
+} mutableCopy];
+[FIRAnalytics logEventWithName:kFIREventInAppPurchase parameters:params];
+```
+
+</TabItem>
+</Tabs>
