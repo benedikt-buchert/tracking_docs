@@ -615,4 +615,62 @@ describe('snippetTargets', () => {
     );
     expect(objcSnippet).toContain('kFIRParameterCoupon: @"WELCOME10"');
   });
+
+  it('maps additional Firebase commerce constants present in reference docs', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'in_app_purchase',
+        product_id: 'sku_premium',
+        product_name: 'Premium Plan',
+        subscription: true,
+        free_trial: false,
+        price_is_discounted: true,
+      },
+      schema: { properties: {} },
+    });
+    const swiftSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'in_app_purchase',
+        product_id: 'sku_premium',
+        product_name: 'Premium Plan',
+        subscription: true,
+        free_trial: false,
+        price_is_discounted: true,
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.IN_APP_PURCHASE)',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.PRODUCT_ID, "sku_premium")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.PRODUCT_NAME, "Premium Plan")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.SUBSCRIPTION, 1L)',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.FREE_TRIAL, 0L)',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.PRICE_IS_DISCOUNTED, 1L)',
+    );
+    expect(swiftSnippet).toContain(
+      'Analytics.logEvent(AnalyticsEventInAppPurchase, parameters: purchaseParams)',
+    );
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterProductID: "sku_premium"',
+    );
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterProductName: "Premium Plan"',
+    );
+    expect(swiftSnippet).toContain('AnalyticsParameterSubscription: 1');
+    expect(swiftSnippet).toContain('AnalyticsParameterFreeTrial: 0');
+    expect(swiftSnippet).toContain('AnalyticsParameterPriceIsDiscounted: 1');
+  });
 });
