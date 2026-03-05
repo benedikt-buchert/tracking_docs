@@ -14,10 +14,52 @@
       "$ref": "./mobile/events/screen-view-event.json"
     },
     {
-      "$ref": "./mobile/events/in-app-purchase-event.json"
+      "$ref": "./mobile/events/login-with-user-properties-event.json"
     },
     {
-      "$ref": "./mobile/events/login-with-user-properties-event.json"
+      "$ref": "./mobile/events/view-promotion-event.json"
+    },
+    {
+      "$ref": "./mobile/events/select-promotion-event.json"
+    },
+    {
+      "$ref": "./mobile/events/view-item-list-event.json"
+    },
+    {
+      "$ref": "./mobile/events/select-item-event.json"
+    },
+    {
+      "$ref": "./mobile/events/view-item-event.json"
+    },
+    {
+      "$ref": "./mobile/events/add-to-wishlist-event.json"
+    },
+    {
+      "$ref": "./mobile/events/add-to-cart-event.json"
+    },
+    {
+      "$ref": "./mobile/events/view-cart-event.json"
+    },
+    {
+      "$ref": "./mobile/events/remove-from-cart-event.json"
+    },
+    {
+      "$ref": "./mobile/events/begin-checkout-event.json"
+    },
+    {
+      "$ref": "./mobile/events/add-shipping-info-event.json"
+    },
+    {
+      "$ref": "./mobile/events/add-payment-info-event.json"
+    },
+    {
+      "$ref": "./mobile/events/purchase-event.json"
+    },
+    {
+      "$ref": "./mobile/events/refund-event.json"
+    },
+    {
+      "$ref": "./mobile/events/in-app-purchase-event.json"
     }
   ]
 }
