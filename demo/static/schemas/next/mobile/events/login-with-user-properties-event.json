@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/login-with-user-properties-event.json",
-  "title": "Login Event With User Properties",
+  "title": "Login With User Properties",
   "description": "A login event example with Firebase user_properties for Android and iOS.",
   "x-tracking-targets": [
     "android-firebase-kotlin-sdk",
@@ -24,7 +24,9 @@
     "method": {
       "type": "string",
       "description": "Login method.",
-      "examples": ["email"]
+      "examples": [
+        "email"
+      ]
     },
     "user_properties": {
       "type": "object",
@@ -33,16 +35,31 @@
         "sign_up_method": {
           "type": "string",
           "description": "The sign up method user property.",
-          "examples": ["email"]
+          "examples": [
+            "email"
+          ]
         },
         "allow_ad_personalization_signals": {
-          "type": ["string", "null"],
+          "type": [
+            "string",
+            "null"
+          ],
           "description": "Whether ad personalization signals are allowed.",
-          "examples": ["false", null]
+          "examples": [
+            "false",
+            null
+          ]
         }
       },
-      "required": ["sign_up_method"]
+      "required": [
+        "sign_up_method"
+      ]
     }
   },
-  "required": ["$schema", "event", "method", "user_properties"]
+  "required": [
+    "$schema",
+    "event",
+    "method",
+    "user_properties"
+  ]
 }
