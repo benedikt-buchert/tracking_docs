@@ -4,6 +4,11 @@ import fs from 'fs';
 import validateSchemas from './validateSchemas.js';
 import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default async function (context, options) {
   const { siteDir } = context;
@@ -62,6 +67,35 @@ export default async function (context, options) {
       .description('Update the $id of the versioned schemas')
       .action((version) => {
         updateSchemaIds(siteDir, url, version);
+      });
+
+    cli
+      .command('sync-gtm')
+      .description('Synchronize GTM Data Layer Variables from JSON schemas')
+      .option(
+        '--path <siteDir>',
+        'Docusaurus site directory that contains static/schemas',
+        siteDir,
+      )
+      .option('--json', 'Output JSON summary')
+      .option('--quiet', 'Suppress non-error logs')
+      .option(
+        '--skip-array-sub-properties',
+        'Skip array item sub-properties (e.g., list.0.item)',
+      )
+      .action((commandOptions) => {
+        const scriptPath = path.join(__dirname, 'scripts', 'sync-gtm.js');
+        const args = [`--path=${commandOptions.path}`];
+
+        if (commandOptions.json) args.push('--json');
+        if (commandOptions.quiet) args.push('--quiet');
+        if (commandOptions.skipArraySubProperties)
+          args.push('--skip-array-sub-properties');
+
+        execSync(`node "${scriptPath}" ${args.join(' ')}`, {
+          cwd: siteDir,
+          stdio: 'inherit',
+        });
       });
 
     cli
