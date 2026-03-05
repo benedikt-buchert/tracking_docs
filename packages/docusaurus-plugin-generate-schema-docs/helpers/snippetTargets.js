@@ -72,6 +72,42 @@ const FIREBASE_PARAM_CONSTANTS = {
     swift: 'AnalyticsParameterItems',
     objc: 'kFIRParameterItems',
   },
+  item_id: {
+    kotlin: 'FirebaseAnalytics.Param.ITEM_ID',
+    java: 'FirebaseAnalytics.Param.ITEM_ID',
+    swift: 'AnalyticsParameterItemID',
+    objc: 'kFIRParameterItemID',
+  },
+  item_name: {
+    kotlin: 'FirebaseAnalytics.Param.ITEM_NAME',
+    java: 'FirebaseAnalytics.Param.ITEM_NAME',
+    swift: 'AnalyticsParameterItemName',
+    objc: 'kFIRParameterItemName',
+  },
+  item_category: {
+    kotlin: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
+    java: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
+    swift: 'AnalyticsParameterItemCategory',
+    objc: 'kFIRParameterItemCategory',
+  },
+  item_variant: {
+    kotlin: 'FirebaseAnalytics.Param.ITEM_VARIANT',
+    java: 'FirebaseAnalytics.Param.ITEM_VARIANT',
+    swift: 'AnalyticsParameterItemVariant',
+    objc: 'kFIRParameterItemVariant',
+  },
+  item_brand: {
+    kotlin: 'FirebaseAnalytics.Param.ITEM_BRAND',
+    java: 'FirebaseAnalytics.Param.ITEM_BRAND',
+    swift: 'AnalyticsParameterItemBrand',
+    objc: 'kFIRParameterItemBrand',
+  },
+  price: {
+    kotlin: 'FirebaseAnalytics.Param.PRICE',
+    java: 'FirebaseAnalytics.Param.PRICE',
+    swift: 'AnalyticsParameterPrice',
+    objc: 'kFIRParameterPrice',
+  },
 };
 
 export const findClearableProperties = (schema) => {
@@ -161,6 +197,134 @@ function getFirebaseParamExpression(key, platform) {
   return JSON.stringify(key);
 }
 
+function resolveTypedFirebaseValue(rawValue) {
+  if (typeof rawValue === 'string') {
+    return { kind: 'string', value: rawValue, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'number') {
+    if (Number.isFinite(rawValue) && Number.isInteger(rawValue)) {
+      return { kind: 'long', value: rawValue, usedJsonFallback: false };
+    }
+    return { kind: 'double', value: rawValue, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'boolean') {
+    return { kind: 'long', value: rawValue ? 1 : 0, usedJsonFallback: false };
+  }
+  if (rawValue === null) {
+    return { kind: 'string', value: 'null', usedJsonFallback: true };
+  }
+  return {
+    kind: 'string',
+    value: JSON.stringify(rawValue),
+    usedJsonFallback: true,
+  };
+}
+
+function buildKotlinItemBundles(items) {
+  const lines = [];
+  let usedJsonFallback = false;
+  const names = items.map((_, idx) => `item${idx + 1}`);
+
+  items.forEach((item, idx) => {
+    const varName = names[idx];
+    lines.push(`val ${varName} = Bundle().apply {`);
+    Object.entries(item).forEach(([key, rawValue]) => {
+      const keyExpr = getFirebaseParamExpression(key, 'kotlin');
+      const typed = resolveTypedFirebaseValue(rawValue);
+      if (typed.usedJsonFallback) usedJsonFallback = true;
+      if (typed.kind === 'string') {
+        lines.push(`  putString(${keyExpr}, ${JSON.stringify(typed.value)})`);
+      } else if (typed.kind === 'long') {
+        lines.push(`  putLong(${keyExpr}, ${typed.value}L)`);
+      } else {
+        lines.push(`  putDouble(${keyExpr}, ${typed.value})`);
+      }
+    });
+    lines.push('}');
+  });
+
+  return { lines, names, usedJsonFallback };
+}
+
+function buildJavaItemBundles(items) {
+  const lines = [];
+  let usedJsonFallback = false;
+  const names = items.map((_, idx) => `item${idx + 1}`);
+
+  items.forEach((item, idx) => {
+    const varName = names[idx];
+    lines.push(`Bundle ${varName} = new Bundle();`);
+    Object.entries(item).forEach(([key, rawValue]) => {
+      const keyExpr = getFirebaseParamExpression(key, 'java');
+      const typed = resolveTypedFirebaseValue(rawValue);
+      if (typed.usedJsonFallback) usedJsonFallback = true;
+      if (typed.kind === 'string') {
+        lines.push(
+          `${varName}.putString(${keyExpr}, ${JSON.stringify(typed.value)});`,
+        );
+      } else if (typed.kind === 'long') {
+        lines.push(`${varName}.putLong(${keyExpr}, ${typed.value}L);`);
+      } else {
+        lines.push(`${varName}.putDouble(${keyExpr}, ${typed.value});`);
+      }
+    });
+  });
+
+  return { lines, names, usedJsonFallback };
+}
+
+function buildSwiftItems(items) {
+  const lines = [];
+  let usedJsonFallback = false;
+  const names = items.map((_, idx) => `item${idx + 1}`);
+
+  items.forEach((item, idx) => {
+    const varName = names[idx];
+    lines.push(`var ${varName}: [String: Any] = [`);
+    const entries = Object.entries(item);
+    entries.forEach(([key, rawValue], entryIndex) => {
+      const keyExpr = getFirebaseParamExpression(key, 'swift');
+      const typed = resolveTypedFirebaseValue(rawValue);
+      if (typed.usedJsonFallback) usedJsonFallback = true;
+      const comma = entryIndex < entries.length - 1 ? ',' : '';
+      if (typed.kind === 'string') {
+        lines.push(`  ${keyExpr}: ${JSON.stringify(typed.value)}${comma}`);
+      } else {
+        lines.push(`  ${keyExpr}: ${typed.value}${comma}`);
+      }
+    });
+    lines.push(']');
+  });
+
+  return { lines, names, usedJsonFallback };
+}
+
+function buildObjcItems(items) {
+  const lines = [];
+  let usedJsonFallback = false;
+  const names = items.map((_, idx) => `item${idx + 1}`);
+
+  items.forEach((item, idx) => {
+    const varName = names[idx];
+    lines.push(`NSMutableDictionary *${varName} = [@{`);
+    const entries = Object.entries(item);
+    entries.forEach(([key, rawValue], entryIndex) => {
+      const keyExpr = getFirebaseParamExpression(key, 'objc');
+      const typed = resolveTypedFirebaseValue(rawValue);
+      if (typed.usedJsonFallback) usedJsonFallback = true;
+      const comma = entryIndex < entries.length - 1 ? ',' : '';
+      if (typed.kind === 'string') {
+        lines.push(`  ${keyExpr}: @"${escapeObjCString(typed.value)}"${comma}`);
+      } else {
+        lines.push(`  ${keyExpr}: @(${typed.value})${comma}`);
+      }
+    });
+    lines.push('} mutableCopy];');
+  });
+
+  return { lines, names, usedJsonFallback };
+}
+
 function resolveFirebaseEvent(example) {
   const eventName =
     typeof example?.event === 'string' && example.event.trim().length > 0
@@ -175,7 +339,7 @@ function resolveFirebaseEvent(example) {
       value.length > 0 &&
       value.every((item) => isPlainObject(item))
     ) {
-      params.push({ key, kind: 'itemsObjectArray', valueCount: value.length });
+      params.push({ key, kind: 'itemsObjectArray', items: value });
       return;
     }
 
@@ -224,20 +388,28 @@ function generateAndroidKotlinFirebaseSnippet({ example }) {
   const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'kotlin');
+  const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
+  const itemBundles = itemsParam
+    ? buildKotlinItemBundles(itemsParam.items)
+    : null;
+  const hasFallback = usedFallback || Boolean(itemBundles?.usedJsonFallback);
 
-  if (usedFallback) {
+  if (hasFallback) {
     lines.push(`// ${FIREBASE_FALLBACK_WARNING}`);
+  }
+
+  if (itemBundles) {
+    lines.push(...itemBundles.lines);
+    lines.push('');
   }
 
   lines.push(`firebaseAnalytics.logEvent(${eventExpr}) {`);
   params.forEach((param) => {
     const keyExpr = getFirebaseParamExpression(param.key, 'kotlin');
     if (param.kind === 'itemsObjectArray') {
-      const itemVariables = Array.from(
-        { length: param.valueCount },
-        (_, i) => `item${i + 1}`,
+      lines.push(
+        `  param(${keyExpr}, arrayOf(${itemBundles.names.join(', ')}))`,
       );
-      lines.push(`  param(${keyExpr}, arrayOf(${itemVariables.join(', ')}))`);
       return;
     }
     if (param.kind === 'string') {
@@ -258,21 +430,27 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
   const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'java');
+  const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
+  const itemBundles = itemsParam
+    ? buildJavaItemBundles(itemsParam.items)
+    : null;
+  const hasFallback = usedFallback || Boolean(itemBundles?.usedJsonFallback);
 
-  if (usedFallback) {
+  if (hasFallback) {
     lines.push(`// ${FIREBASE_FALLBACK_WARNING}`);
+  }
+
+  if (itemBundles) {
+    lines.push(...itemBundles.lines);
+    lines.push('');
   }
 
   lines.push('Bundle purchaseParams = new Bundle();');
   params.forEach((param) => {
     const keyExpr = getFirebaseParamExpression(param.key, 'java');
     if (param.kind === 'itemsObjectArray') {
-      const itemVariables = Array.from(
-        { length: param.valueCount },
-        (_, i) => `item${i + 1}`,
-      );
       lines.push(
-        `purchaseParams.putParcelableArray(${keyExpr}, new Parcelable[]{${itemVariables.join(', ')}});`,
+        `purchaseParams.putParcelableArray(${keyExpr}, new Parcelable[]{${itemBundles.names.join(', ')}});`,
       );
       return;
     }
@@ -298,9 +476,16 @@ function generateIosSwiftFirebaseSnippet({ example }) {
   const eventExpr = getFirebaseEventExpression(eventName, 'swift');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
+  const swiftItems = itemsParam ? buildSwiftItems(itemsParam.items) : null;
+  const hasFallback = usedFallback || Boolean(swiftItems?.usedJsonFallback);
 
-  if (usedFallback) {
+  if (hasFallback) {
     lines.push(`// ${FIREBASE_FALLBACK_WARNING}`);
+  }
+
+  if (swiftItems) {
+    lines.push(...swiftItems.lines);
+    lines.push('');
   }
 
   if (params.length === 0) {
@@ -322,11 +507,7 @@ function generateIosSwiftFirebaseSnippet({ example }) {
 
   if (itemsParam) {
     const keyExpr = getFirebaseParamExpression(itemsParam.key, 'swift');
-    const itemVariables = Array.from(
-      { length: itemsParam.valueCount },
-      (_, i) => `item${i + 1}`,
-    );
-    lines.push(`purchaseParams[${keyExpr}] = [${itemVariables.join(', ')}]`);
+    lines.push(`purchaseParams[${keyExpr}] = [${swiftItems.names.join(', ')}]`);
   }
 
   lines.push(`Analytics.logEvent(${eventExpr}, parameters: purchaseParams)`);
@@ -343,9 +524,16 @@ function generateIosObjcFirebaseSnippet({ example }) {
   const eventExpr = getFirebaseEventExpression(eventName, 'objc');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
+  const objcItems = itemsParam ? buildObjcItems(itemsParam.items) : null;
+  const hasFallback = usedFallback || Boolean(objcItems?.usedJsonFallback);
 
-  if (usedFallback) {
+  if (hasFallback) {
     lines.push(`// ${FIREBASE_FALLBACK_WARNING}`);
+  }
+
+  if (objcItems) {
+    lines.push(...objcItems.lines);
+    lines.push('');
   }
 
   if (params.length === 0) {
@@ -367,11 +555,9 @@ function generateIosObjcFirebaseSnippet({ example }) {
 
   if (itemsParam) {
     const keyExpr = getFirebaseParamExpression(itemsParam.key, 'objc');
-    const itemVariables = Array.from(
-      { length: itemsParam.valueCount },
-      (_, i) => `item${i + 1}`,
+    lines.push(
+      `purchaseParams[${keyExpr}] = @[${objcItems.names.join(', ')}];`,
     );
-    lines.push(`purchaseParams[${keyExpr}] = @[${itemVariables.join(', ')}];`);
   }
 
   lines.push(
