@@ -57,7 +57,10 @@ describe('connector lines visual regressions', () => {
     );
     fireEvent.click(screen.getByText('Custom Provider'));
 
-    const walletProviderCell = getPropertyCellByName(container, 'wallet_provider');
+    const walletProviderCell = getPropertyCellByName(
+      container,
+      'wallet_provider',
+    );
     expect(walletProviderCell).toBeInTheDocument();
     expect(walletProviderCell).not.toHaveClass('is-last');
     expect(walletProviderCell.outerHTML).toMatchSnapshot();
@@ -77,7 +80,9 @@ describe('connector lines visual regressions', () => {
       (row) => row.type === 'conditional',
     );
 
-    const { container } = renderInTable(<ConditionalRows row={cardConditional} />);
+    const { container } = renderInTable(
+      <ConditionalRows row={cardConditional} />,
+    );
     fireEvent.click(screen.getByText('Else'));
 
     const cvvCell = getPropertyCellByName(container, 'cvv');
