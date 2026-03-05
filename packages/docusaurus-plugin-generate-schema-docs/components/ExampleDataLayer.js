@@ -3,49 +3,23 @@ import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Heading from '@theme/Heading';
-import { schemaToExamples } from '../helpers/schemaToExamples';
-
-const generateCodeSnippet = (example, schema, dataLayerName = 'dataLayer') => {
-  const clearableProperties = findClearableProperties(schema || {});
-  let codeSnippet = '';
-  const propertiesToClear = clearableProperties.filter(
-    (prop) => prop in example,
-  );
-
-  if (propertiesToClear.length > 0) {
-    const resetObject = {};
-    propertiesToClear.forEach((prop) => {
-      resetObject[prop] = null;
-    });
-    codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-      resetObject,
-      null,
-      2,
-    )});\n`;
-  }
-
-  codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-    example,
-    null,
-    2,
-  )});`;
-  return codeSnippet;
-};
+import {
+  buildExampleModel,
+  findClearableProperties,
+} from '../helpers/exampleModel';
 
 export default function ExampleDataLayer({ schema, dataLayerName }) {
-  const exampleGroups = schemaToExamples(schema);
+  const model = buildExampleModel(schema, { dataLayerName });
+  const exampleGroups = model.variantGroups;
+  const targetId = model.targets[0].id;
 
   if (!exampleGroups || exampleGroups.length === 0) {
     return null;
   }
 
   // Handle the simple case of a single default example with no choices
-  if (exampleGroups.length === 1 && exampleGroups[0].property === 'default') {
-    const codeSnippet = generateCodeSnippet(
-      exampleGroups[0].options[0].example,
-      schema,
-      dataLayerName,
-    );
+  if (model.isSimpleDefault) {
+    const codeSnippet = exampleGroups[0].options[0].snippets[targetId];
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
   }
 
@@ -57,10 +31,10 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
             <code>{group.property}</code> options:
           </Heading>
           <Tabs>
-            {group.options.map(({ title, example }, index) => (
+            {group.options.map(({ title, snippets }, index) => (
               <TabItem value={index} label={title} key={index}>
                 <CodeBlock language="javascript">
-                  {generateCodeSnippet(example, schema, dataLayerName)}
+                  {snippets[targetId]}
                 </CodeBlock>
               </TabItem>
             ))}
@@ -71,10 +45,4 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
   );
 }
 
-export const findClearableProperties = (schema) => {
-  if (!schema || !schema.properties) return [];
-
-  return Object.entries(schema.properties)
-    .filter(([, definition]) => definition['x-gtm-clear'] === true)
-    .map(([key]) => key);
-};
+export { findClearableProperties };
