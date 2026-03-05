@@ -1,57 +1,39 @@
 import { schemaToExamples } from './schemaToExamples';
+import {
+  DEFAULT_SNIPPET_TARGET_ID,
+  findClearableProperties,
+  generateSnippetForTarget,
+  getSnippetTarget,
+} from './snippetTargets';
 
-export const DEFAULT_SNIPPET_TARGET = {
-  id: 'web-datalayer-js',
-  label: 'Web',
-  language: 'javascript',
-};
+export function resolveExampleTargets(schema) {
+  const configured = schema?.['x-tracking-targets'];
+  const targetIds =
+    Array.isArray(configured) && configured.length > 0
+      ? configured
+      : [DEFAULT_SNIPPET_TARGET_ID];
 
-export const findClearableProperties = (schema) => {
-  if (!schema || !schema.properties) return [];
+  const targets = targetIds
+    .map((id) => {
+      try {
+        return getSnippetTarget(id);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
 
-  return Object.entries(schema.properties)
-    .filter(([, definition]) => definition['x-gtm-clear'] === true)
-    .map(([key]) => key);
-};
-
-export const generateWebDataLayerSnippet = (
-  example,
-  schema,
-  dataLayerName = 'dataLayer',
-) => {
-  const clearableProperties = findClearableProperties(schema || {});
-  const propertiesToClear = clearableProperties.filter(
-    (prop) => prop in example,
-  );
-
-  let codeSnippet = '';
-  if (propertiesToClear.length > 0) {
-    const resetObject = {};
-    propertiesToClear.forEach((prop) => {
-      resetObject[prop] = null;
-    });
-    codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-      resetObject,
-      null,
-      2,
-    )});\n`;
-  }
-
-  codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-    example,
-    null,
-    2,
-  )});`;
-
-  return codeSnippet;
-};
+  if (targets.length > 0) return targets;
+  return [getSnippetTarget(DEFAULT_SNIPPET_TARGET_ID)];
+}
 
 export function buildExampleModel(schema, { dataLayerName } = {}) {
   const exampleGroups = schemaToExamples(schema);
+  const targets = resolveExampleTargets(schema);
 
   if (!exampleGroups || exampleGroups.length === 0) {
     return {
-      targets: [DEFAULT_SNIPPET_TARGET],
+      targets,
       variantGroups: [],
       isSimpleDefault: false,
     };
@@ -63,20 +45,26 @@ export function buildExampleModel(schema, { dataLayerName } = {}) {
       id: `${group.property}-${index}`,
       title: option.title,
       example: option.example,
-      snippets: {
-        [DEFAULT_SNIPPET_TARGET.id]: generateWebDataLayerSnippet(
-          option.example,
-          schema,
-          dataLayerName,
-        ),
-      },
+      snippets: Object.fromEntries(
+        targets.map((target) => [
+          target.id,
+          generateSnippetForTarget({
+            targetId: target.id,
+            example: option.example,
+            schema,
+            dataLayerName,
+          }),
+        ]),
+      ),
     })),
   }));
 
   return {
-    targets: [DEFAULT_SNIPPET_TARGET],
+    targets,
     variantGroups,
     isSimpleDefault:
       variantGroups.length === 1 && variantGroups[0].property === 'default',
   };
 }
+
+export { findClearableProperties };

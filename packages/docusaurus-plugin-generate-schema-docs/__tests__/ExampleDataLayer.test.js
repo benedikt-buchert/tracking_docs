@@ -3,6 +3,9 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ExampleDataLayer, {
   findClearableProperties,
+  readHashTarget,
+  resolveInitialTargetId,
+  TARGET_STORAGE_KEY,
 } from '../components/ExampleDataLayer';
 import choiceEventSchema from './__fixtures__/static/schemas/choice-event.json';
 
@@ -30,6 +33,11 @@ jest.mock('@theme/TabItem', () => {
 });
 
 describe('ExampleDataLayer', () => {
+  afterEach(() => {
+    window.location.hash = '';
+    window.localStorage.clear();
+  });
+
   it('should render a single example for a simple schema', () => {
     const schema = {
       type: 'object',
@@ -81,6 +89,42 @@ describe('ExampleDataLayer', () => {
     );
     expect(getByText(/window.customDataLayer.push/)).toBeInTheDocument();
   });
+
+  it('should render target tabs when multiple targets are configured', () => {
+    const schema = {
+      type: 'object',
+      'x-tracking-targets': ['web-datalayer-js', 'android-firebase-kotlin-sdk'],
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    const { getByTestId, getAllByTestId } = render(
+      <ExampleDataLayer schema={schema} />,
+    );
+    expect(getByTestId('target-tabs')).toBeInTheDocument();
+    const tabLabels = getAllByTestId('tab-item').map((item) =>
+      item.getAttribute('data-label'),
+    );
+    expect(tabLabels).toEqual(
+      expect.arrayContaining([
+        'Web Data Layer (JS)',
+        'Android Firebase (Kotlin)',
+      ]),
+    );
+  });
+
+  it('should not render target tabs for single-target schemas', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    const { queryByTestId } = render(<ExampleDataLayer schema={schema} />);
+    expect(queryByTestId('target-tabs')).toBeNull();
+  });
 });
 
 describe('findClearableProperties', () => {
@@ -101,5 +145,38 @@ describe('findClearableProperties', () => {
       },
     };
     expect(findClearableProperties(schema)).toEqual(['prop2', 'prop4']);
+  });
+});
+
+describe('target selection helpers', () => {
+  afterEach(() => {
+    window.location.hash = '';
+    window.localStorage.clear();
+  });
+
+  it('reads target from hash', () => {
+    window.location.hash = '#target=android-firebase-java-sdk';
+    expect(readHashTarget()).toBe('android-firebase-java-sdk');
+  });
+
+  it('prefers hash over localStorage for initial target resolution', () => {
+    const targets = [
+      { id: 'web-datalayer-js' },
+      { id: 'android-firebase-java-sdk' },
+    ];
+    window.localStorage.setItem(TARGET_STORAGE_KEY, 'web-datalayer-js');
+    window.location.hash = '#target=android-firebase-java-sdk';
+
+    expect(resolveInitialTargetId(targets)).toBe('android-firebase-java-sdk');
+  });
+
+  it('falls back to first target when hash is unknown', () => {
+    const targets = [
+      { id: 'web-datalayer-js' },
+      { id: 'android-firebase-java-sdk' },
+    ];
+    window.location.hash = '#target=unknown';
+
+    expect(resolveInitialTargetId(targets)).toBe('web-datalayer-js');
   });
 });
