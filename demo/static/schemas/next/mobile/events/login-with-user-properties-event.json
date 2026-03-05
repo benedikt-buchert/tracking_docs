@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/login-with-user-properties-event.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/login-with-user-properties-event.json",
   "title": "Login Event With User Properties",
   "description": "A login event example with Firebase user_properties for Android and iOS.",
   "x-tracking-targets": [
@@ -14,7 +14,7 @@
     "$schema": {
       "type": "string",
       "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/login-with-user-properties-event.json"
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/login-with-user-properties-event.json"
     },
     "event": {
       "type": "string",

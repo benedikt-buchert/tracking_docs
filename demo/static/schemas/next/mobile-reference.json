@@ -11,13 +11,13 @@
   ],
   "oneOf": [
     {
-      "$ref": "./events/screen-view-event.json"
+      "$ref": "./mobile/events/screen-view-event.json"
     },
     {
-      "$ref": "./events/in-app-purchase-event.json"
+      "$ref": "./mobile/events/in-app-purchase-event.json"
     },
     {
-      "$ref": "./events/login-with-user-properties-event.json"
+      "$ref": "./mobile/events/login-with-user-properties-event.json"
     }
   ]
 }
