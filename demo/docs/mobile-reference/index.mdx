@@ -1,0 +1,18 @@
+---
+title: Mobile Reference
+description: "Dedicated Android and iOS Firebase snippets and schema examples."
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/mobile-reference.json
+---
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+# Mobile Reference
+
+Dedicated Android and iOS Firebase snippets and schema examples.
+
+Please select one of the following options:
+
+- [Screen View Event](./screen-view-event)
+- [In-App Purchase Event](./in-app-purchase-event)
+- [Login Event With User Properties](./login-with-user-properties-event)
+
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/next/mobile-reference.json","title":"Mobile Reference","description":"Dedicated Android and iOS Firebase snippets and schema examples.","type":"object","allOf":[{"$ref":"./events/components/dataLayer.json"}],"oneOf":[{"$ref":"./events/screen-view-event.json"},{"$ref":"./events/in-app-purchase-event.json"},{"$ref":"./events/login-with-user-properties-event.json"}]}} />
