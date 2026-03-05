@@ -29,7 +29,7 @@
     "screen_class": {
       "type": "string",
       "description": "Screen class or view controller name.",
-      "examples": ["CheckoutActivity", "CheckoutViewController"]
+      "examples": ["CheckoutScreen"]
     }
   },
   "required": ["$schema", "event", "screen_name", "screen_class"]

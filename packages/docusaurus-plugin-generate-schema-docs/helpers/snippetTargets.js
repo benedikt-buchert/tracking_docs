@@ -636,28 +636,28 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
     lines.push('');
   }
 
-  lines.push('Bundle purchaseParams = new Bundle();');
+  lines.push('Bundle eventParams = new Bundle();');
   params.forEach((param) => {
     const keyExpr = getFirebaseParamExpression(param.key, 'java');
     if (param.kind === 'itemsObjectArray') {
       lines.push(
-        `purchaseParams.putParcelableArray(${keyExpr}, new Parcelable[]{${itemBundles.names.join(', ')}});`,
+        `eventParams.putParcelableArray(${keyExpr}, new Parcelable[]{${itemBundles.names.join(', ')}});`,
       );
       return;
     }
     if (param.kind === 'string') {
       lines.push(
-        `purchaseParams.putString(${keyExpr}, ${JSON.stringify(param.value)});`,
+        `eventParams.putString(${keyExpr}, ${JSON.stringify(param.value)});`,
       );
       return;
     }
     if (param.kind === 'long') {
-      lines.push(`purchaseParams.putLong(${keyExpr}, ${param.value}L);`);
+      lines.push(`eventParams.putLong(${keyExpr}, ${param.value}L);`);
       return;
     }
-    lines.push(`purchaseParams.putDouble(${keyExpr}, ${param.value});`);
+    lines.push(`eventParams.putDouble(${keyExpr}, ${param.value});`);
   });
-  lines.push(`mFirebaseAnalytics.logEvent(${eventExpr}, purchaseParams);`);
+  lines.push(`mFirebaseAnalytics.logEvent(${eventExpr}, eventParams);`);
   return lines.join('\n');
 }
 
@@ -695,7 +695,7 @@ function generateIosSwiftFirebaseSnippet({ example }) {
     return lines.join('\n');
   }
 
-  lines.push('var purchaseParams: [String: Any] = [');
+  lines.push('var eventParams: [String: Any] = [');
   normalParams.forEach((param, index) => {
     const comma = index < normalParams.length - 1 ? ',' : '';
     const keyExpr = getFirebaseParamExpression(param.key, 'swift');
@@ -709,10 +709,10 @@ function generateIosSwiftFirebaseSnippet({ example }) {
 
   if (itemsParam) {
     const keyExpr = getFirebaseParamExpression(itemsParam.key, 'swift');
-    lines.push(`purchaseParams[${keyExpr}] = [${swiftItems.names.join(', ')}]`);
+    lines.push(`eventParams[${keyExpr}] = [${swiftItems.names.join(', ')}]`);
   }
 
-  lines.push(`Analytics.logEvent(${eventExpr}, parameters: purchaseParams)`);
+  lines.push(`Analytics.logEvent(${eventExpr}, parameters: eventParams)`);
   return lines.join('\n');
 }
 
@@ -760,7 +760,7 @@ function generateIosObjcFirebaseSnippet({ example }) {
     return lines.join('\n');
   }
 
-  lines.push('NSMutableDictionary *purchaseParams = [@{');
+  lines.push('NSMutableDictionary *eventParams = [@{');
   normalParams.forEach((param, index) => {
     const comma = index < normalParams.length - 1 ? ',' : '';
     const keyExpr = getFirebaseParamExpression(param.key, 'objc');
@@ -774,13 +774,11 @@ function generateIosObjcFirebaseSnippet({ example }) {
 
   if (itemsParam) {
     const keyExpr = getFirebaseParamExpression(itemsParam.key, 'objc');
-    lines.push(
-      `purchaseParams[${keyExpr}] = @[${objcItems.names.join(', ')}];`,
-    );
+    lines.push(`eventParams[${keyExpr}] = @[${objcItems.names.join(', ')}];`);
   }
 
   lines.push(
-    `[FIRAnalytics logEventWithName:${eventExpr} parameters:purchaseParams];`,
+    `[FIRAnalytics logEventWithName:${eventExpr} parameters:eventParams];`,
   );
   return lines.join('\n');
 }

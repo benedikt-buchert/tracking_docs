@@ -81,17 +81,17 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain('Bundle purchaseParams = new Bundle();');
+    expect(snippet).toContain('Bundle eventParams = new Bundle();');
     expect(snippet).toContain(
-      'purchaseParams.putString("image_name", "hero.jpg");',
+      'eventParams.putString("image_name", "hero.jpg");',
     );
-    expect(snippet).toContain('purchaseParams.putLong("count", 2L);');
+    expect(snippet).toContain('eventParams.putLong("count", 2L);');
     expect(snippet).toContain(
-      'purchaseParams.putDouble(FirebaseAnalytics.Param.SCORE, 4.5);',
+      'eventParams.putDouble(FirebaseAnalytics.Param.SCORE, 4.5);',
     );
-    expect(snippet).toContain('purchaseParams.putLong("premium", 0L);');
+    expect(snippet).toContain('eventParams.putLong("premium", 0L);');
     expect(snippet).toContain(
-      'mFirebaseAnalytics.logEvent("share_image", purchaseParams);',
+      'mFirebaseAnalytics.logEvent("share_image", eventParams);',
     );
   });
 
@@ -108,13 +108,13 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain('var purchaseParams: [String: Any] = [');
+    expect(snippet).toContain('var eventParams: [String: Any] = [');
     expect(snippet).toContain('"image_name": "hero.jpg"');
     expect(snippet).toContain('"count": 2');
     expect(snippet).toContain('AnalyticsParameterScore: 4.5');
     expect(snippet).toContain('"premium": 1');
     expect(snippet).toContain(
-      'Analytics.logEvent("share_image", parameters: purchaseParams)',
+      'Analytics.logEvent("share_image", parameters: eventParams)',
     );
   });
 
@@ -131,13 +131,13 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain('NSMutableDictionary *purchaseParams = [@{');
+    expect(snippet).toContain('NSMutableDictionary *eventParams = [@{');
     expect(snippet).toContain('@"image_name": @"hero.jpg"');
     expect(snippet).toContain('@"count": @(2)');
     expect(snippet).toContain('kFIRParameterScore: @(4.5)');
     expect(snippet).toContain('@"premium": @(0)');
     expect(snippet).toContain(
-      '[FIRAnalytics logEventWithName:@"share_image" parameters:purchaseParams];',
+      '[FIRAnalytics logEventWithName:@"share_image" parameters:eventParams];',
     );
   });
 
@@ -242,7 +242,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('var item2: [String: Any] = [');
     expect(snippet).toContain('AnalyticsParameterItemID: "SKU_456"');
     expect(snippet).toContain(
-      'purchaseParams[AnalyticsParameterItems] = [item1, item2]',
+      'eventParams[AnalyticsParameterItems] = [item1, item2]',
     );
   });
 
@@ -265,7 +265,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('AnalyticsParameterValue: 72.05');
     expect(snippet).toContain('AnalyticsParameterCurrency: "EUR"');
     expect(snippet).toContain(
-      'Analytics.logEvent(AnalyticsEventPurchase, parameters: purchaseParams)',
+      'Analytics.logEvent(AnalyticsEventPurchase, parameters: eventParams)',
     );
     expect(snippet).not.toContain('$schema');
     expect(snippet).not.toContain('ecommerce');
@@ -307,13 +307,13 @@ describe('snippetTargets', () => {
     });
 
     expect(snippet).toContain(
-      'mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, purchaseParams);',
+      'mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, eventParams);',
     );
     expect(snippet).toContain(
-      'purchaseParams.putString(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout");',
+      'eventParams.putString(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout");',
     );
     expect(snippet).toContain(
-      'purchaseParams.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity");',
+      'eventParams.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity");',
     );
   });
 
@@ -329,7 +329,7 @@ describe('snippetTargets', () => {
     });
 
     expect(snippet).toContain(
-      'Analytics.logEvent(AnalyticsEventScreenView, parameters: purchaseParams)',
+      'Analytics.logEvent(AnalyticsEventScreenView, parameters: eventParams)',
     );
     expect(snippet).toContain('AnalyticsParameterScreenName: "Checkout"');
     expect(snippet).toContain(
@@ -349,7 +349,7 @@ describe('snippetTargets', () => {
     });
 
     expect(snippet).toContain(
-      '[FIRAnalytics logEventWithName:kFIREventScreenView parameters:purchaseParams];',
+      '[FIRAnalytics logEventWithName:kFIREventScreenView parameters:eventParams];',
     );
     expect(snippet).toContain('kFIRParameterScreenName: @"Checkout"');
     expect(snippet).toContain(
@@ -386,7 +386,7 @@ describe('snippetTargets', () => {
       'param(FirebaseAnalytics.Param.VALUE, 42.5)',
     );
     expect(swiftSnippet).toContain(
-      'Analytics.logEvent(AnalyticsEventLogin, parameters: purchaseParams)',
+      'Analytics.logEvent(AnalyticsEventLogin, parameters: eventParams)',
     );
     expect(swiftSnippet).toContain('AnalyticsParameterMethod: "email"');
   });
@@ -402,10 +402,10 @@ describe('snippetTargets', () => {
     });
 
     expect(javaSnippet).toContain(
-      'mFirebaseAnalytics.logEvent("my_custom_event", purchaseParams);',
+      'mFirebaseAnalytics.logEvent("my_custom_event", eventParams);',
     );
     expect(javaSnippet).toContain(
-      'purchaseParams.putString("custom_prop", "x");',
+      'eventParams.putString("custom_prop", "x");',
     );
   });
 
@@ -439,7 +439,7 @@ describe('snippetTargets', () => {
       'param(FirebaseAnalytics.Param.ACLID, "aclid_99")',
     );
     expect(objcSnippet).toContain(
-      '[FIRAnalytics logEventWithName:kFIREventCampaignDetails parameters:purchaseParams];',
+      '[FIRAnalytics logEventWithName:kFIREventCampaignDetails parameters:eventParams];',
     );
     expect(objcSnippet).toContain('kFIRParameterCampaignID: @"cmp_42"');
     expect(objcSnippet).toContain('kFIRParameterAdNetworkClickID: @"aclid_99"');
@@ -661,7 +661,7 @@ describe('snippetTargets', () => {
       'param(FirebaseAnalytics.Param.PRICE_IS_DISCOUNTED, 1L)',
     );
     expect(swiftSnippet).toContain(
-      'Analytics.logEvent(AnalyticsEventInAppPurchase, parameters: purchaseParams)',
+      'Analytics.logEvent(AnalyticsEventInAppPurchase, parameters: eventParams)',
     );
     expect(swiftSnippet).toContain(
       'AnalyticsParameterProductID: "sku_premium"',
