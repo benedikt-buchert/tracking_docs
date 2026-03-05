@@ -81,13 +81,15 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain('Bundle params = new Bundle();');
-    expect(snippet).toContain('params.putString("image_name", "hero.jpg");');
-    expect(snippet).toContain('params.putLong("count", 2L);');
-    expect(snippet).toContain('params.putDouble("score", 4.5);');
-    expect(snippet).toContain('params.putLong("premium", 0L);');
+    expect(snippet).toContain('Bundle purchaseParams = new Bundle();');
     expect(snippet).toContain(
-      'mFirebaseAnalytics.logEvent("share_image", params);',
+      'purchaseParams.putString("image_name", "hero.jpg");',
+    );
+    expect(snippet).toContain('purchaseParams.putLong("count", 2L);');
+    expect(snippet).toContain('purchaseParams.putDouble("score", 4.5);');
+    expect(snippet).toContain('purchaseParams.putLong("premium", 0L);');
+    expect(snippet).toContain(
+      'mFirebaseAnalytics.logEvent("share_image", purchaseParams);',
     );
   });
 
@@ -104,13 +106,14 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain(
-      'Analytics.logEvent("share_image", parameters: [',
-    );
+    expect(snippet).toContain('var purchaseParams: [String: Any] = [');
     expect(snippet).toContain('"image_name": "hero.jpg"');
     expect(snippet).toContain('"count": 2');
     expect(snippet).toContain('"score": 4.5');
     expect(snippet).toContain('"premium": 1');
+    expect(snippet).toContain(
+      'Analytics.logEvent("share_image", parameters: purchaseParams)',
+    );
   });
 
   it('generates ios objective-c firebase snippet', () => {
@@ -126,11 +129,14 @@ describe('snippetTargets', () => {
       schema: { properties: {} },
     });
 
-    expect(snippet).toContain('[FIRAnalytics logEventWithName:@"share_image"');
+    expect(snippet).toContain('NSMutableDictionary *purchaseParams = [@{');
     expect(snippet).toContain('@"image_name": @"hero.jpg"');
     expect(snippet).toContain('@"count": @(2)');
     expect(snippet).toContain('@"score": @(4.5)');
     expect(snippet).toContain('@"premium": @(0)');
+    expect(snippet).toContain(
+      '[FIRAnalytics logEventWithName:@"share_image" parameters:purchaseParams];',
+    );
   });
 
   it('includes fallback warning comment when nested values are serialized', () => {
@@ -138,13 +144,83 @@ describe('snippetTargets', () => {
       targetId: 'android-firebase-kotlin-sdk',
       example: {
         event: 'checkout',
-        ecommerce: { currency: 'EUR', items: [{ sku: 'abc' }] },
+        ecommerce: {
+          currency: 'EUR',
+          metadata: { payment_step: 2 },
+          items: [{ sku: 'abc' }],
+        },
       },
       schema: { properties: {} },
     });
 
     expect(snippet).toContain('WARNING');
     expect(snippet).toContain('serialized to JSON string');
-    expect(snippet).toContain('param("ecommerce",');
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.CURRENCY, "EUR")');
+    expect(snippet).toContain('param("metadata",');
+  });
+
+  it('uses firebase constants and item placeholders for purchase event', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: 'T12345',
+          affiliation: 'Google Store',
+          currency: 'USD',
+          value: 14.98,
+          tax: 2.58,
+          shipping: 5.34,
+          coupon: 'SUMMER_FUN',
+          items: [{ item_id: 'sku-1' }],
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.PURCHASE)',
+    );
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.TRANSACTION_ID, "T12345")',
+    );
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.AFFILIATION, "Google Store")',
+    );
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.CURRENCY, "USD")');
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.VALUE, 14.98)');
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.TAX, 2.58)');
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.SHIPPING, 5.34)');
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.COUPON, "SUMMER_FUN")',
+    );
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.ITEMS, arrayOf(item1))',
+    );
+  });
+
+  it('omits $schema and unwraps ecommerce primitives for firebase targets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        $schema: 'https://example.com/schemas/purchase-event.json',
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: 'T_12345',
+          value: 72.05,
+          currency: 'EUR',
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('AnalyticsParameterTransactionID: "T_12345"');
+    expect(snippet).toContain('AnalyticsParameterValue: 72.05');
+    expect(snippet).toContain('AnalyticsParameterCurrency: "EUR"');
+    expect(snippet).toContain(
+      'Analytics.logEvent(AnalyticsEventPurchase, parameters: purchaseParams)',
+    );
+    expect(snippet).not.toContain('$schema');
+    expect(snippet).not.toContain('ecommerce');
   });
 });
