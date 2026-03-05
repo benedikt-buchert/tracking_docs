@@ -22,6 +22,25 @@ const findChoicePoints = (subSchema, path = []) => {
   return [...currentChoice, ...nestedChoices];
 };
 
+const findConditionalPoints = (subSchema, path = []) => {
+  if (!subSchema) {
+    return [];
+  }
+
+  const currentConditional =
+    subSchema.if && (subSchema.then || subSchema.else)
+      ? [{ path, schema: subSchema }]
+      : [];
+
+  const nestedConditionals = subSchema.properties
+    ? Object.entries(subSchema.properties).flatMap(([key, propSchema]) =>
+        findConditionalPoints(propSchema, [...path, 'properties', key]),
+      )
+    : [];
+
+  return [...currentConditional, ...nestedConditionals];
+};
+
 const generateExampleForChoice = (rootSchema, path, option) => {
   const schemaVariant = JSON.parse(JSON.stringify(rootSchema));
 
@@ -44,10 +63,43 @@ const generateExampleForChoice = (rootSchema, path, option) => {
   }
 };
 
+const generateConditionalExample = (rootSchema, path, branch) => {
+  const schemaVariant = JSON.parse(JSON.stringify(rootSchema));
+
+  if (path.length === 0) {
+    const branchSchema = schemaVariant[branch];
+    delete schemaVariant.if;
+    delete schemaVariant.then;
+    delete schemaVariant.else;
+    if (branchSchema) {
+      return buildExampleFromSchema(
+        mergeJsonSchema({ allOf: [schemaVariant, branchSchema] }),
+      );
+    }
+    return buildExampleFromSchema(schemaVariant);
+  }
+
+  let target = schemaVariant;
+  for (const segment of path) {
+    target = target[segment];
+  }
+  const branchSchema = target[branch];
+  delete target.if;
+  delete target.then;
+  delete target.else;
+  if (branchSchema) {
+    const merged = mergeJsonSchema({ allOf: [target, branchSchema] });
+    Object.keys(target).forEach((k) => delete target[k]);
+    Object.assign(target, merged);
+  }
+  return buildExampleFromSchema(schemaVariant);
+};
+
 export function schemaToExamples(rootSchema) {
   const choicePoints = findChoicePoints(rootSchema);
+  const conditionalPoints = findConditionalPoints(rootSchema);
 
-  if (choicePoints.length === 0) {
+  if (choicePoints.length === 0 && conditionalPoints.length === 0) {
     const example = buildExampleFromSchema(rootSchema);
     if (example && Object.keys(example).length > 0) {
       return [
@@ -57,7 +109,7 @@ export function schemaToExamples(rootSchema) {
     return [];
   }
 
-  return choicePoints.map(({ path, schema }) => {
+  const choiceExamples = choicePoints.map(({ path, schema }) => {
     const choiceType = schema.oneOf ? 'oneOf' : 'anyOf';
     const propertyName = path.length > 0 ? path[path.length - 1] : 'root';
 
@@ -68,4 +120,25 @@ export function schemaToExamples(rootSchema) {
 
     return { property: propertyName, options };
   });
+
+  const conditionalExamples = conditionalPoints.map(({ path, schema }) => {
+    const options = [];
+
+    if (schema.then) {
+      options.push({
+        title: 'When condition is met',
+        example: generateConditionalExample(rootSchema, path, 'then'),
+      });
+    }
+    if (schema.else) {
+      options.push({
+        title: 'When condition is not met',
+        example: generateConditionalExample(rootSchema, path, 'else'),
+      });
+    }
+
+    return { property: 'conditional', options };
+  });
+
+  return [...choiceExamples, ...conditionalExamples];
 }

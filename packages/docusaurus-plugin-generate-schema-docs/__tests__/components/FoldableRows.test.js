@@ -233,7 +233,7 @@ describe('FoldableRows', () => {
       });
     });
 
-    it('has no background-image for root level choices with no continuing levels', () => {
+    it('has a bracket gradient for root level choices with no continuing levels', () => {
       const rootLevelRow = {
         type: 'choice',
         choiceType: 'oneOf',
@@ -241,6 +241,7 @@ describe('FoldableRows', () => {
         level: 0,
         description: 'Root level choice',
         continuingLevels: [],
+        groupBrackets: [],
         options: [
           {
             title: 'Option A',
@@ -257,9 +258,10 @@ describe('FoldableRows', () => {
         </table>,
       );
 
+      // Root-level choice rows get a bracket gradient even without tree-line continuing levels
       const cells = container.querySelectorAll('td[colspan="5"]');
       cells.forEach((cell) => {
-        expect(cell.style.backgroundImage).toBe('');
+        expect(cell.style.backgroundImage).toContain('linear-gradient');
       });
     });
 
@@ -290,9 +292,10 @@ describe('FoldableRows', () => {
       const cells = container.querySelectorAll('td[colspan="5"]');
       cells.forEach((cell) => {
         const bgImage = cell.style.backgroundImage;
-        // Should have multiple gradients (one for each continuing level + parent)
+        // colSpan=5 rows only have bracket lines (right side), not tree lines (left side).
+        // Should have exactly 1 bracket gradient.
         const gradientCount = (bgImage.match(/linear-gradient/g) || []).length;
-        expect(gradientCount).toBeGreaterThanOrEqual(2);
+        expect(gradientCount).toBeGreaterThanOrEqual(1);
       });
     });
 

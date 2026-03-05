@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/conditional-event.json",
+  "title": "Conditional Event",
+  "description": "An event with conditional properties based on country.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "form_submit"
+    },
+    "country": {
+      "type": "string",
+      "description": "The user's country.",
+      "enum": ["US", "CA"],
+      "examples": ["US"]
+    }
+  },
+  "required": ["event", "country"],
+  "if": {
+    "properties": {
+      "country": { "const": "US" }
+    },
+    "required": ["country"]
+  },
+  "then": {
+    "properties": {
+      "postal_code": {
+        "type": "string",
+        "description": "US ZIP code format.",
+        "pattern": "[0-9]{5}",
+        "examples": ["90210"]
+      },
+      "state": {
+        "type": "string",
+        "description": "US state abbreviation.",
+        "examples": ["CA"]
+      }
+    },
+    "required": ["postal_code"]
+  },
+  "else": {
+    "properties": {
+      "postal_code": {
+        "type": "string",
+        "description": "Canadian postal code format.",
+        "pattern": "[A-Z][0-9][A-Z] [0-9][A-Z][0-9]",
+        "examples": ["K1A 0B1"]
+      }
+    }
+  }
+}

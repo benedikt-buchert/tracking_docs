@@ -1,5 +1,7 @@
 import { schemaToExamples } from '../../helpers/schemaToExamples';
 import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
+import conditionalEventSchema from '../__fixtures__/static/schemas/conditional-event.json';
+import nestedConditionalEventSchema from '../__fixtures__/static/schemas/nested-conditional-event.json';
 
 describe('schemaToExamples', () => {
   it('should generate examples for all options in a complex schema', () => {
@@ -52,5 +54,78 @@ describe('schemaToExamples', () => {
     );
     expect(userIdIntegerOption).toBeDefined();
     expect(userIdIntegerOption.example).toHaveProperty('payment_method');
+  });
+
+  describe('if/then/else conditional examples', () => {
+    it('generates two examples for schema with if/then/else', () => {
+      const groups = schemaToExamples(conditionalEventSchema);
+      const conditionalGroup = groups.find((g) => g.property === 'conditional');
+      expect(conditionalGroup).toBeDefined();
+      expect(conditionalGroup.options).toHaveLength(2);
+    });
+
+    it('then example includes then properties merged with base', () => {
+      const groups = schemaToExamples(conditionalEventSchema);
+      const conditionalGroup = groups.find((g) => g.property === 'conditional');
+      const thenOption = conditionalGroup.options.find(
+        (o) => o.title === 'When condition is met',
+      );
+      expect(thenOption).toBeDefined();
+      expect(thenOption.example).toHaveProperty('event');
+      expect(thenOption.example).toHaveProperty('postal_code', '90210');
+      expect(thenOption.example).toHaveProperty('state', 'CA');
+    });
+
+    it('else example includes else properties merged with base', () => {
+      const groups = schemaToExamples(conditionalEventSchema);
+      const conditionalGroup = groups.find((g) => g.property === 'conditional');
+      const elseOption = conditionalGroup.options.find(
+        (o) => o.title === 'When condition is not met',
+      );
+      expect(elseOption).toBeDefined();
+      expect(elseOption.example).toHaveProperty('event');
+      expect(elseOption.example).toHaveProperty('postal_code', 'K1A 0B1');
+      expect(elseOption.example).not.toHaveProperty('state');
+    });
+
+    it('generates only one example when else is absent', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          status: { type: 'string', examples: ['active'] },
+        },
+        if: { properties: { status: { const: 'active' } } },
+        then: {
+          properties: {
+            active_since: { type: 'string', examples: ['2024-01-01'] },
+          },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const conditionalGroup = groups.find((g) => g.property === 'conditional');
+      expect(conditionalGroup).toBeDefined();
+      expect(conditionalGroup.options).toHaveLength(1);
+      expect(conditionalGroup.options[0].title).toBe('When condition is met');
+    });
+
+    it('detects nested conditional points inside properties', () => {
+      const groups = schemaToExamples(nestedConditionalEventSchema);
+      const conditionalGroup = groups.find((g) => g.property === 'conditional');
+      expect(conditionalGroup).toBeDefined();
+      expect(conditionalGroup.options).toHaveLength(2);
+
+      const thenOption = conditionalGroup.options.find(
+        (o) => o.title === 'When condition is met',
+      );
+      expect(thenOption.example.shipping).toHaveProperty(
+        'priority_level',
+        'high',
+      );
+
+      const elseOption = conditionalGroup.options.find(
+        (o) => o.title === 'When condition is not met',
+      );
+      expect(elseOption.example.shipping).toHaveProperty('estimated_days', 5);
+    });
   });
 });

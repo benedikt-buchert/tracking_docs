@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/conditional-event.json",
+  "title": "Conditional Event",
+  "description": "An event demonstrating if/then/else conditional properties. The postal code format depends on the selected country.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.2.0/events/conditional-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "address_submitted",
+      "description": "The event name.",
+      "examples": ["address_submitted"]
+    },
+    "country": {
+      "type": "string",
+      "description": "The user's country code.",
+      "enum": ["US", "CA"],
+      "examples": ["US"]
+    }
+  },
+  "required": ["event", "country"],
+  "if": {
+    "properties": {
+      "country": { "const": "US" }
+    },
+    "required": ["country"]
+  },
+  "then": {
+    "properties": {
+      "postal_code": {
+        "type": "string",
+        "description": "US ZIP code (5-digit format).",
+        "pattern": "^[0-9]{5}$",
+        "examples": ["90210"]
+      },
+      "state": {
+        "type": "string",
+        "description": "US state abbreviation.",
+        "minLength": 2,
+        "maxLength": 2,
+        "examples": ["CA"]
+      }
+    },
+    "required": ["postal_code"]
+  },
+  "else": {
+    "properties": {
+      "postal_code": {
+        "type": "string",
+        "description": "Canadian postal code (letter-number format).",
+        "pattern": "^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$",
+        "examples": ["K1A 0B1"]
+      },
+      "province": {
+        "type": "string",
+        "description": "Canadian province abbreviation.",
+        "examples": ["ON"]
+      }
+    },
+    "required": ["postal_code"]
+  }
+}

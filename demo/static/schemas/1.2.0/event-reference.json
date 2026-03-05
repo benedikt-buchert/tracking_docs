@@ -27,6 +27,9 @@
     },
     {
       "$ref": "./events/choice-event.json"
+    },
+    {
+      "$ref": "./events/conditional-event.json"
     }
   ]
 }
