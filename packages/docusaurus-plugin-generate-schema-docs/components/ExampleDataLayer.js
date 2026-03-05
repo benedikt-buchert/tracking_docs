@@ -33,7 +33,11 @@ function persistTarget(targetId) {
   const query = (window.location.hash || '').replace(/^#/, '');
   const params = new URLSearchParams(query);
   params.set(TARGET_HASH_KEY, targetId);
-  window.history.replaceState(null, '', `#${params.toString()}`);
+  window.history.replaceState(
+    null,
+    '',
+    `${window.location.pathname}${window.location.search}#${params.toString()}`,
+  );
 }
 
 function resolveInitialTargetId(targets) {
@@ -70,16 +74,39 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
+    let isSyncing = false;
+    const originalReplaceState = window.history.replaceState;
 
     const syncFromSearch = () => {
+      if (isSyncing) return;
       const targetFromSearch = readSearchTarget(window.location.search);
       if (!targetFromSearch || !validTargetIds.has(targetFromSearch)) return;
-      persistTarget(targetFromSearch);
+
+      isSyncing = true;
+      try {
+        window.localStorage.setItem(TARGET_STORAGE_KEY, targetFromSearch);
+
+        const hashQuery = (window.location.hash || '').replace(/^#/, '');
+        const hashParams = new URLSearchParams(hashQuery);
+        hashParams.set(TARGET_HASH_KEY, targetFromSearch);
+
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.delete(TARGET_HASH_KEY);
+        const remainingSearch = searchParams.toString();
+        const searchPart = remainingSearch ? `?${remainingSearch}` : '';
+
+        originalReplaceState.call(
+          window.history,
+          null,
+          '',
+          `${window.location.pathname}${searchPart}#${hashParams.toString()}`,
+        );
+      } finally {
+        isSyncing = false;
+      }
     };
 
     syncFromSearch();
-
-    const originalReplaceState = window.history.replaceState;
     window.history.replaceState = function patchedReplaceState(...args) {
       const result = originalReplaceState.apply(window.history, args);
       syncFromSearch();
