@@ -159,7 +159,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('param("metadata",');
   });
 
-  it('uses firebase constants and item placeholders for purchase event', () => {
+  it('uses firebase constants and concrete item bundles for purchase event', () => {
     const snippet = generateSnippetForTarget({
       targetId: 'android-firebase-kotlin-sdk',
       example: {
@@ -194,8 +194,53 @@ describe('snippetTargets', () => {
     expect(snippet).toContain(
       'param(FirebaseAnalytics.Param.COUPON, "SUMMER_FUN")',
     );
+    expect(snippet).toContain('val item1 = Bundle().apply {');
+    expect(snippet).toContain(
+      'putString(FirebaseAnalytics.Param.ITEM_ID, "sku-1")',
+    );
     expect(snippet).toContain(
       'param(FirebaseAnalytics.Param.ITEMS, arrayOf(item1))',
+    );
+  });
+
+  it('builds item dictionaries for swift purchase snippets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: 'T12345',
+          items: [
+            {
+              item_id: 'SKU_123',
+              item_name: 'jeggings',
+              item_category: 'pants',
+              item_variant: 'black',
+              item_brand: 'Google',
+              price: 9.99,
+            },
+            {
+              item_id: 'SKU_456',
+              item_name: 'boots',
+              item_category: 'shoes',
+              item_variant: 'brown',
+              item_brand: 'Google',
+              price: 24.99,
+            },
+          ],
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('var item1: [String: Any] = [');
+    expect(snippet).toContain('AnalyticsParameterItemID: "SKU_123"');
+    expect(snippet).toContain('AnalyticsParameterItemName: "jeggings"');
+    expect(snippet).toContain('AnalyticsParameterPrice: 9.99');
+    expect(snippet).toContain('var item2: [String: Any] = [');
+    expect(snippet).toContain('AnalyticsParameterItemID: "SKU_456"');
+    expect(snippet).toContain(
+      'purchaseParams[AnalyticsParameterItems] = [item1, item2]',
     );
   });
 
