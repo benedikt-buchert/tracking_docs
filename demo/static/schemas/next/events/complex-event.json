@@ -3,6 +3,11 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/complex-event.json",
   "title": "Complex Event with Validation Constraints",
   "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
+  "x-tracking-targets": [
+    "web-datalayer-js",
+    "android-firebase-kotlin-sdk",
+    "ios-firebase-swift-sdk"
+  ],
   "type": "object",
   "required": [
     "$schema",
