@@ -49,6 +49,7 @@ function createAjvInstance(schemas, mainSchema, schemaPath) {
   addFormats(ajv);
   if (ajv.addKeyword) {
     ajv.addKeyword('x-gtm-clear');
+    ajv.addKeyword('x-tracking-targets');
   }
   ajvKeywords(ajv);
 
