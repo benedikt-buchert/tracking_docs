@@ -195,6 +195,34 @@ describe('target selection helpers', () => {
     );
   });
 
+  it('persistTarget writes hash without duplicate query target', () => {
+    const originalReplaceState = window.history.replaceState;
+    const replaceSpy = jest.fn();
+    window.history.replaceState = replaceSpy;
+    window.history.pushState(
+      {},
+      '',
+      '/next/event-reference/purchase-event?target=android-firebase-kotlin-sdk',
+    );
+
+    const schema = {
+      type: 'object',
+      'x-tracking-targets': ['web-datalayer-js', 'android-firebase-kotlin-sdk'],
+      properties: {
+        event: { type: 'string', examples: ['purchase'] },
+      },
+    };
+
+    render(<ExampleDataLayer schema={schema} />);
+    expect(replaceSpy).toHaveBeenCalled();
+    const lastCallUrl =
+      replaceSpy.mock.calls[replaceSpy.mock.calls.length - 1][2];
+    expect(lastCallUrl).toContain('#target=android-firebase-kotlin-sdk');
+    expect(lastCallUrl).not.toContain('?target=android-firebase-kotlin-sdk');
+
+    window.history.replaceState = originalReplaceState;
+  });
+
   it('prefers hash over localStorage for initial target resolution', () => {
     const targets = [
       { id: 'web-datalayer-js' },
