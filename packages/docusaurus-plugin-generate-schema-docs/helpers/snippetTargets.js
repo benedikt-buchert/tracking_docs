@@ -14,9 +14,12 @@ function generateWebDataLayerSnippet({
   config = {},
   dataLayerName,
 }) {
-  const resolvedDataLayerName = dataLayerName || config.dataLayerName || 'dataLayer';
+  const resolvedDataLayerName =
+    dataLayerName || config.dataLayerName || 'dataLayer';
   const clearableProperties = findClearableProperties(schema || {});
-  const propertiesToClear = clearableProperties.filter((prop) => prop in example);
+  const propertiesToClear = clearableProperties.filter(
+    (prop) => prop in example,
+  );
 
   let codeSnippet = '';
   if (propertiesToClear.length > 0) {
