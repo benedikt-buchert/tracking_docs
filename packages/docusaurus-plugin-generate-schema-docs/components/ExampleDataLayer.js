@@ -33,7 +33,9 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
           <Tabs>
             {group.options.map(({ title, snippets }, index) => (
               <TabItem value={index} label={title} key={index}>
-                <CodeBlock language="javascript">{snippets[targetId]}</CodeBlock>
+                <CodeBlock language="javascript">
+                  {snippets[targetId]}
+                </CodeBlock>
               </TabItem>
             ))}
           </Tabs>

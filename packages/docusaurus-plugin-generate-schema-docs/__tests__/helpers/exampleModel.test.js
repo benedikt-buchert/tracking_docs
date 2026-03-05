@@ -1,4 +1,7 @@
-import { buildExampleModel, DEFAULT_SNIPPET_TARGET } from '../../helpers/exampleModel';
+import {
+  buildExampleModel,
+  DEFAULT_SNIPPET_TARGET,
+} from '../../helpers/exampleModel';
 import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
 import conditionalEventSchema from '../__fixtures__/static/schemas/conditional-event.json';
 
@@ -58,7 +61,9 @@ describe('buildExampleModel', () => {
       },
     };
 
-    const model = buildExampleModel(schema, { dataLayerName: 'customDataLayer' });
+    const model = buildExampleModel(schema, {
+      dataLayerName: 'customDataLayer',
+    });
     expect(
       model.variantGroups[0].options[0].snippets[DEFAULT_SNIPPET_TARGET.id],
     ).toContain('window.customDataLayer.push');
