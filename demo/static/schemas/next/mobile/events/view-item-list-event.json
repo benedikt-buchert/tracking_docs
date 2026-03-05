@@ -28,16 +28,12 @@
         "item_list_id": {
           "type": "string",
           "description": "ID of the item list.",
-          "examples": [
-            "related_products"
-          ]
+          "examples": ["related_products"]
         },
         "item_list_name": {
           "type": "string",
           "description": "Name of the item list.",
-          "examples": [
-            "Related Products"
-          ]
+          "examples": ["Related Products"]
         },
         "items": {
           "type": "array",
@@ -48,13 +44,8 @@
           }
         }
       },
-      "required": [
-        "items"
-      ]
+      "required": ["items"]
     }
   },
-  "required": [
-    "$schema",
-    "event"
-  ]
+  "required": ["$schema", "event"]
 }

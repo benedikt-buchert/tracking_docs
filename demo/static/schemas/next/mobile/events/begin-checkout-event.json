@@ -30,23 +30,17 @@
           "description": "ISO 4217 currency code.",
           "minLength": 3,
           "maxLength": 3,
-          "examples": [
-            "USD"
-          ]
+          "examples": ["USD"]
         },
         "value": {
           "type": "number",
           "description": "Monetary value of the event.",
-          "examples": [
-            72.05
-          ]
+          "examples": [72.05]
         },
         "coupon": {
           "type": "string",
           "description": "Coupon code associated with the event.",
-          "examples": [
-            "SUMMER_FUN"
-          ]
+          "examples": ["SUMMER_FUN"]
         },
         "items": {
           "type": "array",
@@ -57,14 +51,8 @@
           }
         }
       },
-      "required": [
-        "currency",
-        "items"
-      ]
+      "required": ["currency", "items"]
     }
   },
-  "required": [
-    "$schema",
-    "event"
-  ]
+  "required": ["$schema", "event"]
 }
