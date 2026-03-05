@@ -6,6 +6,7 @@
     "gen-docs": "docusaurus generate-schema-docs",
     "validate-schemas": "docusaurus validate-schemas",
     "update-schema-ids": "docusaurus update-schema-ids",
+    "sync-gtm": "docusaurus sync-gtm",
     "version": "docusaurus version-with-schemas",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",

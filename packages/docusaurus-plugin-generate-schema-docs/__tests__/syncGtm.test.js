@@ -34,10 +34,10 @@ describe('parseArgs', () => {
     expect(siteDir).toBe('./my-demo');
   });
 
-  it('should default siteDir to ./demo', () => {
+  it('should default siteDir to .', () => {
     const argv = ['node', 'script.js'];
     const { siteDir } = gtmScript.parseArgs(argv);
-    expect(siteDir).toBe('./demo');
+    expect(siteDir).toBe('.');
   });
 });
 
@@ -292,6 +292,7 @@ describe('main function', () => {
 
   beforeEach(() => {
     logSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
+    fs.existsSync.mockReturnValue(true);
     mockDeps = {
       setupGtmWorkspace: jest.fn().mockResolvedValue({
         workspaceName: 'test-workspace',
@@ -302,8 +303,11 @@ describe('main function', () => {
         deleted: ['var2'],
         inSync: ['var3'],
       }),
-      getVariablesFromSchemas: jest.fn().mockResolvedValue([]),
+      getVariablesFromSchemas: jest
+        .fn()
+        .mockResolvedValue([{ name: 'event', description: 'Event name' }]),
       getLatestSchemaPath: jest.fn().mockReturnValue('/fake/schemas'),
+      assertGtmCliAvailable: jest.fn(),
       logger: gtmScript.logger,
       parseArgs: gtmScript.parseArgs,
       process: {

@@ -73,6 +73,23 @@ npm run update-schema-ids
 
 This command will update the `$id` of all schemas in the versioned directories.
 
+### Sync GTM Variables (Optional)
+
+If you use Google Tag Manager, you can sync Data Layer Variables from your schemas:
+
+```bash
+npm install --save-optional @owntag/gtm-cli
+npm run sync:gtm
+```
+
+The Docusaurus CLI command is:
+
+```bash
+docusaurus sync-gtm
+```
+
+By default, it resolves schemas from the project root. Use `--path=<siteDir>` to target a different site directory.
+
 ## How it Works
 
 The plugin reads your JSON schemas, dereferences any `$ref` properties, and merges `allOf` properties. It then generates an MDX file for each schema, which uses custom React components to render the schema details.

@@ -2,9 +2,6 @@
 name: Sync GTM Variables
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:

@@ -23,6 +23,16 @@ const logger = {
   },
 };
 
+function assertGtmCliAvailable() {
+  try {
+    execSync('gtm --version', { stdio: 'pipe' });
+  } catch (error) {
+    throw new Error(
+      'GTM CLI is not installed or not available in PATH. Install it with "npm install --save-optional @owntag/gtm-cli" (or "npm install -g @owntag/gtm-cli").',
+    );
+  }
+}
+
 function safeJsonParse(cliOutput) {
   if (!cliOutput) return null;
   const arrayStartIndex = cliOutput.indexOf('[');
@@ -281,7 +291,7 @@ async function setupGtmWorkspace() {
 function parseArgs(argv) {
   const args = argv.slice(2);
   const pathArg = args.find((arg) => arg.startsWith('--path=')) || '';
-  const siteDir = pathArg.split('=')[1] || './demo';
+  const siteDir = pathArg.split('=')[1] || '.';
   return {
     isJson: args.includes('--json'),
     isQuiet: args.includes('--quiet'),
@@ -297,6 +307,7 @@ async function main(argv, deps) {
       getLatestSchemaPath: getPath,
       getVariablesFromSchemas: getVars,
       syncGtmVariables: sync,
+      assertGtmCliAvailable: assertCli = assertGtmCliAvailable,
       logger: log,
       parseArgs: parse,
       process: proc,
@@ -305,14 +316,25 @@ async function main(argv, deps) {
     log.setup(isJson, isQuiet);
 
     log.log('Starting GTM variable synchronization script...');
+    assertCli();
 
     const { workspaceName, workspaceId } = await setup();
 
     const schemaPath = getPath(siteDir);
+    if (!fs.existsSync(schemaPath)) {
+      throw new Error(
+        `Schema directory not found: ${schemaPath}. Use --path=<siteDir> to point to your Docusaurus project root.`,
+      );
+    }
     log.log(`Scanning for schemas in: ${schemaPath}`);
     const schemaVariables = await getVars(schemaPath, {
       skipArraySubProperties,
     });
+    if (schemaVariables.length === 0) {
+      throw new Error(
+        `No schema variables found in ${schemaPath}. Aborting to avoid deleting existing GTM variables.`,
+      );
+    }
     log.log(`Found ${schemaVariables.length} variables defined in schemas.`);
 
     const summary = await sync(schemaVariables, { skipArraySubProperties });
@@ -334,7 +356,11 @@ async function main(argv, deps) {
   } catch (error) {
     logger.error('An error occurred during GTM synchronization:');
     logger.error(error.message);
-    process.exit(1);
+    if (deps.process && typeof deps.process.exit === 'function') {
+      deps.process.exit(1);
+    } else {
+      process.exit(1);
+    }
   }
 }
 
@@ -344,6 +370,7 @@ if (require.main === module) {
     getLatestSchemaPath,
     getVariablesFromSchemas,
     syncGtmVariables,
+    assertGtmCliAvailable,
     logger,
     parseArgs,
     process,
@@ -365,5 +392,6 @@ module.exports = {
   safeJsonParse,
   logger,
   parseArgs,
+  assertGtmCliAvailable,
   setupGtmWorkspace,
 };
