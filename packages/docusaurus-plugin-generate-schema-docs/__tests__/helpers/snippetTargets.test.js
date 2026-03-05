@@ -268,4 +268,90 @@ describe('snippetTargets', () => {
     expect(snippet).not.toContain('$schema');
     expect(snippet).not.toContain('ecommerce');
   });
+
+  it('uses official firebase screen_view constants for kotlin snippets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'screen_view',
+        screen_name: 'Checkout',
+        screen_class: 'CheckoutActivity',
+        firebase_screen: 'Checkout',
+        firebase_screen_class: 'CheckoutActivity',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW)',
+    );
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout")',
+    );
+    expect(snippet).toContain(
+      'param(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity")',
+    );
+  });
+
+  it('uses official firebase screen_view constants for java snippets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'screen_view',
+        screen_name: 'Checkout',
+        screen_class: 'CheckoutActivity',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      'mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, purchaseParams);',
+    );
+    expect(snippet).toContain(
+      'purchaseParams.putString(FirebaseAnalytics.Param.SCREEN_NAME, "Checkout");',
+    );
+    expect(snippet).toContain(
+      'purchaseParams.putString(FirebaseAnalytics.Param.SCREEN_CLASS, "CheckoutActivity");',
+    );
+  });
+
+  it('uses official firebase screen_view constants for swift snippets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'screen_view',
+        screen_name: 'Checkout',
+        screen_class: 'CheckoutViewController',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      'Analytics.logEvent(AnalyticsEventScreenView, parameters: purchaseParams)',
+    );
+    expect(snippet).toContain('AnalyticsParameterScreenName: "Checkout"');
+    expect(snippet).toContain(
+      'AnalyticsParameterScreenClass: "CheckoutViewController"',
+    );
+  });
+
+  it('uses official firebase screen_view constants for objective-c snippets', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'screen_view',
+        screen_name: 'Checkout',
+        screen_class: 'CheckoutViewController',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      '[FIRAnalytics logEventWithName:kFIREventScreenView parameters:purchaseParams];',
+    );
+    expect(snippet).toContain('kFIRParameterScreenName: @"Checkout"');
+    expect(snippet).toContain(
+      'kFIRParameterScreenClass: @"CheckoutViewController"',
+    );
+  });
 });

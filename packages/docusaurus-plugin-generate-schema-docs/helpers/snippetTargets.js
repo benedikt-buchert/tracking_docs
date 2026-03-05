@@ -12,6 +12,11 @@ export const FIREBASE_SNIPPET_SOURCES = [
     url: 'https://firebase.google.com/docs/analytics/ios/events',
     reviewedAt: '2026-03-05',
   },
+  {
+    id: 'firebase-analytics-screenviews',
+    url: 'https://firebase.google.com/docs/analytics/screenviews',
+    reviewedAt: '2026-03-05',
+  },
 ];
 
 const FIREBASE_EVENT_CONSTANTS = {
@@ -20,6 +25,12 @@ const FIREBASE_EVENT_CONSTANTS = {
     java: 'FirebaseAnalytics.Event.PURCHASE',
     swift: 'AnalyticsEventPurchase',
     objc: 'kFIREventPurchase',
+  },
+  screen_view: {
+    kotlin: 'FirebaseAnalytics.Event.SCREEN_VIEW',
+    java: 'FirebaseAnalytics.Event.SCREEN_VIEW',
+    swift: 'AnalyticsEventScreenView',
+    objc: 'kFIREventScreenView',
   },
 };
 
@@ -107,6 +118,30 @@ const FIREBASE_PARAM_CONSTANTS = {
     java: 'FirebaseAnalytics.Param.PRICE',
     swift: 'AnalyticsParameterPrice',
     objc: 'kFIRParameterPrice',
+  },
+  screen_name: {
+    kotlin: 'FirebaseAnalytics.Param.SCREEN_NAME',
+    java: 'FirebaseAnalytics.Param.SCREEN_NAME',
+    swift: 'AnalyticsParameterScreenName',
+    objc: 'kFIRParameterScreenName',
+  },
+  screen_class: {
+    kotlin: 'FirebaseAnalytics.Param.SCREEN_CLASS',
+    java: 'FirebaseAnalytics.Param.SCREEN_CLASS',
+    swift: 'AnalyticsParameterScreenClass',
+    objc: 'kFIRParameterScreenClass',
+  },
+  firebase_screen: {
+    kotlin: 'FirebaseAnalytics.Param.SCREEN_NAME',
+    java: 'FirebaseAnalytics.Param.SCREEN_NAME',
+    swift: 'AnalyticsParameterScreenName',
+    objc: 'kFIRParameterScreenName',
+  },
+  firebase_screen_class: {
+    kotlin: 'FirebaseAnalytics.Param.SCREEN_CLASS',
+    java: 'FirebaseAnalytics.Param.SCREEN_CLASS',
+    swift: 'AnalyticsParameterScreenClass',
+    objc: 'kFIRParameterScreenClass',
   },
 };
 
