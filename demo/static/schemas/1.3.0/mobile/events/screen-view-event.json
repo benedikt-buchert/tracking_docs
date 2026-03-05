@@ -24,22 +24,13 @@
     "screen_name": {
       "type": "string",
       "description": "Human-readable screen name.",
-      "examples": [
-        "Checkout"
-      ]
+      "examples": ["Checkout"]
     },
     "screen_class": {
       "type": "string",
       "description": "Screen class or view controller name.",
-      "examples": [
-        "CheckoutScreen"
-      ]
+      "examples": ["CheckoutScreen"]
     }
   },
-  "required": [
-    "$schema",
-    "event",
-    "screen_name",
-    "screen_class"
-  ]
+  "required": ["$schema", "event", "screen_name", "screen_class"]
 }

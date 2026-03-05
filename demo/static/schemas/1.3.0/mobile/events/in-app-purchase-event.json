@@ -24,53 +24,39 @@
     "product_id": {
       "type": "string",
       "description": "The purchased product identifier.",
-      "examples": [
-        "sku_premium"
-      ]
+      "examples": ["sku_premium"]
     },
     "product_name": {
       "type": "string",
       "description": "Display name of the purchased product.",
-      "examples": [
-        "Premium Plan"
-      ]
+      "examples": ["Premium Plan"]
     },
     "currency": {
       "type": "string",
       "description": "ISO 4217 currency code.",
       "minLength": 3,
       "maxLength": 3,
-      "examples": [
-        "USD"
-      ]
+      "examples": ["USD"]
     },
     "value": {
       "type": "number",
       "description": "Purchase value.",
-      "examples": [
-        9.99
-      ]
+      "examples": [9.99]
     },
     "subscription": {
       "type": "boolean",
       "description": "Whether the purchase is a subscription.",
-      "examples": [
-        true
-      ]
+      "examples": [true]
     },
     "free_trial": {
       "type": "boolean",
       "description": "Whether a free trial was used.",
-      "examples": [
-        false
-      ]
+      "examples": [false]
     },
     "price_is_discounted": {
       "type": "boolean",
       "description": "Whether the listed price is discounted.",
-      "examples": [
-        true
-      ]
+      "examples": [true]
     }
   },
   "required": [

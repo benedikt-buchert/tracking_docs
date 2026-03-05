@@ -25,9 +25,7 @@
       "x-gtm-clear": true
     }
   },
-  "required": [
-    "event"
-  ],
+  "required": ["event"],
   "$defs": {
     "strictObject": {
       "type": "object",

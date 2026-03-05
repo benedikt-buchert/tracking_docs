@@ -4,13 +4,7 @@
   "title": "Battle Test Event",
   "description": "A stress-test event exercising every nesting combination: oneOf/anyOf inside if/then/else, if/then/else inside oneOf/anyOf branches, nested conditionals inside conditionals, array items with all combos, and deeply nested objects.",
   "type": "object",
-  "required": [
-    "event",
-    "user",
-    "items",
-    "payment",
-    "fulfillment"
-  ],
+  "required": ["event", "user", "items", "payment", "fulfillment"],
   "properties": {
     "$schema": {
       "type": "string",
@@ -21,27 +15,18 @@
       "type": "string",
       "const": "checkout_complete",
       "description": "The event name.",
-      "examples": [
-        "checkout_complete"
-      ]
+      "examples": ["checkout_complete"]
     },
     "user": {
       "type": "object",
       "description": "User information with conditional fields based on account type. Demonstrates: if/then/else with oneOf inside then branch, and nested if/then/else inside then branch.",
-      "required": [
-        "account_type"
-      ],
+      "required": ["account_type"],
       "properties": {
         "account_type": {
           "type": "string",
           "description": "Whether the user is a guest or registered.",
-          "enum": [
-            "guest",
-            "registered"
-          ],
-          "examples": [
-            "registered"
-          ]
+          "enum": ["guest", "registered"],
+          "examples": ["registered"]
         },
         "user_id": {
           "description": "The user's ID, which can be a string or integer.",
@@ -50,17 +35,13 @@
               "title": "String ID",
               "type": "string",
               "description": "A string-based user ID.",
-              "examples": [
-                "usr-abc-123"
-              ]
+              "examples": ["usr-abc-123"]
             },
             {
               "title": "Integer ID",
               "type": "integer",
               "description": "A numeric user ID.",
-              "examples": [
-                98765
-              ]
+              "examples": [98765]
             }
           ]
         }
@@ -71,9 +52,7 @@
             "const": "registered"
           }
         },
-        "required": [
-          "account_type"
-        ]
+        "required": ["account_type"]
       },
       "then": {
         "description": "Registered users have a loyalty tier, preferences, and a contact method choice.",
@@ -81,15 +60,8 @@
           "loyalty_tier": {
             "type": "string",
             "description": "The user's loyalty program tier.",
-            "enum": [
-              "bronze",
-              "silver",
-              "gold",
-              "platinum"
-            ],
-            "examples": [
-              "gold"
-            ]
+            "enum": ["bronze", "silver", "gold", "platinum"],
+            "examples": ["gold"]
           },
           "contact_method": {
             "description": "How to reach the registered user — oneOf inside a then branch.",
@@ -107,15 +79,10 @@
                     "type": "string",
                     "format": "email",
                     "description": "The user's email address.",
-                    "examples": [
-                      "user@example.com"
-                    ]
+                    "examples": ["user@example.com"]
                   }
                 },
-                "required": [
-                  "channel",
-                  "email_address"
-                ]
+                "required": ["channel", "email_address"]
               },
               {
                 "title": "SMS Contact",
@@ -130,31 +97,22 @@
                     "type": "string",
                     "description": "The user's phone number.",
                     "pattern": "^\\+[0-9]{10,15}$",
-                    "examples": [
-                      "+1234567890"
-                    ]
+                    "examples": ["+1234567890"]
                   }
                 },
-                "required": [
-                  "channel",
-                  "phone_number"
-                ]
+                "required": ["channel", "phone_number"]
               }
             ]
           },
           "preferences": {
             "type": "object",
             "description": "User notification preferences with nested if/then/else (if/then/else inside if/then).",
-            "required": [
-              "marketing_consent"
-            ],
+            "required": ["marketing_consent"],
             "properties": {
               "marketing_consent": {
                 "type": "boolean",
                 "description": "Whether the user consented to marketing.",
-                "examples": [
-                  true
-                ]
+                "examples": [true]
               }
             },
             "if": {
@@ -163,9 +121,7 @@
                   "const": true
                 }
               },
-              "required": [
-                "marketing_consent"
-              ]
+              "required": ["marketing_consent"]
             },
             "then": {
               "description": "Consenting users specify their preferred frequency.",
@@ -173,14 +129,8 @@
                 "frequency": {
                   "type": "string",
                   "description": "How often to send marketing messages.",
-                  "enum": [
-                    "daily",
-                    "weekly",
-                    "monthly"
-                  ],
-                  "examples": [
-                    "weekly"
-                  ]
+                  "enum": ["daily", "weekly", "monthly"],
+                  "examples": ["weekly"]
                 },
                 "topics": {
                   "type": "array",
@@ -188,17 +138,10 @@
                   "items": {
                     "type": "string"
                   },
-                  "examples": [
-                    [
-                      "deals",
-                      "new_arrivals"
-                    ]
-                  ]
+                  "examples": [["deals", "new_arrivals"]]
                 }
               },
-              "required": [
-                "frequency"
-              ]
+              "required": ["frequency"]
             },
             "else": {
               "description": "Non-consenting users only have an opt-out reason.",
@@ -206,17 +149,13 @@
                 "opt_out_reason": {
                   "type": "string",
                   "description": "Why the user declined marketing.",
-                  "examples": [
-                    "too_many_emails"
-                  ]
+                  "examples": ["too_many_emails"]
                 }
               }
             }
           }
         },
-        "required": [
-          "loyalty_tier"
-        ]
+        "required": ["loyalty_tier"]
       },
       "else": {
         "description": "Guest users only have a session ID.",
@@ -224,14 +163,10 @@
           "session_id": {
             "type": "string",
             "description": "Temporary session identifier for guest users.",
-            "examples": [
-              "sess-xyz-789"
-            ]
+            "examples": ["sess-xyz-789"]
           }
         },
-        "required": [
-          "session_id"
-        ]
+        "required": ["session_id"]
       }
     },
     "items": {
@@ -240,46 +175,31 @@
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": [
-          "item_type",
-          "name",
-          "price"
-        ],
+        "required": ["item_type", "name", "price"],
         "properties": {
           "item_type": {
             "type": "string",
             "description": "Whether this is a physical or digital item.",
-            "enum": [
-              "physical",
-              "digital"
-            ],
-            "examples": [
-              "physical"
-            ]
+            "enum": ["physical", "digital"],
+            "examples": ["physical"]
           },
           "name": {
             "type": "string",
             "description": "Item name.",
-            "examples": [
-              "Wireless Headphones"
-            ]
+            "examples": ["Wireless Headphones"]
           },
           "price": {
             "type": "number",
             "description": "Item price in the transaction currency.",
             "minimum": 0,
-            "examples": [
-              79.99
-            ]
+            "examples": [79.99]
           },
           "quantity": {
             "type": "integer",
             "description": "Number of units.",
             "minimum": 1,
             "default": 1,
-            "examples": [
-              2
-            ]
+            "examples": [2]
           }
         },
         "if": {
@@ -288,9 +208,7 @@
               "const": "physical"
             }
           },
-          "required": [
-            "item_type"
-          ]
+          "required": ["item_type"]
         },
         "then": {
           "description": "Physical items have weight, dimensions, and a shipping class choice (oneOf inside then).",
@@ -299,9 +217,7 @@
               "type": "number",
               "description": "Item weight in kilograms.",
               "minimum": 0.01,
-              "examples": [
-                0.35
-              ]
+              "examples": [0.35]
             },
             "dimensions": {
               "type": "object",
@@ -310,23 +226,17 @@
                 "length": {
                   "type": "number",
                   "description": "Length in cm.",
-                  "examples": [
-                    20
-                  ]
+                  "examples": [20]
                 },
                 "width": {
                   "type": "number",
                   "description": "Width in cm.",
-                  "examples": [
-                    15
-                  ]
+                  "examples": [15]
                 },
                 "height": {
                   "type": "number",
                   "description": "Height in cm.",
-                  "examples": [
-                    8
-                  ]
+                  "examples": [8]
                 }
               }
             },
@@ -346,14 +256,10 @@
                       "type": "integer",
                       "description": "Estimated delivery days.",
                       "minimum": 1,
-                      "examples": [
-                        5
-                      ]
+                      "examples": [5]
                     }
                   },
-                  "required": [
-                    "class"
-                  ]
+                  "required": ["class"]
                 },
                 {
                   "title": "Freight",
@@ -367,23 +273,16 @@
                     "requires_signature": {
                       "type": "boolean",
                       "description": "Whether delivery requires a signature.",
-                      "examples": [
-                        true
-                      ]
+                      "examples": [true]
                     },
                     "pallet_count": {
                       "type": "integer",
                       "description": "Number of pallets.",
                       "minimum": 1,
-                      "examples": [
-                        1
-                      ]
+                      "examples": [1]
                     }
                   },
-                  "required": [
-                    "class",
-                    "requires_signature"
-                  ]
+                  "required": ["class", "requires_signature"]
                 }
               ]
             }
@@ -396,21 +295,13 @@
               "type": "string",
               "format": "uri",
               "description": "URL to download the digital item.",
-              "examples": [
-                "https://example.com/download/abc"
-              ]
+              "examples": ["https://example.com/download/abc"]
             },
             "license_type": {
               "type": "string",
               "description": "License model for the digital item.",
-              "enum": [
-                "single-use",
-                "perpetual",
-                "subscription"
-              ],
-              "examples": [
-                "perpetual"
-              ]
+              "enum": ["single-use", "perpetual", "subscription"],
+              "examples": ["perpetual"]
             }
           }
         }
@@ -419,17 +310,13 @@
     "payment": {
       "type": "object",
       "description": "Payment details — anyOf with if/then/else inside one of the anyOf branches.",
-      "required": [
-        "currency"
-      ],
+      "required": ["currency"],
       "properties": {
         "currency": {
           "type": "string",
           "description": "ISO 4217 currency code.",
           "pattern": "^[A-Z]{3}$",
-          "examples": [
-            "USD"
-          ]
+          "examples": ["USD"]
         }
       },
       "anyOf": [
@@ -444,38 +331,24 @@
             "card_brand": {
               "type": "string",
               "description": "Card network.",
-              "enum": [
-                "visa",
-                "mastercard",
-                "amex"
-              ],
-              "examples": [
-                "visa"
-              ]
+              "enum": ["visa", "mastercard", "amex"],
+              "examples": ["visa"]
             },
             "last_four": {
               "type": "string",
               "description": "Last four digits of the card.",
               "pattern": "^[0-9]{4}$",
-              "examples": [
-                "4242"
-              ]
+              "examples": ["4242"]
             }
           },
-          "required": [
-            "method",
-            "card_brand",
-            "last_four"
-          ],
+          "required": ["method", "card_brand", "last_four"],
           "if": {
             "properties": {
               "card_brand": {
                 "const": "amex"
               }
             },
-            "required": [
-              "card_brand"
-            ]
+            "required": ["card_brand"]
           },
           "then": {
             "description": "Amex cards require a CID (4-digit security code).",
@@ -484,14 +357,10 @@
                 "type": "string",
                 "description": "4-digit Card Identification Number for Amex.",
                 "pattern": "^[0-9]{4}$",
-                "examples": [
-                  "1234"
-                ]
+                "examples": ["1234"]
               }
             },
-            "required": [
-              "cid"
-            ]
+            "required": ["cid"]
           },
           "else": {
             "description": "Non-Amex cards use a 3-digit CVV.",
@@ -500,9 +369,7 @@
                 "type": "string",
                 "description": "3-digit Card Verification Value.",
                 "pattern": "^[0-9]{3}$",
-                "examples": [
-                  "123"
-                ]
+                "examples": ["123"]
               }
             }
           }
@@ -521,23 +388,15 @@
                 {
                   "title": "Known Provider",
                   "type": "string",
-                  "enum": [
-                    "apple_pay",
-                    "google_pay",
-                    "paypal"
-                  ],
-                  "examples": [
-                    "apple_pay"
-                  ]
+                  "enum": ["apple_pay", "google_pay", "paypal"],
+                  "examples": ["apple_pay"]
                 },
                 {
                   "title": "Custom Provider",
                   "type": "string",
                   "pattern": "^custom_",
                   "description": "A custom wallet provider prefixed with 'custom_'.",
-                  "examples": [
-                    "custom_klarna"
-                  ]
+                  "examples": ["custom_klarna"]
                 }
               ]
             },
@@ -545,15 +404,10 @@
               "type": "string",
               "format": "email",
               "description": "Email linked to the wallet account.",
-              "examples": [
-                "user@example.com"
-              ]
+              "examples": ["user@example.com"]
             }
           },
-          "required": [
-            "method",
-            "wallet_provider"
-          ]
+          "required": ["method", "wallet_provider"]
         },
         {
           "title": "Bank Transfer",
@@ -566,44 +420,28 @@
             "bank_name": {
               "type": "string",
               "description": "Name of the bank.",
-              "examples": [
-                "First National Bank"
-              ]
+              "examples": ["First National Bank"]
             },
             "reference_id": {
               "type": "string",
               "description": "Transfer reference number.",
-              "examples": [
-                "TXN-2026-001"
-              ]
+              "examples": ["TXN-2026-001"]
             }
           },
-          "required": [
-            "method",
-            "bank_name",
-            "reference_id"
-          ]
+          "required": ["method", "bank_name", "reference_id"]
         }
       ]
     },
     "fulfillment": {
       "type": "object",
       "description": "Fulfillment details — anyOf with different fulfillment types, some containing nested if/then/else.",
-      "required": [
-        "type"
-      ],
+      "required": ["type"],
       "properties": {
         "type": {
           "type": "string",
           "description": "Fulfillment type.",
-          "enum": [
-            "delivery",
-            "pickup",
-            "digital"
-          ],
-          "examples": [
-            "delivery"
-          ]
+          "enum": ["delivery", "pickup", "digital"],
+          "examples": ["delivery"]
         }
       },
       "anyOf": [
@@ -618,31 +456,22 @@
             "address": {
               "type": "object",
               "description": "Delivery address.",
-              "required": [
-                "country",
-                "city"
-              ],
+              "required": ["country", "city"],
               "properties": {
                 "country": {
                   "type": "string",
                   "description": "ISO 3166-1 alpha-2 country code.",
-                  "examples": [
-                    "US"
-                  ]
+                  "examples": ["US"]
                 },
                 "city": {
                   "type": "string",
                   "description": "City name.",
-                  "examples": [
-                    "New York"
-                  ]
+                  "examples": ["New York"]
                 },
                 "street": {
                   "type": "string",
                   "description": "Street address.",
-                  "examples": [
-                    "123 Main St"
-                  ]
+                  "examples": ["123 Main St"]
                 }
               },
               "if": {
@@ -653,9 +482,7 @@
                     }
                   }
                 },
-                "required": [
-                  "country"
-                ]
+                "required": ["country"]
               },
               "then": {
                 "description": "International addresses require a customs declaration.",
@@ -667,34 +494,23 @@
                       "declared_value": {
                         "type": "number",
                         "description": "Declared value for customs.",
-                        "examples": [
-                          150
-                        ]
+                        "examples": [150]
                       },
                       "contents_description": {
                         "type": "string",
                         "description": "Description of package contents.",
-                        "examples": [
-                          "Electronics"
-                        ]
+                        "examples": ["Electronics"]
                       },
                       "hs_code": {
                         "type": "string",
                         "description": "Harmonized System tariff code.",
-                        "examples": [
-                          "8518.30"
-                        ]
+                        "examples": ["8518.30"]
                       }
                     },
-                    "required": [
-                      "declared_value",
-                      "contents_description"
-                    ]
+                    "required": ["declared_value", "contents_description"]
                   }
                 },
-                "required": [
-                  "customs_declaration"
-                ]
+                "required": ["customs_declaration"]
               },
               "else": {
                 "description": "Domestic US addresses may include a ZIP+4.",
@@ -703,18 +519,13 @@
                     "type": "string",
                     "description": "Extended ZIP code.",
                     "pattern": "^[0-9]{5}-[0-9]{4}$",
-                    "examples": [
-                      "10001-1234"
-                    ]
+                    "examples": ["10001-1234"]
                   }
                 }
               }
             }
           },
-          "required": [
-            "fulfillment_method",
-            "address"
-          ]
+          "required": ["fulfillment_method", "address"]
         },
         {
           "title": "Store Pickup",
@@ -727,9 +538,7 @@
             "store_id": {
               "type": "string",
               "description": "ID of the pickup store.",
-              "examples": [
-                "STORE-42"
-              ]
+              "examples": ["STORE-42"]
             },
             "pickup_time": {
               "description": "When to pick up — anyOf inside an anyOf branch.",
@@ -747,15 +556,10 @@
                       "type": "string",
                       "format": "date-time",
                       "description": "Scheduled pickup date and time.",
-                      "examples": [
-                        "2026-03-15T14:00:00Z"
-                      ]
+                      "examples": ["2026-03-15T14:00:00Z"]
                     }
                   },
-                  "required": [
-                    "slot_type",
-                    "datetime"
-                  ]
+                  "required": ["slot_type", "datetime"]
                 },
                 {
                   "title": "ASAP Pickup",
@@ -770,22 +574,15 @@
                       "type": "integer",
                       "description": "Estimated minutes until ready.",
                       "minimum": 5,
-                      "examples": [
-                        30
-                      ]
+                      "examples": [30]
                     }
                   },
-                  "required": [
-                    "slot_type"
-                  ]
+                  "required": ["slot_type"]
                 }
               ]
             }
           },
-          "required": [
-            "fulfillment_method",
-            "store_id"
-          ]
+          "required": ["fulfillment_method", "store_id"]
         },
         {
           "title": "Digital Fulfillment",
@@ -799,15 +596,10 @@
               "type": "string",
               "format": "email",
               "description": "Email to send digital items to.",
-              "examples": [
-                "buyer@example.com"
-              ]
+              "examples": ["buyer@example.com"]
             }
           },
-          "required": [
-            "fulfillment_method",
-            "delivery_email"
-          ]
+          "required": ["fulfillment_method", "delivery_email"]
         }
       ]
     },
@@ -828,15 +620,10 @@
               "description": "Discount percentage (0-100).",
               "minimum": 0,
               "maximum": 100,
-              "examples": [
-                15
-              ]
+              "examples": [15]
             }
           },
-          "required": [
-            "type",
-            "value"
-          ]
+          "required": ["type", "value"]
         },
         {
           "title": "Fixed Discount",
@@ -851,15 +638,10 @@
               "type": "number",
               "description": "Discount amount in the transaction currency.",
               "minimum": 0,
-              "examples": [
-                10
-              ]
+              "examples": [10]
             }
           },
-          "required": [
-            "type",
-            "amount"
-          ]
+          "required": ["type", "amount"]
         }
       ]
     },
@@ -871,9 +653,7 @@
           "type": "string",
           "format": "date-time",
           "description": "When the event occurred.",
-          "examples": [
-            "2026-02-24T12:00:00Z"
-          ]
+          "examples": ["2026-02-24T12:00:00Z"]
         },
         "source": {
           "description": "Where the event originated — oneOf with if/then/else inside a branch.",
@@ -882,10 +662,7 @@
               "title": "Web Source",
               "type": "object",
               "description": "Event from a web browser, with if/then/else based on device type.",
-              "required": [
-                "platform",
-                "device_type"
-              ],
+              "required": ["platform", "device_type"],
               "properties": {
                 "platform": {
                   "type": "string",
@@ -894,21 +671,13 @@
                 "device_type": {
                   "type": "string",
                   "description": "The type of device.",
-                  "enum": [
-                    "desktop",
-                    "mobile",
-                    "tablet"
-                  ],
-                  "examples": [
-                    "desktop"
-                  ]
+                  "enum": ["desktop", "mobile", "tablet"],
+                  "examples": ["desktop"]
                 },
                 "browser": {
                   "type": "string",
                   "description": "Browser name.",
-                  "examples": [
-                    "Chrome"
-                  ]
+                  "examples": ["Chrome"]
                 }
               },
               "if": {
@@ -917,9 +686,7 @@
                     "const": "mobile"
                   }
                 },
-                "required": [
-                  "device_type"
-                ]
+                "required": ["device_type"]
               },
               "then": {
                 "description": "Mobile web sessions include screen size and touch capability.",
@@ -927,16 +694,12 @@
                   "screen_width": {
                     "type": "integer",
                     "description": "Screen width in pixels.",
-                    "examples": [
-                      390
-                    ]
+                    "examples": [390]
                   },
                   "touch_capable": {
                     "type": "boolean",
                     "description": "Whether the device supports touch.",
-                    "examples": [
-                      true
-                    ]
+                    "examples": [true]
                   }
                 }
               },
@@ -946,16 +709,12 @@
                   "viewport_width": {
                     "type": "integer",
                     "description": "Browser viewport width in pixels.",
-                    "examples": [
-                      1920
-                    ]
+                    "examples": [1920]
                   },
                   "viewport_height": {
                     "type": "integer",
                     "description": "Browser viewport height in pixels.",
-                    "examples": [
-                      1080
-                    ]
+                    "examples": [1080]
                   }
                 }
               }
@@ -964,10 +723,7 @@
               "title": "App Source",
               "type": "object",
               "description": "Event from a native app.",
-              "required": [
-                "platform",
-                "app_version"
-              ],
+              "required": ["platform", "app_version"],
               "properties": {
                 "platform": {
                   "type": "string",
@@ -977,20 +733,13 @@
                   "type": "string",
                   "description": "Semantic version of the app.",
                   "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-                  "examples": [
-                    "3.2.1"
-                  ]
+                  "examples": ["3.2.1"]
                 },
                 "os": {
                   "type": "string",
                   "description": "Operating system.",
-                  "enum": [
-                    "ios",
-                    "android"
-                  ],
-                  "examples": [
-                    "ios"
-                  ]
+                  "enum": ["ios", "android"],
+                  "examples": ["ios"]
                 }
               }
             }
@@ -1022,30 +771,21 @@
             "description": "Tax rate as a decimal (e.g. 0.0825 for 8.25%).",
             "minimum": 0,
             "maximum": 1,
-            "examples": [
-              0.0825
-            ]
+            "examples": [0.0825]
           },
           "amount": {
             "type": "number",
             "description": "Calculated tax amount.",
             "minimum": 0,
-            "examples": [
-              6.6
-            ]
+            "examples": [6.6]
           },
           "jurisdiction": {
             "type": "string",
             "description": "Tax jurisdiction (state).",
-            "examples": [
-              "CA"
-            ]
+            "examples": ["CA"]
           }
         },
-        "required": [
-          "rate",
-          "amount"
-        ]
+        "required": ["rate", "amount"]
       }
     },
     "if": {
@@ -1070,22 +810,16 @@
             "applies": {
               "type": "boolean",
               "description": "Whether a recycling fee applies.",
-              "examples": [
-                true
-              ]
+              "examples": [true]
             },
             "amount": {
               "type": "number",
               "description": "Recycling fee amount.",
               "minimum": 0,
-              "examples": [
-                1.5
-              ]
+              "examples": [1.5]
             }
           },
-          "required": [
-            "applies"
-          ]
+          "required": ["applies"]
         }
       }
     },
@@ -1095,9 +829,7 @@
         "state_exemption_code": {
           "type": "string",
           "description": "State-specific tax exemption code.",
-          "examples": [
-            "TX-EXEMPT-001"
-          ]
+          "examples": ["TX-EXEMPT-001"]
         }
       }
     }
@@ -1109,9 +841,7 @@
         "type": "string",
         "description": "EU VAT identification number.",
         "pattern": "^[A-Z]{2}[0-9A-Z]+$",
-        "examples": [
-          "DE123456789"
-        ]
+        "examples": ["DE123456789"]
       }
     }
   }

@@ -14,35 +14,23 @@
       "type": "string",
       "const": "address_submitted",
       "description": "The event name.",
-      "examples": [
-        "address_submitted"
-      ]
+      "examples": ["address_submitted"]
     },
     "country": {
       "type": "string",
       "description": "The user's country code.",
-      "enum": [
-        "US",
-        "CA"
-      ],
-      "examples": [
-        "US"
-      ]
+      "enum": ["US", "CA"],
+      "examples": ["US"]
     }
   },
-  "required": [
-    "event",
-    "country"
-  ],
+  "required": ["event", "country"],
   "if": {
     "properties": {
       "country": {
         "const": "US"
       }
     },
-    "required": [
-      "country"
-    ]
+    "required": ["country"]
   },
   "then": {
     "properties": {
@@ -50,23 +38,17 @@
         "type": "string",
         "description": "US ZIP code (5-digit format).",
         "pattern": "^[0-9]{5}$",
-        "examples": [
-          "90210"
-        ]
+        "examples": ["90210"]
       },
       "state": {
         "type": "string",
         "description": "US state abbreviation.",
         "minLength": 2,
         "maxLength": 2,
-        "examples": [
-          "CA"
-        ]
+        "examples": ["CA"]
       }
     },
-    "required": [
-      "postal_code"
-    ]
+    "required": ["postal_code"]
   },
   "else": {
     "properties": {
@@ -74,20 +56,14 @@
         "type": "string",
         "description": "Canadian postal code (letter-number format).",
         "pattern": "^[A-Z][0-9][A-Z] [0-9][A-Z][0-9]$",
-        "examples": [
-          "K1A 0B1"
-        ]
+        "examples": ["K1A 0B1"]
       },
       "province": {
         "type": "string",
         "description": "Canadian province abbreviation.",
-        "examples": [
-          "ON"
-        ]
+        "examples": ["ON"]
       }
     },
-    "required": [
-      "postal_code"
-    ]
+    "required": ["postal_code"]
   }
 }

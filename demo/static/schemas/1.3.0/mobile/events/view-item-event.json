@@ -30,16 +30,12 @@
           "description": "ISO 4217 currency code.",
           "minLength": 3,
           "maxLength": 3,
-          "examples": [
-            "USD"
-          ]
+          "examples": ["USD"]
         },
         "value": {
           "type": "number",
           "description": "Monetary value of the event.",
-          "examples": [
-            72.05
-          ]
+          "examples": [72.05]
         },
         "items": {
           "type": "array",
@@ -50,13 +46,8 @@
           }
         }
       },
-      "required": [
-        "items"
-      ]
+      "required": ["items"]
     }
   },
-  "required": [
-    "$schema",
-    "event"
-  ]
+  "required": ["$schema", "event"]
 }

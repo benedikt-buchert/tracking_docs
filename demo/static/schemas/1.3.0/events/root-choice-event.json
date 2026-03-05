@@ -13,9 +13,7 @@
           "const": "https://tracking-docs-demo.buchert.digital/schemas/events/root-choice-event.json"
         }
       },
-      "required": [
-        "$schema"
-      ]
+      "required": ["$schema"]
     },
     {
       "oneOf": [
@@ -31,9 +29,7 @@
             },
             "param_a": {
               "type": "string",
-              "examples": [
-                "example_a"
-              ]
+              "examples": ["example_a"]
             }
           }
         },
@@ -48,9 +44,7 @@
             },
             "param_b": {
               "type": "integer",
-              "examples": [
-                123
-              ]
+              "examples": [123]
             }
           }
         }

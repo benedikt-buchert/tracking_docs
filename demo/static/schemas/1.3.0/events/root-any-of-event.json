@@ -15,10 +15,7 @@
       "const": "any_of_event"
     }
   },
-  "required": [
-    "$schema",
-    "event"
-  ],
+  "required": ["$schema", "event"],
   "anyOf": [
     {
       "title": "Has Param C",
@@ -26,9 +23,7 @@
       "properties": {
         "param_c": {
           "type": "string",
-          "examples": [
-            "example_c"
-          ]
+          "examples": ["example_c"]
         }
       }
     },
@@ -37,9 +32,7 @@
       "properties": {
         "param_d": {
           "type": "boolean",
-          "examples": [
-            true
-          ]
+          "examples": [true]
         }
       }
     }
