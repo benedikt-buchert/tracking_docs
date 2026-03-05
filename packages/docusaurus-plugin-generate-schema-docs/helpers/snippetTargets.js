@@ -17,133 +17,147 @@ export const FIREBASE_SNIPPET_SOURCES = [
     url: 'https://firebase.google.com/docs/analytics/screenviews',
     reviewedAt: '2026-03-05',
   },
+  {
+    id: 'firebase-android-event-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Event',
+    reviewedAt: '2026-03-05',
+  },
+  {
+    id: 'firebase-android-param-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.Param',
+    reviewedAt: '2026-03-05',
+  },
 ];
 
-const FIREBASE_EVENT_CONSTANTS = {
-  purchase: {
-    kotlin: 'FirebaseAnalytics.Event.PURCHASE',
-    java: 'FirebaseAnalytics.Event.PURCHASE',
-    swift: 'AnalyticsEventPurchase',
-    objc: 'kFIREventPurchase',
-  },
-  screen_view: {
-    kotlin: 'FirebaseAnalytics.Event.SCREEN_VIEW',
-    java: 'FirebaseAnalytics.Event.SCREEN_VIEW',
-    swift: 'AnalyticsEventScreenView',
-    objc: 'kFIREventScreenView',
-  },
+const FIREBASE_PREDEFINED_EVENTS = new Set([
+  'ad_impression',
+  'add_payment_info',
+  'add_shipping_info',
+  'add_to_cart',
+  'add_to_wishlist',
+  'app_open',
+  'begin_checkout',
+  'campaign_details',
+  'earn_virtual_currency',
+  'generate_lead',
+  'join_group',
+  'level_end',
+  'level_start',
+  'level_up',
+  'login',
+  'post_score',
+  'purchase',
+  'refund',
+  'remove_from_cart',
+  'screen_view',
+  'search',
+  'select_content',
+  'select_item',
+  'select_promotion',
+  'share',
+  'sign_up',
+  'spend_virtual_currency',
+  'tutorial_begin',
+  'tutorial_complete',
+  'unlock_achievement',
+  'view_cart',
+  'view_item',
+  'view_item_list',
+  'view_promotion',
+  'view_search_results',
+]);
+
+const FIREBASE_PREDEFINED_PARAMS = new Set([
+  'achievement_id',
+  'ad_format',
+  'ad_platform',
+  'ad_source',
+  'affiliation',
+  'campaign',
+  'character',
+  'content',
+  'content_type',
+  'coupon',
+  'cp1',
+  'creative_name',
+  'creative_slot',
+  'currency',
+  'destination',
+  'discount',
+  'end_date',
+  'extend_session',
+  'flight_number',
+  'group_id',
+  'index',
+  'items',
+  'item_brand',
+  'item_category',
+  'item_category2',
+  'item_category3',
+  'item_category4',
+  'item_category5',
+  'item_id',
+  'item_list_id',
+  'item_list_name',
+  'item_name',
+  'item_variant',
+  'level',
+  'level_name',
+  'location',
+  'location_id',
+  'medium',
+  'method',
+  'number_of_nights',
+  'number_of_passengers',
+  'number_of_rooms',
+  'origin',
+  'payment_type',
+  'price',
+  'promotion_id',
+  'promotion_name',
+  'quantity',
+  'score',
+  'screen_class',
+  'screen_name',
+  'search_term',
+  'shipping',
+  'shipping_tier',
+  'source',
+  'start_date',
+  'success',
+  'tax',
+  'term',
+  'transaction_id',
+  'travel_class',
+  'value',
+  'virtual_currency_name',
+]);
+
+const FIREBASE_PARAM_ALIASES = {
+  firebase_screen: 'screen_name',
+  firebase_screen_class: 'screen_class',
 };
 
-const FIREBASE_PARAM_CONSTANTS = {
-  transaction_id: {
-    kotlin: 'FirebaseAnalytics.Param.TRANSACTION_ID',
-    java: 'FirebaseAnalytics.Param.TRANSACTION_ID',
-    swift: 'AnalyticsParameterTransactionID',
-    objc: 'kFIRParameterTransactionID',
-  },
-  affiliation: {
-    kotlin: 'FirebaseAnalytics.Param.AFFILIATION',
-    java: 'FirebaseAnalytics.Param.AFFILIATION',
-    swift: 'AnalyticsParameterAffiliation',
-    objc: 'kFIRParameterAffiliation',
-  },
-  currency: {
-    kotlin: 'FirebaseAnalytics.Param.CURRENCY',
-    java: 'FirebaseAnalytics.Param.CURRENCY',
-    swift: 'AnalyticsParameterCurrency',
-    objc: 'kFIRParameterCurrency',
-  },
-  value: {
-    kotlin: 'FirebaseAnalytics.Param.VALUE',
-    java: 'FirebaseAnalytics.Param.VALUE',
-    swift: 'AnalyticsParameterValue',
-    objc: 'kFIRParameterValue',
-  },
-  tax: {
-    kotlin: 'FirebaseAnalytics.Param.TAX',
-    java: 'FirebaseAnalytics.Param.TAX',
-    swift: 'AnalyticsParameterTax',
-    objc: 'kFIRParameterTax',
-  },
-  shipping: {
-    kotlin: 'FirebaseAnalytics.Param.SHIPPING',
-    java: 'FirebaseAnalytics.Param.SHIPPING',
-    swift: 'AnalyticsParameterShipping',
-    objc: 'kFIRParameterShipping',
-  },
-  coupon: {
-    kotlin: 'FirebaseAnalytics.Param.COUPON',
-    java: 'FirebaseAnalytics.Param.COUPON',
-    swift: 'AnalyticsParameterCoupon',
-    objc: 'kFIRParameterCoupon',
-  },
-  items: {
-    kotlin: 'FirebaseAnalytics.Param.ITEMS',
-    java: 'FirebaseAnalytics.Param.ITEMS',
-    swift: 'AnalyticsParameterItems',
-    objc: 'kFIRParameterItems',
-  },
-  item_id: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_ID',
-    java: 'FirebaseAnalytics.Param.ITEM_ID',
-    swift: 'AnalyticsParameterItemID',
-    objc: 'kFIRParameterItemID',
-  },
-  item_name: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_NAME',
-    java: 'FirebaseAnalytics.Param.ITEM_NAME',
-    swift: 'AnalyticsParameterItemName',
-    objc: 'kFIRParameterItemName',
-  },
-  item_category: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
-    java: 'FirebaseAnalytics.Param.ITEM_CATEGORY',
-    swift: 'AnalyticsParameterItemCategory',
-    objc: 'kFIRParameterItemCategory',
-  },
-  item_variant: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_VARIANT',
-    java: 'FirebaseAnalytics.Param.ITEM_VARIANT',
-    swift: 'AnalyticsParameterItemVariant',
-    objc: 'kFIRParameterItemVariant',
-  },
-  item_brand: {
-    kotlin: 'FirebaseAnalytics.Param.ITEM_BRAND',
-    java: 'FirebaseAnalytics.Param.ITEM_BRAND',
-    swift: 'AnalyticsParameterItemBrand',
-    objc: 'kFIRParameterItemBrand',
-  },
-  price: {
-    kotlin: 'FirebaseAnalytics.Param.PRICE',
-    java: 'FirebaseAnalytics.Param.PRICE',
-    swift: 'AnalyticsParameterPrice',
-    objc: 'kFIRParameterPrice',
-  },
-  screen_name: {
-    kotlin: 'FirebaseAnalytics.Param.SCREEN_NAME',
-    java: 'FirebaseAnalytics.Param.SCREEN_NAME',
-    swift: 'AnalyticsParameterScreenName',
-    objc: 'kFIRParameterScreenName',
-  },
-  screen_class: {
-    kotlin: 'FirebaseAnalytics.Param.SCREEN_CLASS',
-    java: 'FirebaseAnalytics.Param.SCREEN_CLASS',
-    swift: 'AnalyticsParameterScreenClass',
-    objc: 'kFIRParameterScreenClass',
-  },
-  firebase_screen: {
-    kotlin: 'FirebaseAnalytics.Param.SCREEN_NAME',
-    java: 'FirebaseAnalytics.Param.SCREEN_NAME',
-    swift: 'AnalyticsParameterScreenName',
-    objc: 'kFIRParameterScreenName',
-  },
-  firebase_screen_class: {
-    kotlin: 'FirebaseAnalytics.Param.SCREEN_CLASS',
-    java: 'FirebaseAnalytics.Param.SCREEN_CLASS',
-    swift: 'AnalyticsParameterScreenClass',
-    objc: 'kFIRParameterScreenClass',
-  },
+const FIREBASE_ABBREVIATIONS = {
+  id: 'ID',
+  cp1: 'CP1',
 };
+
+function toFirebaseUpperSnake(key) {
+  return key.toUpperCase();
+}
+
+function toFirebasePascalCase(key) {
+  return key
+    .split('_')
+    .filter(Boolean)
+    .map((segment) => {
+      const abbreviation = FIREBASE_ABBREVIATIONS[segment.toLowerCase()];
+      if (abbreviation) return abbreviation;
+      return segment.charAt(0).toUpperCase() + segment.slice(1);
+    })
+    .join('');
+}
 
 export const findClearableProperties = (schema) => {
   if (!schema || !schema.properties) return [];
@@ -219,15 +233,30 @@ function toFirebaseParamEntries(example) {
 }
 
 function getFirebaseEventExpression(eventName, platform) {
-  const known = FIREBASE_EVENT_CONSTANTS[eventName]?.[platform];
-  if (known) return known;
+  if (FIREBASE_PREDEFINED_EVENTS.has(eventName)) {
+    const upper = toFirebaseUpperSnake(eventName);
+    const pascal = toFirebasePascalCase(eventName);
+    if (platform === 'kotlin' || platform === 'java') {
+      return `FirebaseAnalytics.Event.${upper}`;
+    }
+    if (platform === 'swift') return `AnalyticsEvent${pascal}`;
+    if (platform === 'objc') return `kFIREvent${pascal}`;
+  }
   if (platform === 'objc') return `@"${escapeObjCString(eventName)}"`;
   return JSON.stringify(eventName);
 }
 
 function getFirebaseParamExpression(key, platform) {
-  const known = FIREBASE_PARAM_CONSTANTS[key]?.[platform];
-  if (known) return known;
+  const canonicalKey = FIREBASE_PARAM_ALIASES[key] || key;
+  if (FIREBASE_PREDEFINED_PARAMS.has(canonicalKey)) {
+    const upper = toFirebaseUpperSnake(canonicalKey);
+    const pascal = toFirebasePascalCase(canonicalKey);
+    if (platform === 'kotlin' || platform === 'java') {
+      return `FirebaseAnalytics.Param.${upper}`;
+    }
+    if (platform === 'swift') return `AnalyticsParameter${pascal}`;
+    if (platform === 'objc') return `kFIRParameter${pascal}`;
+  }
   if (platform === 'objc') return `@"${escapeObjCString(key)}"`;
   return JSON.stringify(key);
 }

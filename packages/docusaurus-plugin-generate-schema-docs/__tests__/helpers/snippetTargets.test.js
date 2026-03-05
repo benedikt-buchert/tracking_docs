@@ -64,7 +64,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('firebaseAnalytics.logEvent("share_image")');
     expect(snippet).toContain('param("image_name", "hero.jpg")');
     expect(snippet).toContain('param("count", 2L)');
-    expect(snippet).toContain('param("score", 4.5)');
+    expect(snippet).toContain('param(FirebaseAnalytics.Param.SCORE, 4.5)');
     expect(snippet).toContain('param("premium", 1L)');
   });
 
@@ -86,7 +86,9 @@ describe('snippetTargets', () => {
       'purchaseParams.putString("image_name", "hero.jpg");',
     );
     expect(snippet).toContain('purchaseParams.putLong("count", 2L);');
-    expect(snippet).toContain('purchaseParams.putDouble("score", 4.5);');
+    expect(snippet).toContain(
+      'purchaseParams.putDouble(FirebaseAnalytics.Param.SCORE, 4.5);',
+    );
     expect(snippet).toContain('purchaseParams.putLong("premium", 0L);');
     expect(snippet).toContain(
       'mFirebaseAnalytics.logEvent("share_image", purchaseParams);',
@@ -109,7 +111,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('var purchaseParams: [String: Any] = [');
     expect(snippet).toContain('"image_name": "hero.jpg"');
     expect(snippet).toContain('"count": 2');
-    expect(snippet).toContain('"score": 4.5');
+    expect(snippet).toContain('AnalyticsParameterScore: 4.5');
     expect(snippet).toContain('"premium": 1');
     expect(snippet).toContain(
       'Analytics.logEvent("share_image", parameters: purchaseParams)',
@@ -132,7 +134,7 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('NSMutableDictionary *purchaseParams = [@{');
     expect(snippet).toContain('@"image_name": @"hero.jpg"');
     expect(snippet).toContain('@"count": @(2)');
-    expect(snippet).toContain('@"score": @(4.5)');
+    expect(snippet).toContain('kFIRParameterScore: @(4.5)');
     expect(snippet).toContain('@"premium": @(0)');
     expect(snippet).toContain(
       '[FIRAnalytics logEventWithName:@"share_image" parameters:purchaseParams];',
@@ -352,6 +354,58 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('kFIRParameterScreenName: @"Checkout"');
     expect(snippet).toContain(
       'kFIRParameterScreenClass: @"CheckoutViewController"',
+    );
+  });
+
+  it('maps additional predefined firebase event and parameter constants', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'add_to_cart',
+        currency: 'EUR',
+        value: 42.5,
+      },
+      schema: { properties: {} },
+    });
+    const swiftSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'login',
+        method: 'email',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART)',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.CURRENCY, "EUR")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.VALUE, 42.5)',
+    );
+    expect(swiftSnippet).toContain(
+      'Analytics.logEvent(AnalyticsEventLogin, parameters: purchaseParams)',
+    );
+    expect(swiftSnippet).toContain('AnalyticsParameterMethod: "email"');
+  });
+
+  it('keeps custom events and params as string literals', () => {
+    const javaSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'my_custom_event',
+        custom_prop: 'x',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(javaSnippet).toContain(
+      'mFirebaseAnalytics.logEvent("my_custom_event", purchaseParams);',
+    );
+    expect(javaSnippet).toContain(
+      'purchaseParams.putString("custom_prop", "x");',
     );
   });
 });
