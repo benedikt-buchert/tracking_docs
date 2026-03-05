@@ -28,74 +28,60 @@
         "transaction_id": {
           "type": "string",
           "description": "Unique transaction identifier.",
-          "examples": ["T_12345"]
+          "examples": [
+            "T_12345"
+          ]
         },
         "currency": {
           "type": "string",
           "description": "ISO 4217 currency code.",
           "minLength": 3,
           "maxLength": 3,
-          "examples": ["USD"]
+          "examples": [
+            "USD"
+          ]
         },
         "value": {
           "type": "number",
           "description": "Monetary value of the event.",
-          "examples": [72.05]
+          "examples": [
+            72.05
+          ]
         },
         "coupon": {
           "type": "string",
           "description": "Coupon code associated with the event.",
-          "examples": ["SUMMER_FUN"]
+          "examples": [
+            "SUMMER_FUN"
+          ]
         },
         "tax": {
           "type": "number",
           "description": "Tax amount for the event.",
-          "examples": [3.6]
+          "examples": [
+            3.6
+          ]
         },
         "shipping": {
           "type": "number",
           "description": "Shipping cost for the event.",
-          "examples": [5.99]
+          "examples": [
+            5.99
+          ]
         },
         "payment_type": {
           "type": "string",
           "description": "Selected payment type.",
-          "examples": ["Credit Card"]
+          "examples": [
+            "Credit Card"
+          ]
         },
         "shipping_tier": {
           "type": "string",
           "description": "Selected shipping tier.",
-          "examples": ["Ground"]
-        },
-        "item_list_id": {
-          "type": "string",
-          "description": "ID of the item list.",
-          "examples": ["related_products"]
-        },
-        "item_list_name": {
-          "type": "string",
-          "description": "Name of the item list.",
-          "examples": ["Related Products"]
-        },
-        "promotion_id": {
-          "type": "string",
-          "description": "ID of the promotion.",
-          "examples": ["P_12345"]
-        },
-        "promotion_name": {
-          "type": "string",
-          "description": "Name of the promotion.",
-          "examples": ["Summer Sale"]
-        },
-        "creative_name": {
-          "type": "string",
-          "description": "Name of the promotion creative.",
-          "examples": ["summer_banner"]
-        },
-        "creative_slot": {
-          "type": "string",
-          "description": "Creative slot associated with the promotion.",
-          "examples": ["featured_app_1"]
+          "examples": [
+            "Ground"
+          ]
         },
         "items": {
           "type": "array",
@@ -106,8 +92,16 @@
           }
         }
       },
-      "required": ["transaction_id", "currency", "value", "items"]
+      "required": [
+        "transaction_id",
+        "currency",
+        "value",
+        "items"
+      ]
     }
   },
-  "required": ["$schema", "event"]
+  "required": [
+    "$schema",
+    "event"
+  ]
 }
