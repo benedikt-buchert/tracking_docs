@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
@@ -15,6 +15,13 @@ function readHashTarget() {
   if (typeof window === 'undefined') return null;
   const raw = window.location.hash || '';
   const query = raw.startsWith('#') ? raw.substring(1) : raw;
+  const params = new URLSearchParams(query);
+  return params.get(TARGET_HASH_KEY);
+}
+
+function readSearchTarget(search = '') {
+  const query = search.startsWith('?') ? search.substring(1) : search;
+  if (!query) return null;
   const params = new URLSearchParams(query);
   return params.get(TARGET_HASH_KEY);
 }
@@ -54,11 +61,35 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
     [schema, dataLayerName],
   );
   const exampleGroups = model.variantGroups;
-  const [selectedTargetId, setSelectedTargetId] = useState(() =>
-    resolveInitialTargetId(model.targets),
-  );
-  const targetId = selectedTargetId || model.targets[0]?.id;
+  const targetId = resolveInitialTargetId(model.targets);
   const showTargetTabs = model.targets.length > 1;
+  const validTargetIds = useMemo(
+    () => new Set(model.targets.map((target) => target.id)),
+    [model.targets],
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const syncFromSearch = () => {
+      const targetFromSearch = readSearchTarget(window.location.search);
+      if (!targetFromSearch || !validTargetIds.has(targetFromSearch)) return;
+      persistTarget(targetFromSearch);
+    };
+
+    syncFromSearch();
+
+    const originalReplaceState = window.history.replaceState;
+    window.history.replaceState = function patchedReplaceState(...args) {
+      const result = originalReplaceState.apply(window.history, args);
+      syncFromSearch();
+      return result;
+    };
+
+    return () => {
+      window.history.replaceState = originalReplaceState;
+    };
+  }, [validTargetIds]);
 
   if (!exampleGroups || exampleGroups.length === 0) {
     return null;
@@ -116,13 +147,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
 
   return (
     <div data-testid="target-tabs">
-      <Tabs
-        defaultValue={targetId}
-        onChange={(value) => {
-          setSelectedTargetId(value);
-          persistTarget(value);
-        }}
-      >
+      <Tabs defaultValue={targetId} queryString={TARGET_HASH_KEY}>
         {model.targets.map((target) => (
           <TabItem value={target.id} label={target.label} key={target.id}>
             {renderVariantGroups(target.id)}
@@ -137,5 +162,6 @@ export {
   findClearableProperties,
   resolveInitialTargetId,
   readHashTarget,
+  readSearchTarget,
   TARGET_STORAGE_KEY,
 };

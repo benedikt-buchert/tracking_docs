@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import ExampleDataLayer, {
   findClearableProperties,
   readHashTarget,
+  readSearchTarget,
   resolveInitialTargetId,
   TARGET_STORAGE_KEY,
 } from '../components/ExampleDataLayer';
@@ -17,8 +18,20 @@ jest.mock('@theme/CodeBlock', () => {
 });
 
 jest.mock('@theme/Tabs', () => {
-  return function Tabs({ children }) {
-    return <div data-testid="tabs">{children}</div>;
+  return function Tabs({ children, queryString, defaultValue }) {
+    const attrs = {};
+    if (queryString !== undefined) {
+      attrs['data-query-string'] = queryString;
+    }
+    if (defaultValue !== undefined) {
+      attrs['data-default-value'] = defaultValue;
+    }
+
+    return (
+      <div data-testid="tabs" {...attrs}>
+        {children}
+      </div>
+    );
   };
 });
 
@@ -112,6 +125,7 @@ describe('ExampleDataLayer', () => {
         'Android Firebase (Kotlin)',
       ]),
     );
+    expect(getByTestId('tabs')).toHaveAttribute('data-query-string', 'target');
   });
 
   it('should not render target tabs for single-target schemas', () => {
@@ -157,6 +171,12 @@ describe('target selection helpers', () => {
   it('reads target from hash', () => {
     window.location.hash = '#target=android-firebase-java-sdk';
     expect(readHashTarget()).toBe('android-firebase-java-sdk');
+  });
+
+  it('reads target from search', () => {
+    expect(readSearchTarget('?target=android-firebase-java-sdk')).toBe(
+      'android-firebase-java-sdk',
+    );
   });
 
   it('prefers hash over localStorage for initial target resolution', () => {
