@@ -19,6 +19,7 @@ function processOptions(
   requiredArray = [],
   continuingLevels = [],
   groupBrackets = [],
+  choiceIsLastInGroup = true,
 ) {
   return choices.map((optionSchema, index) => {
     const optionTitle = optionSchema.title || 'Option';
@@ -50,7 +51,8 @@ function processOptions(
         description: optionSchema.description,
         examples: getExamples(optionSchema),
         constraints: constraints,
-        isLastInGroup: isLastOption, // Updated: Uses the calculated flag instead of always true
+        // Keep connector lines open when the enclosing choice block isn't truly last.
+        isLastInGroup: isLastOption && choiceIsLastInGroup,
         hasChildren: false,
         containerType: null,
         continuingLevels: [...continuingLevels],
@@ -65,7 +67,7 @@ function processOptions(
         level,
         isNestedInProperty ? [] : path,
         continuingLevels,
-        isLastOption,
+        isLastOption && choiceIsLastInGroup,
         groupBrackets,
       );
     }
@@ -114,6 +116,7 @@ export function schemaToTableData(
     continuingLevels,
     currentGroupBrackets = [],
     ownContinuingLevels,
+    conditionalIsLastInGroup = true,
   ) {
     // Inner rows (condition, branches) inherit the parent's continuingLevels.
     // The immediate parent connector (currentLevel - 1) is handled by the
@@ -149,7 +152,8 @@ export function schemaToTableData(
           currentLevel,
           currentPath,
           thenLevels,
-          !hasElse, // false when Else exists: Else toggle follows, so last prop isn't truly last
+          // Keep branch connectors open if this conditional block isn't truly last.
+          !hasElse && conditionalIsLastInGroup,
           innerGroupBrackets,
         ),
       });
@@ -164,7 +168,7 @@ export function schemaToTableData(
           currentLevel,
           currentPath,
           continuingLevels,
-          true,
+          conditionalIsLastInGroup,
           innerGroupBrackets,
         ),
       });
@@ -181,7 +185,7 @@ export function schemaToTableData(
       type: 'conditional',
       path: [...currentPath, 'if/then/else'],
       level: currentLevel,
-      isLastInGroup: true,
+      isLastInGroup: conditionalIsLastInGroup,
       hasChildren: false,
       containerType: null,
       continuingLevels: [...rowContinuingLevels],
@@ -318,6 +322,7 @@ export function schemaToTableData(
               subSchema.required || requiredFromParent,
               childContinuingLevels,
               innerGroupBrackets,
+              isLast,
             ),
           });
         } else {
@@ -381,6 +386,8 @@ export function schemaToTableData(
                 [...newPath, '[n]'],
                 childContinuingLevels,
                 currentGroupBrackets,
+                undefined,
+                isLast,
               );
             }
           } else if (isChoiceWrapper) {
@@ -430,6 +437,8 @@ export function schemaToTableData(
               newPath,
               childContinuingLevels,
               currentGroupBrackets,
+              undefined,
+              isLast,
             );
           }
         }
@@ -456,6 +465,8 @@ export function schemaToTableData(
       const choices = subSchema[choiceType];
       const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
       const innerGroupBrackets = [...currentGroupBrackets, ownBracket];
+      const choiceIsLastInGroup =
+        isLastOption && !(subSchema.if && (subSchema.then || subSchema.else));
       flatRows.push({
         type: 'choice',
         choiceType,
@@ -463,7 +474,7 @@ export function schemaToTableData(
         level: currentLevel,
         title: subSchema.title,
         description: subSchema.description,
-        isLastInGroup: true,
+        isLastInGroup: choiceIsLastInGroup,
         hasChildren: false,
         containerType: null,
         continuingLevels: [...ownContinuingLevels],
@@ -476,6 +487,7 @@ export function schemaToTableData(
           subSchema.required || requiredFromParent,
           continuingLevels,
           innerGroupBrackets,
+          choiceIsLastInGroup,
         ),
       });
     } else if (!subSchema.properties && subSchema.type) {
@@ -509,6 +521,7 @@ export function schemaToTableData(
         continuingLevels,
         currentGroupBrackets,
         hasProperties ? [...ownContinuingLevels] : undefined,
+        isLastOption,
       );
     }
   }

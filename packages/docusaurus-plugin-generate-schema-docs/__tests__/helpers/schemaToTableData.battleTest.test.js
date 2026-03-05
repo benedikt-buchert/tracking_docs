@@ -127,7 +127,8 @@ describe('schemaToTableData – battle-test-event integration', () => {
 
       const intOpt = userId.options[1];
       expect(intOpt.title).toBe('Integer ID');
-      expect(intOpt.rows[0].isLastInGroup).toBe(true);
+      // Must keep the branch line going because user-level conditional follows
+      expect(intOpt.rows[0].isLastInGroup).toBe(false);
     });
 
     it('user conditional – condition rows', () => {
@@ -373,6 +374,31 @@ describe('schemaToTableData – battle-test-event integration', () => {
       expect(walletProvider.choiceType).toBe('oneOf');
       // Simple choice: scalar options, no property row
       expect(walletProvider.options).toHaveLength(2);
+
+      // Last wallet provider option must not terminate the line because
+      // wallet_email follows at the same level in this option.
+      const customProviderRow = walletProvider.options[1].rows[0];
+      expect(customProviderRow.name).toBe('wallet_provider');
+      expect(customProviderRow.isLastInGroup).toBe(false);
+    });
+
+    it('cvv in credit-card else branch keeps line continuity to following options', () => {
+      const paymentChoice = rows.find(
+        (r) =>
+          r.type === 'choice' &&
+          r.path[0] === 'payment' &&
+          r.choiceType === 'anyOf',
+      );
+      const creditCard = paymentChoice.options[0];
+      const cardConditional = creditCard.rows.find(
+        (r) => r.type === 'conditional',
+      );
+      const cvvRow = cardConditional.branches[1].rows.find(
+        (r) => r.name === 'cvv',
+      );
+
+      // Credit Card is not the last anyOf option, so cvv must not close the branch.
+      expect(cvvRow.isLastInGroup).toBe(false);
     });
   });
 
