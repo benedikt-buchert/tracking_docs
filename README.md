@@ -73,6 +73,24 @@ To validate all schemas, run:
 npm run validate-schemas
 ```
 
+## GTM Sync Workflow Setup
+
+The GTM sync Github workflow (`.github/workflows/sync-gtm.yml`) is manual execution and uses service-account auth in CI. This can be set up to be run with evry deployment in your repo.
+
+### Required GitHub configuration
+
+1. Add repository secret `GTM_SERVICE_ACCOUNT_KEY`
+   Store the full JSON key content (not a file path).
+2. Add repository variable `GTM_ACCOUNT_ID`
+   Your Google Tag Manager account ID.
+3. Add repository variable `GTM_CONTAINER_ID`
+   Your Google Tag Manager container ID.
+
+That is all required to run the workflow.
+
+For local usage, authenticate with `gtm auth login` (or other supported auth methods) per the official GTM CLI docs:
+https://github.com/owntag/gtm-cli#authentication
+
 ## Release Process
 
 This project has a separated release process for the demo site and the plugin.
