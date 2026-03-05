@@ -551,4 +551,68 @@ describe('snippetTargets', () => {
     );
     expect(kotlinSnippet).not.toContain('param("user_properties"');
   });
+
+  it('maps ecommerce-focused params with IDs and numbered categories correctly', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'select_promotion',
+        promotion_id: 'PROMO_123',
+        promotion_name: 'Summer Sale',
+        creative_slot: 'hero_top',
+        item_list_id: 'LIST_42',
+        item_list_name: 'Homepage Picks',
+      },
+      schema: { properties: {} },
+    });
+    const swiftSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'purchase',
+        ecommerce: {
+          transaction_id: 'T_100',
+          shipping_tier: 'Express',
+          items: [
+            {
+              item_id: 'SKU_123',
+              item_name: 'jeggings',
+              item_category2: 'bottoms',
+              item_category5: 'sale',
+            },
+          ],
+        },
+      },
+      schema: { properties: {} },
+    });
+    const objcSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'add_to_cart',
+        ecommerce: {
+          item_list_id: 'LIST_42',
+          item_list_name: 'Homepage Picks',
+          coupon: 'WELCOME10',
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.PROMOTION_ID, "PROMO_123")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.ITEM_LIST_ID, "LIST_42")',
+    );
+    expect(swiftSnippet).toContain('AnalyticsParameterTransactionID: "T_100"');
+    expect(swiftSnippet).toContain('AnalyticsParameterShippingTier: "Express"');
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterItemCategory2: "bottoms"',
+    );
+    expect(swiftSnippet).toContain('AnalyticsParameterItemCategory5: "sale"');
+    expect(objcSnippet).toContain('kFIRParameterItemListID: @"LIST_42"');
+    expect(objcSnippet).toContain(
+      'kFIRParameterItemListName: @"Homepage Picks"',
+    );
+    expect(objcSnippet).toContain('kFIRParameterCoupon: @"WELCOME10"');
+  });
 });
