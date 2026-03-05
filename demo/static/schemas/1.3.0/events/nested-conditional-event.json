@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/events/nested-conditional-event.json",
+  "title": "Nested Conditional Event",
+  "description": "An event demonstrating if/then/else conditional properties nested inside a property. The shipping details depend on the selected method.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/events/nested-conditional-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "order_placed",
+      "description": "The event name.",
+      "examples": [
+        "order_placed"
+      ]
+    },
+    "order_id": {
+      "type": "string",
+      "description": "Unique identifier for the order.",
+      "examples": [
+        "ORD-12345"
+      ]
+    },
+    "shipping": {
+      "type": "object",
+      "description": "Shipping details for the order.",
+      "properties": {
+        "method": {
+          "type": "string",
+          "description": "The shipping method selected by the customer.",
+          "enum": [
+            "express",
+            "standard"
+          ],
+          "examples": [
+            "express"
+          ]
+        }
+      },
+      "required": [
+        "method"
+      ],
+      "if": {
+        "properties": {
+          "method": {
+            "const": "express"
+          }
+        },
+        "required": [
+          "method"
+        ]
+      },
+      "then": {
+        "description": "Express shipping includes a priority level.",
+        "properties": {
+          "priority_level": {
+            "type": "string",
+            "description": "Priority level for express delivery.",
+            "enum": [
+              "high",
+              "critical"
+            ],
+            "examples": [
+              "high"
+            ]
+          },
+          "guaranteed_by": {
+            "type": "string",
+            "description": "Guaranteed delivery date (ISO 8601).",
+            "format": "date",
+            "examples": [
+              "2026-03-01"
+            ]
+          }
+        },
+        "required": [
+          "priority_level"
+        ]
+      },
+      "else": {
+        "description": "Standard shipping includes estimated delivery days.",
+        "properties": {
+          "estimated_days": {
+            "type": "integer",
+            "description": "Estimated number of days for delivery.",
+            "minimum": 1,
+            "maximum": 30,
+            "examples": [
+              5
+            ]
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "event",
+    "order_id",
+    "shipping"
+  ]
+}

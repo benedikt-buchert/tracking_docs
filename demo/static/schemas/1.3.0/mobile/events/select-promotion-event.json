@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/events/select-promotion-event.json",
+  "title": "Select Promotion",
+  "description": "Triggered when a user selects a promotion.",
+  "x-tracking-targets": [
+    "android-firebase-kotlin-sdk",
+    "android-firebase-java-sdk",
+    "ios-firebase-swift-sdk",
+    "ios-firebase-objc-sdk"
+  ],
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/select-promotion-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "select_promotion",
+      "description": "The event name select_promotion."
+    },
+    "ecommerce": {
+      "type": "object",
+      "description": "Ecommerce payload for this event.",
+      "properties": {
+        "promotion_id": {
+          "type": "string",
+          "description": "ID of the promotion.",
+          "examples": [
+            "P_12345"
+          ]
+        },
+        "promotion_name": {
+          "type": "string",
+          "description": "Name of the promotion.",
+          "examples": [
+            "Summer Sale"
+          ]
+        },
+        "creative_name": {
+          "type": "string",
+          "description": "Name of the promotion creative.",
+          "examples": [
+            "summer_banner"
+          ]
+        },
+        "creative_slot": {
+          "type": "string",
+          "description": "Creative slot associated with the promotion.",
+          "examples": [
+            "featured_app_1"
+          ]
+        },
+        "items": {
+          "type": "array",
+          "description": "Items associated with this ecommerce event.",
+          "minItems": 1,
+          "items": {
+            "$ref": "../../events/components/product.json"
+          }
+        }
+      },
+      "required": []
+    }
+  },
+  "required": [
+    "$schema",
+    "event"
+  ]
+}
