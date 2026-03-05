@@ -198,6 +198,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
       <Tabs defaultValue={targetId} queryString={TARGET_HASH_KEY}>
         {safeTargets.map((target) => (
           <TabItem value={target.id} label={target.label} key={target.id}>
+            <span id={`${TARGET_HASH_KEY}=${target.id}`} />
             {renderVariantGroups(target.id)}
           </TabItem>
         ))}
