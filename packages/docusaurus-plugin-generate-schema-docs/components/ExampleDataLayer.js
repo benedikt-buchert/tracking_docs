@@ -41,8 +41,11 @@ function persistTarget(targetId) {
 }
 
 function resolveInitialTargetId(targets) {
-  if (targets.length === 0) return null;
-  const validTargetIds = new Set(targets.map((t) => t.id));
+  const safeTargets = Array.isArray(targets)
+    ? targets.filter((t) => t && typeof t.id === 'string' && t.id.length > 0)
+    : [];
+  if (safeTargets.length === 0) return null;
+  const validTargetIds = new Set(safeTargets.map((t) => t.id));
 
   const fromHash = readHashTarget();
   if (fromHash && validTargetIds.has(fromHash)) {
@@ -56,7 +59,7 @@ function resolveInitialTargetId(targets) {
     }
   }
 
-  return targets[0].id;
+  return safeTargets[0].id;
 }
 
 export default function ExampleDataLayer({ schema, dataLayerName }) {
@@ -64,12 +67,20 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
     () => buildExampleModel(schema, { dataLayerName }),
     [schema, dataLayerName],
   );
-  const exampleGroups = model.variantGroups;
-  const targetId = resolveInitialTargetId(model.targets);
-  const showTargetTabs = model.targets.length > 1;
-  const validTargetIds = useMemo(
-    () => new Set(model.targets.map((target) => target.id)),
+  const safeTargets = useMemo(
+    () =>
+      (Array.isArray(model.targets) ? model.targets : []).filter(
+        (target) =>
+          target && typeof target.id === 'string' && target.id.length > 0,
+      ),
     [model.targets],
+  );
+  const exampleGroups = model.variantGroups;
+  const targetId = resolveInitialTargetId(safeTargets);
+  const showTargetTabs = safeTargets.length > 1;
+  const validTargetIds = useMemo(
+    () => new Set(safeTargets.map((target) => target.id)),
+    [safeTargets],
   );
 
   useEffect(() => {
@@ -123,8 +134,8 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
   }
 
   const getLanguageForTarget = (targetIdForSnippet) =>
-    model.targets.find((target) => target.id === targetIdForSnippet)
-      ?.language || 'javascript';
+    safeTargets.find((target) => target.id === targetIdForSnippet)?.language ||
+    'javascript';
 
   const renderVariantGroups = (currentTargetId) => (
     <>
@@ -168,7 +179,9 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
 
   // Single target + single default variant => keep old layout
   if (!showTargetTabs && model.isSimpleDefault) {
-    const codeSnippet = exampleGroups[0].options[0].snippets[targetId];
+    const snippets = exampleGroups[0].options[0].snippets || {};
+    const codeSnippet =
+      (targetId && snippets[targetId]) || Object.values(snippets)[0] || '';
     return (
       <CodeBlock language={getLanguageForTarget(targetId)}>
         {codeSnippet}
@@ -183,7 +196,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
   return (
     <div data-testid="target-tabs">
       <Tabs defaultValue={targetId} queryString={TARGET_HASH_KEY}>
-        {model.targets.map((target) => (
+        {safeTargets.map((target) => (
           <TabItem value={target.id} label={target.label} key={target.id}>
             {renderVariantGroups(target.id)}
           </TabItem>

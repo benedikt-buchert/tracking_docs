@@ -243,4 +243,10 @@ describe('target selection helpers', () => {
 
     expect(resolveInitialTargetId(targets)).toBe('web-datalayer-js');
   });
+
+  it('ignores malformed targets and still resolves a valid initial target', () => {
+    const targets = [undefined, {}, { id: 'android-firebase-kotlin-sdk' }];
+    window.location.hash = '#target=android-firebase-kotlin-sdk';
+    expect(resolveInitialTargetId(targets)).toBe('android-firebase-kotlin-sdk');
+  });
 });
