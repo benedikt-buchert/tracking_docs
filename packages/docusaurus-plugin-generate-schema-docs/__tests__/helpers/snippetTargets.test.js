@@ -442,7 +442,45 @@ describe('snippetTargets', () => {
       '[FIRAnalytics logEventWithName:kFIREventCampaignDetails parameters:purchaseParams];',
     );
     expect(objcSnippet).toContain('kFIRParameterCampaignID: @"cmp_42"');
-    expect(objcSnippet).toContain('kFIRParameterACLID: @"aclid_99"');
+    expect(objcSnippet).toContain('kFIRParameterAdNetworkClickID: @"aclid_99"');
+  });
+
+  it('uses the iOS/Obj-C aclid exception constant and additional standard params', () => {
+    const swiftSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'campaign_details',
+        aclid: 'aclid_99',
+        source_platform: 'google_ads',
+        marketing_tactic: 'retargeting',
+      },
+      schema: { properties: {} },
+    });
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'ad_impression',
+        ad_unit_name: '/123/home',
+        creative_format: 'video',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterAdNetworkClickID: "aclid_99"',
+    );
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterSourcePlatform: "google_ads"',
+    );
+    expect(swiftSnippet).toContain(
+      'AnalyticsParameterMarketingTactic: "retargeting"',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.AD_UNIT_NAME, "/123/home")',
+    );
+    expect(kotlinSnippet).toContain(
+      'param(FirebaseAnalytics.Param.CREATIVE_FORMAT, "video")',
+    );
   });
 
   it('emits firebase user property setters with predefined constants', () => {

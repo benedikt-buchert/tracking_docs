@@ -83,6 +83,7 @@ const FIREBASE_PREDEFINED_PARAMS = new Set([
   'ad_format',
   'ad_platform',
   'ad_source',
+  'ad_unit_name',
   'affiliation',
   'campaign',
   'campaign_id',
@@ -92,6 +93,7 @@ const FIREBASE_PREDEFINED_PARAMS = new Set([
   'coupon',
   'cp1',
   'creative_name',
+  'creative_format',
   'creative_slot',
   'currency',
   'destination',
@@ -119,6 +121,7 @@ const FIREBASE_PREDEFINED_PARAMS = new Set([
   'location_id',
   'medium',
   'method',
+  'marketing_tactic',
   'number_of_nights',
   'number_of_passengers',
   'number_of_rooms',
@@ -135,6 +138,7 @@ const FIREBASE_PREDEFINED_PARAMS = new Set([
   'shipping',
   'shipping_tier',
   'source',
+  'source_platform',
   'start_date',
   'success',
   'tax',
@@ -148,6 +152,15 @@ const FIREBASE_PREDEFINED_PARAMS = new Set([
 const FIREBASE_PARAM_ALIASES = {
   firebase_screen: 'screen_name',
   firebase_screen_class: 'screen_class',
+};
+
+const FIREBASE_PARAM_CONSTANTS = {
+  aclid: {
+    kotlin: 'FirebaseAnalytics.Param.ACLID',
+    java: 'FirebaseAnalytics.Param.ACLID',
+    swift: 'AnalyticsParameterAdNetworkClickID',
+    objc: 'kFIRParameterAdNetworkClickID',
+  },
 };
 
 const FIREBASE_USER_PROPERTY_CONSTANTS = {
@@ -288,6 +301,8 @@ function getFirebaseEventExpression(eventName, platform) {
 
 function getFirebaseParamExpression(key, platform) {
   const canonicalKey = FIREBASE_PARAM_ALIASES[key] || key;
+  const known = FIREBASE_PARAM_CONSTANTS[canonicalKey]?.[platform];
+  if (known) return known;
   if (FIREBASE_PREDEFINED_PARAMS.has(canonicalKey)) {
     const upper = toFirebaseUpperSnake(canonicalKey);
     const pascal = toFirebasePascalCase(canonicalKey);
