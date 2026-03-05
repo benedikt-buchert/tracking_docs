@@ -444,4 +444,73 @@ describe('snippetTargets', () => {
     expect(objcSnippet).toContain('kFIRParameterCampaignID: @"cmp_42"');
     expect(objcSnippet).toContain('kFIRParameterACLID: @"aclid_99"');
   });
+
+  it('emits firebase user property setters with predefined constants', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'login',
+        method: 'email',
+        user_properties: {
+          sign_up_method: 'email',
+          allow_ad_personalization_signals: 'false',
+        },
+      },
+      schema: { properties: {} },
+    });
+    const javaSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'login',
+        method: 'email',
+        user_properties: {
+          sign_up_method: 'email',
+        },
+      },
+      schema: { properties: {} },
+    });
+    const swiftSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'login',
+        method: 'email',
+        user_properties: {
+          sign_up_method: 'email',
+        },
+      },
+      schema: { properties: {} },
+    });
+    const objcSnippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'login',
+        method: 'email',
+        user_properties: {
+          sign_up_method: 'email',
+          allow_ad_personalization_signals: null,
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email")',
+    );
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS, "false")',
+    );
+    expect(javaSnippet).toContain(
+      'mFirebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email");',
+    );
+    expect(swiftSnippet).toContain(
+      'Analytics.setUserProperty("email", forName: AnalyticsUserPropertySignUpMethod)',
+    );
+    expect(objcSnippet).toContain(
+      '[FIRAnalytics setUserPropertyString:@"email" forName:kFIRUserPropertySignUpMethod];',
+    );
+    expect(objcSnippet).toContain(
+      '[FIRAnalytics setUserPropertyString:nil forName:kFIRUserPropertyAllowAdPersonalizationSignals];',
+    );
+    expect(kotlinSnippet).not.toContain('param("user_properties"');
+  });
 });

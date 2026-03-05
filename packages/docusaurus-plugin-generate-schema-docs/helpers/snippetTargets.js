@@ -32,6 +32,11 @@ export const FIREBASE_SNIPPET_SOURCES = [
     url: 'https://firebase.google.com/docs/reference/ios/firebaseanalytics/api/reference/Constants',
     reviewedAt: '2026-03-05',
   },
+  {
+    id: 'firebase-android-user-property-reference',
+    url: 'https://firebase.google.com/docs/reference/android/com/google/firebase/analytics/FirebaseAnalytics.UserProperty',
+    reviewedAt: '2026-03-05',
+  },
 ];
 
 const FIREBASE_PREDEFINED_EVENTS = new Set([
@@ -145,6 +150,25 @@ const FIREBASE_PARAM_ALIASES = {
   firebase_screen_class: 'screen_class',
 };
 
+const FIREBASE_USER_PROPERTY_CONSTANTS = {
+  allow_personalized_ads: {
+    kotlin: 'FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS',
+    java: 'FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS',
+    swift: 'AnalyticsUserPropertyAllowAdPersonalizationSignals',
+    objc: 'kFIRUserPropertyAllowAdPersonalizationSignals',
+  },
+  sign_up_method: {
+    kotlin: 'FirebaseAnalytics.UserProperty.SIGN_UP_METHOD',
+    java: 'FirebaseAnalytics.UserProperty.SIGN_UP_METHOD',
+    swift: 'AnalyticsUserPropertySignUpMethod',
+    objc: 'kFIRUserPropertySignUpMethod',
+  },
+};
+
+const FIREBASE_USER_PROPERTY_ALIASES = {
+  allow_ad_personalization_signals: 'allow_personalized_ads',
+};
+
 const FIREBASE_ABBREVIATIONS = {
   aclid: 'ACLID',
   id: 'ID',
@@ -223,6 +247,7 @@ function toFirebaseParamEntries(example) {
   const entries = [];
   Object.entries(example || {}).forEach(([key, value]) => {
     if (key === 'event' || key === '$schema' || value === undefined) return;
+    if (key === 'user_properties') return;
 
     // dataLayer payloads often wrap GA4 params under "ecommerce";
     // Firebase events expect those params directly at top level.
@@ -238,6 +263,13 @@ function toFirebaseParamEntries(example) {
     entries.push([key, value]);
   });
   return entries;
+}
+
+function toFirebaseUserPropertyEntries(example) {
+  if (!isPlainObject(example?.user_properties)) return [];
+  return Object.entries(example.user_properties).filter(
+    ([, value]) => value !== undefined,
+  );
 }
 
 function getFirebaseEventExpression(eventName, platform) {
@@ -269,6 +301,14 @@ function getFirebaseParamExpression(key, platform) {
   return JSON.stringify(key);
 }
 
+function getFirebaseUserPropertyExpression(key, platform) {
+  const canonicalKey = FIREBASE_USER_PROPERTY_ALIASES[key] || key;
+  const known = FIREBASE_USER_PROPERTY_CONSTANTS[canonicalKey]?.[platform];
+  if (known) return known;
+  if (platform === 'objc') return `@"${escapeObjCString(key)}"`;
+  return JSON.stringify(key);
+}
+
 function resolveTypedFirebaseValue(rawValue) {
   if (typeof rawValue === 'string') {
     return { kind: 'string', value: rawValue, usedJsonFallback: false };
@@ -284,6 +324,27 @@ function resolveTypedFirebaseValue(rawValue) {
   }
   if (rawValue === null) {
     return { kind: 'string', value: 'null', usedJsonFallback: true };
+  }
+  return {
+    kind: 'string',
+    value: JSON.stringify(rawValue),
+    usedJsonFallback: true,
+  };
+}
+
+function resolveTypedFirebaseUserPropertyValue(rawValue) {
+  if (rawValue === null) {
+    return { kind: 'null', value: null, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'string') {
+    return { kind: 'string', value: rawValue, usedJsonFallback: false };
+  }
+  if (typeof rawValue === 'number' || typeof rawValue === 'boolean') {
+    return {
+      kind: 'string',
+      value: String(rawValue),
+      usedJsonFallback: false,
+    };
   }
   return {
     kind: 'string',
@@ -449,15 +510,31 @@ function resolveFirebaseEvent(example) {
     });
   });
 
+  const userProperties = toFirebaseUserPropertyEntries(example).map(
+    ([key, rawValue]) => {
+      const typed = resolveTypedFirebaseUserPropertyValue(rawValue);
+      return {
+        key,
+        kind: typed.kind,
+        value: typed.value,
+        usedJsonFallback: typed.usedJsonFallback,
+      };
+    },
+  );
+
   return {
     eventName,
     params,
-    usedFallback: params.some((p) => p.usedJsonFallback),
+    userProperties,
+    usedFallback:
+      params.some((p) => p.usedJsonFallback) ||
+      userProperties.some((p) => p.usedJsonFallback),
   };
 }
 
 function generateAndroidKotlinFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'kotlin');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
@@ -472,6 +549,16 @@ function generateAndroidKotlinFirebaseSnippet({ example }) {
 
   if (itemBundles) {
     lines.push(...itemBundles.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'kotlin');
+    const valueExpr =
+      property.kind === 'null' ? 'null' : JSON.stringify(property.value);
+    lines.push(`firebaseAnalytics.setUserProperty(${keyExpr}, ${valueExpr})`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -499,7 +586,8 @@ function generateAndroidKotlinFirebaseSnippet({ example }) {
 }
 
 function generateAndroidJavaFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'java');
   const itemsParam = params.find((p) => p.kind === 'itemsObjectArray');
@@ -514,6 +602,16 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
 
   if (itemBundles) {
     lines.push(...itemBundles.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'java');
+    const valueExpr =
+      property.kind === 'null' ? 'null' : JSON.stringify(property.value);
+    lines.push(`mFirebaseAnalytics.setUserProperty(${keyExpr}, ${valueExpr});`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -543,7 +641,8 @@ function generateAndroidJavaFirebaseSnippet({ example }) {
 }
 
 function generateIosSwiftFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'swift');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
@@ -557,6 +656,16 @@ function generateIosSwiftFirebaseSnippet({ example }) {
 
   if (swiftItems) {
     lines.push(...swiftItems.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'swift');
+    const valueExpr =
+      property.kind === 'null' ? 'nil' : JSON.stringify(property.value);
+    lines.push(`Analytics.setUserProperty(${valueExpr}, forName: ${keyExpr})`);
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
@@ -591,7 +700,8 @@ function escapeObjCString(value) {
 }
 
 function generateIosObjcFirebaseSnippet({ example }) {
-  const { eventName, params, usedFallback } = resolveFirebaseEvent(example);
+  const { eventName, params, userProperties, usedFallback } =
+    resolveFirebaseEvent(example);
   const lines = [];
   const eventExpr = getFirebaseEventExpression(eventName, 'objc');
   const normalParams = params.filter((p) => p.kind !== 'itemsObjectArray');
@@ -605,6 +715,22 @@ function generateIosObjcFirebaseSnippet({ example }) {
 
   if (objcItems) {
     lines.push(...objcItems.lines);
+    lines.push('');
+  }
+
+  userProperties.forEach((property) => {
+    const keyExpr = getFirebaseUserPropertyExpression(property.key, 'objc');
+    if (property.kind === 'null') {
+      lines.push(
+        `[FIRAnalytics setUserPropertyString:nil forName:${keyExpr}];`,
+      );
+      return;
+    }
+    lines.push(
+      `[FIRAnalytics setUserPropertyString:@"${escapeObjCString(property.value)}" forName:${keyExpr}];`,
+    );
+  });
+  if (userProperties.length > 0) {
     lines.push('');
   }
 
