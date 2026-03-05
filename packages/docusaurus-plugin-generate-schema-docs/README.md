@@ -90,6 +90,29 @@ docusaurus sync-gtm
 
 By default, it resolves schemas from the project root. Use `--path=<siteDir>` to target a different site directory.
 
+### Firebase Snippet Targets
+
+`ExampleDataLayer` supports Firebase snippet targets for:
+
+- `android-firebase-kotlin-sdk`
+- `android-firebase-java-sdk`
+- `ios-firebase-swift-sdk`
+- `ios-firebase-objc-sdk`
+
+Mapping rules for generated parameters:
+
+- `string` -> string parameter
+- `integer`/`boolean` -> integer/long parameter (`true` = `1`, `false` = `0`)
+- `number` -> double parameter
+- non-primitive values (`object`, `array`, `null`) -> JSON string fallback
+
+When a JSON fallback is used, generated snippets include a warning comment so schema authors can decide whether flattening those fields is preferable.
+
+Reference docs used for syntax and kept as source of truth:
+
+- https://firebase.google.com/docs/analytics/android/events
+- https://firebase.google.com/docs/analytics/ios/events
+
 ## How it Works
 
 The plugin reads your JSON schemas, dereferences any `$ref` properties, and merges `allOf` properties. It then generates an MDX file for each schema, which uses custom React components to render the schema details.
