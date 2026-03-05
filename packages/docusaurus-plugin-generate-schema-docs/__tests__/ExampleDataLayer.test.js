@@ -114,6 +114,22 @@ describe('ExampleDataLayer', () => {
     );
   });
 
+  it('uses per-target syntax highlighting language', () => {
+    const schema = {
+      type: 'object',
+      'x-tracking-targets': ['android-firebase-kotlin-sdk'],
+      properties: {
+        event: { type: 'string', examples: ['purchase'] },
+        value: { type: 'number', examples: [14.98] },
+      },
+    };
+
+    const { container } = render(<ExampleDataLayer schema={schema} />);
+    const codeBlocks = container.querySelectorAll('pre[data-language]');
+    expect(codeBlocks.length).toBeGreaterThan(0);
+    expect(codeBlocks[0]).toHaveAttribute('data-language', 'kotlin');
+  });
+
   it('should not render target tabs for single-target schemas', () => {
     const schema = {
       type: 'object',
