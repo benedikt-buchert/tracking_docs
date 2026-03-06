@@ -1,5 +1,33 @@
 import path from 'path';
+import fs from 'fs';
 import processSchema from './processSchema.js';
+import mergeJsonSchema from 'json-schema-merge-allof';
+
+function mergePropertySchemas(baseProperties = {}, optionProperties = {}) {
+  const mergedProperties = {
+    ...baseProperties,
+    ...optionProperties,
+  };
+
+  for (const key of Object.keys(baseProperties)) {
+    if (!Object.prototype.hasOwnProperty.call(optionProperties, key)) {
+      continue;
+    }
+
+    mergedProperties[key] = mergeJsonSchema(
+      {
+        allOf: [baseProperties[key], optionProperties[key]],
+      },
+      {
+        resolvers: {
+          defaultResolver: mergeJsonSchema.options.resolvers.title,
+        },
+      },
+    );
+  }
+
+  return mergedProperties;
+}
 
 export function slugify(text) {
   if (!text) {
@@ -20,7 +48,15 @@ export async function processOneOfSchema(schema, filePath) {
   const choiceType = schema.oneOf ? 'oneOf' : null;
 
   if (choiceType) {
-    const parentWithoutChoice = { ...schema };
+    let parentSchema = schema;
+
+    // When the root schema is loaded from disk, use its processed form so
+    // parent-level allOf refs (e.g. shared dataLayer metadata) are preserved.
+    if (filePath && fs.existsSync(filePath)) {
+      parentSchema = await processSchema(filePath);
+    }
+
+    const parentWithoutChoice = { ...parentSchema };
     delete parentWithoutChoice[choiceType];
 
     for (const option of schema[choiceType]) {
@@ -34,10 +70,10 @@ export async function processOneOfSchema(schema, filePath) {
 
       // Merge the parent schema with the resolved option schema
       const newSchema = { ...parentWithoutChoice, ...resolvedOption };
-      newSchema.properties = {
-        ...parentWithoutChoice.properties,
-        ...resolvedOption.properties,
-      };
+      newSchema.properties = mergePropertySchemas(
+        parentWithoutChoice.properties,
+        resolvedOption.properties,
+      );
 
       let slug;
       const hadId = resolvedOption.$id && resolvedOption.$id.endsWith('.json');
