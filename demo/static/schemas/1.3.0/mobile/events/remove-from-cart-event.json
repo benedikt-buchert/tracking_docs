@@ -21,33 +21,35 @@
       "const": "remove_from_cart",
       "description": "The event name remove_from_cart."
     },
-    "ecommerce": {
-      "type": "object",
-      "description": "Ecommerce payload for this event.",
-      "properties": {
-        "currency": {
-          "type": "string",
-          "description": "ISO 4217 currency code.",
-          "minLength": 3,
-          "maxLength": 3,
-          "examples": ["USD"]
-        },
-        "value": {
-          "type": "number",
-          "description": "Monetary value of the event.",
-          "examples": [72.05]
-        },
-        "items": {
-          "type": "array",
-          "description": "Items associated with this ecommerce event.",
-          "minItems": 1,
-          "items": {
-            "$ref": "../../events/components/product.json"
-          }
-        }
-      },
-      "required": ["currency", "items"]
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": [
+        "USD"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "Monetary value of the event.",
+      "examples": [
+        72.05
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "Items associated with this ecommerce event.",
+      "minItems": 1,
+      "items": {
+        "$ref": "../../events/components/product.json"
+      }
     }
   },
-  "required": ["$schema", "event"]
+  "required": [
+    "$schema",
+    "event",
+    "currency",
+    "items"
+  ]
 }

@@ -21,53 +21,62 @@
       "const": "refund",
       "description": "The event name refund."
     },
-    "ecommerce": {
-      "type": "object",
-      "description": "Ecommerce payload for this event.",
-      "properties": {
-        "transaction_id": {
-          "type": "string",
-          "description": "Unique transaction identifier.",
-          "examples": ["T_12345"]
-        },
-        "currency": {
-          "type": "string",
-          "description": "ISO 4217 currency code.",
-          "minLength": 3,
-          "maxLength": 3,
-          "examples": ["USD"]
-        },
-        "value": {
-          "type": "number",
-          "description": "Monetary value of the event.",
-          "examples": [72.05]
-        },
-        "coupon": {
-          "type": "string",
-          "description": "Coupon code associated with the event.",
-          "examples": ["SUMMER_FUN"]
-        },
-        "shipping": {
-          "type": "number",
-          "description": "Shipping cost for the event.",
-          "examples": [5.99]
-        },
-        "tax": {
-          "type": "number",
-          "description": "Tax amount for the event.",
-          "examples": [3.6]
-        },
-        "items": {
-          "type": "array",
-          "description": "Items associated with this ecommerce event.",
-          "minItems": 1,
-          "items": {
-            "$ref": "../../events/components/product.json"
-          }
-        }
-      },
-      "required": ["transaction_id"]
+    "transaction_id": {
+      "type": "string",
+      "description": "Unique transaction identifier.",
+      "examples": [
+        "T_12345"
+      ]
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": [
+        "USD"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "Monetary value of the event.",
+      "examples": [
+        72.05
+      ]
+    },
+    "coupon": {
+      "type": "string",
+      "description": "Coupon code associated with the event.",
+      "examples": [
+        "SUMMER_FUN"
+      ]
+    },
+    "shipping": {
+      "type": "number",
+      "description": "Shipping cost for the event.",
+      "examples": [
+        5.99
+      ]
+    },
+    "tax": {
+      "type": "number",
+      "description": "Tax amount for the event.",
+      "examples": [
+        3.6
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "Items associated with this ecommerce event.",
+      "minItems": 1,
+      "items": {
+        "$ref": "../../events/components/product.json"
+      }
     }
   },
-  "required": ["$schema", "event"]
+  "required": [
+    "$schema",
+    "event",
+    "transaction_id"
+  ]
 }

@@ -21,43 +21,49 @@
       "const": "add_payment_info",
       "description": "The event name add_payment_info."
     },
-    "ecommerce": {
-      "type": "object",
-      "description": "Ecommerce payload for this event.",
-      "properties": {
-        "currency": {
-          "type": "string",
-          "description": "ISO 4217 currency code.",
-          "minLength": 3,
-          "maxLength": 3,
-          "examples": ["USD"]
-        },
-        "value": {
-          "type": "number",
-          "description": "Monetary value of the event.",
-          "examples": [72.05]
-        },
-        "coupon": {
-          "type": "string",
-          "description": "Coupon code associated with the event.",
-          "examples": ["SUMMER_FUN"]
-        },
-        "payment_type": {
-          "type": "string",
-          "description": "Selected payment type.",
-          "examples": ["Credit Card"]
-        },
-        "items": {
-          "type": "array",
-          "description": "Items associated with this ecommerce event.",
-          "minItems": 1,
-          "items": {
-            "$ref": "../../events/components/product.json"
-          }
-        }
-      },
-      "required": ["currency", "items"]
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": [
+        "USD"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "description": "Monetary value of the event.",
+      "examples": [
+        72.05
+      ]
+    },
+    "coupon": {
+      "type": "string",
+      "description": "Coupon code associated with the event.",
+      "examples": [
+        "SUMMER_FUN"
+      ]
+    },
+    "payment_type": {
+      "type": "string",
+      "description": "Selected payment type.",
+      "examples": [
+        "Credit Card"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "Items associated with this ecommerce event.",
+      "minItems": 1,
+      "items": {
+        "$ref": "../../events/components/product.json"
+      }
     }
   },
-  "required": ["$schema", "event"]
+  "required": [
+    "$schema",
+    "event",
+    "currency",
+    "items"
+  ]
 }

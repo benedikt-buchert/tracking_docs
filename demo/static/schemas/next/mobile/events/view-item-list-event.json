@@ -21,31 +21,32 @@
       "const": "view_item_list",
       "description": "The event name view_item_list."
     },
-    "ecommerce": {
-      "type": "object",
-      "description": "Ecommerce payload for this event.",
-      "properties": {
-        "item_list_id": {
-          "type": "string",
-          "description": "ID of the item list.",
-          "examples": ["related_products"]
-        },
-        "item_list_name": {
-          "type": "string",
-          "description": "Name of the item list.",
-          "examples": ["Related Products"]
-        },
-        "items": {
-          "type": "array",
-          "description": "Items associated with this ecommerce event.",
-          "minItems": 1,
-          "items": {
-            "$ref": "../../events/components/product.json"
-          }
-        }
-      },
-      "required": ["items"]
+    "item_list_id": {
+      "type": "string",
+      "description": "ID of the item list.",
+      "examples": [
+        "related_products"
+      ]
+    },
+    "item_list_name": {
+      "type": "string",
+      "description": "Name of the item list.",
+      "examples": [
+        "Related Products"
+      ]
+    },
+    "items": {
+      "type": "array",
+      "description": "Items associated with this ecommerce event.",
+      "minItems": 1,
+      "items": {
+        "$ref": "../../events/components/product.json"
+      }
     }
   },
-  "required": ["$schema", "event"]
+  "required": [
+    "$schema",
+    "event",
+    "items"
+  ]
 }
