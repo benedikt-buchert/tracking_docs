@@ -17,6 +17,9 @@
       "$ref": "./mobile/events/login-with-user-properties-event.json"
     },
     {
+      "$ref": "./mobile/events/checkout-options-event.json"
+    },
+    {
       "$ref": "./mobile/events/view-promotion-event.json"
     },
     {
