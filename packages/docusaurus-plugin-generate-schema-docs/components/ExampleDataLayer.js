@@ -4,33 +4,10 @@ import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Heading from '@theme/Heading';
 import { schemaToExamples } from '../helpers/schemaToExamples';
-
-const generateCodeSnippet = (example, schema, dataLayerName = 'dataLayer') => {
-  const clearableProperties = findClearableProperties(schema || {});
-  let codeSnippet = '';
-  const propertiesToClear = clearableProperties.filter(
-    (prop) => prop in example,
-  );
-
-  if (propertiesToClear.length > 0) {
-    const resetObject = {};
-    propertiesToClear.forEach((prop) => {
-      resetObject[prop] = null;
-    });
-    codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-      resetObject,
-      null,
-      2,
-    )});\n`;
-  }
-
-  codeSnippet += `window.${dataLayerName}.push(${JSON.stringify(
-    example,
-    null,
-    2,
-  )});`;
-  return codeSnippet;
-};
+import {
+  findClearableProperties,
+  generateSnippetForTarget,
+} from '../helpers/snippetTargets';
 
 export default function ExampleDataLayer({ schema, dataLayerName }) {
   const exampleGroups = schemaToExamples(schema);
@@ -41,11 +18,12 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
 
   // Handle the simple case of a single default example with no choices
   if (exampleGroups.length === 1 && exampleGroups[0].property === 'default') {
-    const codeSnippet = generateCodeSnippet(
-      exampleGroups[0].options[0].example,
+    const codeSnippet = generateSnippetForTarget({
+      targetId: 'web-datalayer-js',
+      example: exampleGroups[0].options[0].example,
       schema,
       dataLayerName,
-    );
+    });
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
   }
 
@@ -60,7 +38,12 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
             {group.options.map(({ title, example }, index) => (
               <TabItem value={index} label={title} key={index}>
                 <CodeBlock language="javascript">
-                  {generateCodeSnippet(example, schema, dataLayerName)}
+                  {generateSnippetForTarget({
+                    targetId: 'web-datalayer-js',
+                    example,
+                    schema,
+                    dataLayerName,
+                  })}
                 </CodeBlock>
               </TabItem>
             ))}
@@ -70,11 +53,4 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
     </>
   );
 }
-
-export const findClearableProperties = (schema) => {
-  if (!schema || !schema.properties) return [];
-
-  return Object.entries(schema.properties)
-    .filter(([, definition]) => definition['x-gtm-clear'] === true)
-    .map(([key]) => key);
-};
+export { findClearableProperties };
