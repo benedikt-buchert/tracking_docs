@@ -1,0 +1,14 @@
+{
+  "title": "Purchase",
+  "type": "object",
+  "properties": {
+    "ecommerce": {
+      "type": "object",
+      "properties": {
+        "transaction_id": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

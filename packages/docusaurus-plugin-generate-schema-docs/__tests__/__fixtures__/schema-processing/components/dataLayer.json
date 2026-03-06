@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "ecommerce": {
+      "type": "object",
+      "x-gtm-clear": true
+    }
+  }
+}
