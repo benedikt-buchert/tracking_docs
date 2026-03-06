@@ -24,30 +24,22 @@
     "promotion_id": {
       "type": "string",
       "description": "ID of the promotion.",
-      "examples": [
-        "P_12345"
-      ]
+      "examples": ["P_12345"]
     },
     "promotion_name": {
       "type": "string",
       "description": "Name of the promotion.",
-      "examples": [
-        "Summer Sale"
-      ]
+      "examples": ["Summer Sale"]
     },
     "creative_name": {
       "type": "string",
       "description": "Name of the promotion creative.",
-      "examples": [
-        "summer_banner"
-      ]
+      "examples": ["summer_banner"]
     },
     "creative_slot": {
       "type": "string",
       "description": "Creative slot associated with the promotion.",
-      "examples": [
-        "featured_app_1"
-      ]
+      "examples": ["featured_app_1"]
     },
     "items": {
       "type": "array",
@@ -58,8 +50,5 @@
       }
     }
   },
-  "required": [
-    "$schema",
-    "event"
-  ]
+  "required": ["$schema", "event"]
 }

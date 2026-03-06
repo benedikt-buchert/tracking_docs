@@ -24,60 +24,44 @@
     "transaction_id": {
       "type": "string",
       "description": "Unique transaction identifier.",
-      "examples": [
-        "T_12345"
-      ]
+      "examples": ["T_12345"]
     },
     "currency": {
       "type": "string",
       "description": "ISO 4217 currency code.",
       "minLength": 3,
       "maxLength": 3,
-      "examples": [
-        "USD"
-      ]
+      "examples": ["USD"]
     },
     "value": {
       "type": "number",
       "description": "Monetary value of the event.",
-      "examples": [
-        72.05
-      ]
+      "examples": [72.05]
     },
     "coupon": {
       "type": "string",
       "description": "Coupon code associated with the event.",
-      "examples": [
-        "SUMMER_FUN"
-      ]
+      "examples": ["SUMMER_FUN"]
     },
     "tax": {
       "type": "number",
       "description": "Tax amount for the event.",
-      "examples": [
-        3.6
-      ]
+      "examples": [3.6]
     },
     "shipping": {
       "type": "number",
       "description": "Shipping cost for the event.",
-      "examples": [
-        5.99
-      ]
+      "examples": [5.99]
     },
     "payment_type": {
       "type": "string",
       "description": "Selected payment type.",
-      "examples": [
-        "Credit Card"
-      ]
+      "examples": ["Credit Card"]
     },
     "shipping_tier": {
       "type": "string",
       "description": "Selected shipping tier.",
-      "examples": [
-        "Ground"
-      ]
+      "examples": ["Ground"]
     },
     "items": {
       "type": "array",
