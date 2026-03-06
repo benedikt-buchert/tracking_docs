@@ -10,13 +10,16 @@ import validateSchemas from '../validateSchemas';
 describe('validateSchemas', () => {
   let tmpDir;
   let consoleErrorSpy;
-  let consoleLogSpy;
+  let consoleWarnSpy;
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'schema-test-'));
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
+    jest.restoreAllMocks();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
@@ -49,5 +52,54 @@ describe('validateSchemas', () => {
     );
     const result = await validateSchemas(schemaDir);
     expect(result).toBe(false);
+  });
+
+  it('should warn and fallback to default target when x-tracking-targets is missing', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(true);
+    expect(consoleWarnSpy).toHaveBeenCalled();
+    expect(consoleWarnSpy.mock.calls[0][0]).toContain('web-datalayer-js');
+  });
+
+  it('should fail when x-tracking-targets has an unsupported target', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        'x-tracking-targets': ['web-not-supported-js'],
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    expect(consoleErrorSpy.mock.calls[0][0]).toContain('x-tracking-targets');
   });
 });

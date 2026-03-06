@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import processSchema from './helpers/processSchema.js';
 import { schemaToExamples } from './helpers/schemaToExamples.js';
+import { resolveTrackingTargets } from './helpers/trackingTargets.js';
 
 const validateSingleSchema = async (filePath, schemaPath) => {
   const file = path.basename(filePath);
@@ -13,6 +14,20 @@ const validateSingleSchema = async (filePath, schemaPath) => {
     const mergedSchema = await processSchema(filePath);
     const exampleGroups = schemaToExamples(mergedSchema);
     const originalSchema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    const trackingTargets = resolveTrackingTargets(originalSchema, {
+      schemaFile: file,
+    });
+
+    if (trackingTargets.warning) {
+      console.warn(trackingTargets.warning);
+    }
+    if (trackingTargets.errors.length > 0) {
+      trackingTargets.errors.forEach((error) =>
+        errors.push(`x Schema ${file} ${error}`),
+      );
+      return { allValid: false, errors };
+    }
+
     const validate = await createValidator([], originalSchema, schemaPath);
 
     if (exampleGroups.length === 0) {
