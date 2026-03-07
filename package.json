@@ -17,6 +17,7 @@
     "prepare": "husky",
     "eslint:fix": "eslint --fix .",
     "test": "jest",
+    "check:deps": "node scripts/check-dependency-specs.mjs",
     "prettier": "prettier --write .",
     "sync:gtm": "npm run sync-gtm -w demo"
   },
@@ -46,6 +47,6 @@
     "prettier": "^3.7.4"
   },
   "optionalDependencies": {
-    "@owntag/gtm-cli": "latest"
+    "@owntag/gtm-cli": "1.5.6"
   }
 }
