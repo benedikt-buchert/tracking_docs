@@ -27,6 +27,15 @@
     },
     {
       "$ref": "./events/choice-event.json"
+    },
+    {
+      "$ref": "./events/conditional-event.json"
+    },
+    {
+      "$ref": "./events/nested-conditional-event.json"
+    },
+    {
+      "$ref": "./events/battle-test-event.json"
     }
   ]
 }
