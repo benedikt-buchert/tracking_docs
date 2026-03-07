@@ -104,9 +104,8 @@ Mapping rules for generated parameters:
 - `string` -> string parameter
 - `integer`/`boolean` -> integer/long parameter (`true` = `1`, `false` = `0`)
 - `number` -> double parameter
-- non-primitive values (`object`, `array`, `null`) -> JSON string fallback
-
-When a JSON fallback is used, generated snippets include a warning comment so schema authors can decide whether flattening those fields is preferable.
+- `items` -> non-empty array of flat item objects
+- unsupported nested values cause a generation error (no automatic flattening or JSON-string fallback)
 
 Reference docs used for syntax and kept as source of truth:
 

@@ -141,24 +141,50 @@ describe('snippetTargets', () => {
     );
   });
 
-  it('includes fallback warning comment when nested values are serialized', () => {
-    const snippet = generateSnippetForTarget({
-      targetId: 'android-firebase-kotlin-sdk',
-      example: {
-        event: 'checkout',
-        ecommerce: {
-          currency: 'EUR',
-          metadata: { payment_step: 2 },
-          items: [{ sku: 'abc' }],
+  it('throws when firebase payload contains unsupported nested values', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'checkout',
+          ecommerce: {
+            currency: 'EUR',
+            metadata: { payment_step: 2 },
+            items: [{ sku: 'abc' }],
+          },
         },
-      },
-      schema: { properties: {} },
-    });
+        schema: { properties: {} },
+      }),
+    ).toThrow(
+      '[android-firebase-kotlin-sdk] Unsupported Firebase payload at "ecommerce"',
+    );
+  });
 
-    expect(snippet).toContain('WARNING');
-    expect(snippet).toContain('serialized to JSON string');
-    expect(snippet).toContain('param(FirebaseAnalytics.Param.CURRENCY, "EUR")');
-    expect(snippet).toContain('param("metadata",');
+  it('throws when firebase payload is missing a non-empty event name', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'ios-firebase-swift-sdk',
+        example: {
+          value: 12.5,
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow(
+      '[ios-firebase-swift-sdk] Unsupported Firebase payload at "event"',
+    );
+
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-java-sdk',
+        example: {
+          event: '   ',
+          value: 12.5,
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow(
+      '[android-firebase-java-sdk] Unsupported Firebase payload at "event"',
+    );
   });
 
   it('uses firebase constants and concrete item bundles for purchase event', () => {
@@ -166,16 +192,14 @@ describe('snippetTargets', () => {
       targetId: 'android-firebase-kotlin-sdk',
       example: {
         event: 'purchase',
-        ecommerce: {
-          transaction_id: 'T12345',
-          affiliation: 'Google Store',
-          currency: 'USD',
-          value: 14.98,
-          tax: 2.58,
-          shipping: 5.34,
-          coupon: 'SUMMER_FUN',
-          items: [{ item_id: 'sku-1' }],
-        },
+        transaction_id: 'T12345',
+        affiliation: 'Google Store',
+        currency: 'USD',
+        value: 14.98,
+        tax: 2.58,
+        shipping: 5.34,
+        coupon: 'SUMMER_FUN',
+        items: [{ item_id: 'sku-1' }],
       },
       schema: { properties: {} },
     });
@@ -210,27 +234,25 @@ describe('snippetTargets', () => {
       targetId: 'ios-firebase-swift-sdk',
       example: {
         event: 'purchase',
-        ecommerce: {
-          transaction_id: 'T12345',
-          items: [
-            {
-              item_id: 'SKU_123',
-              item_name: 'jeggings',
-              item_category: 'pants',
-              item_variant: 'black',
-              item_brand: 'Google',
-              price: 9.99,
-            },
-            {
-              item_id: 'SKU_456',
-              item_name: 'boots',
-              item_category: 'shoes',
-              item_variant: 'brown',
-              item_brand: 'Google',
-              price: 24.99,
-            },
-          ],
-        },
+        transaction_id: 'T12345',
+        items: [
+          {
+            item_id: 'SKU_123',
+            item_name: 'jeggings',
+            item_category: 'pants',
+            item_variant: 'black',
+            item_brand: 'Google',
+            price: 9.99,
+          },
+          {
+            item_id: 'SKU_456',
+            item_name: 'boots',
+            item_category: 'shoes',
+            item_variant: 'brown',
+            item_brand: 'Google',
+            price: 24.99,
+          },
+        ],
       },
       schema: { properties: {} },
     });
@@ -246,17 +268,15 @@ describe('snippetTargets', () => {
     );
   });
 
-  it('omits $schema and unwraps ecommerce primitives for firebase targets', () => {
+  it('omits $schema for firebase targets', () => {
     const snippet = generateSnippetForTarget({
       targetId: 'ios-firebase-swift-sdk',
       example: {
         $schema: 'https://example.com/schemas/purchase-event.json',
         event: 'purchase',
-        ecommerce: {
-          transaction_id: 'T_12345',
-          value: 72.05,
-          currency: 'EUR',
-        },
+        transaction_id: 'T_12345',
+        value: 72.05,
+        currency: 'EUR',
       },
       schema: { properties: {} },
     });
@@ -268,7 +288,6 @@ describe('snippetTargets', () => {
       'Analytics.logEvent(AnalyticsEventPurchase, parameters: purchaseParams)',
     );
     expect(snippet).not.toContain('$schema');
-    expect(snippet).not.toContain('ecommerce');
   });
 
   it('uses official firebase screen_view constants for kotlin snippets', () => {
@@ -569,18 +588,16 @@ describe('snippetTargets', () => {
       targetId: 'ios-firebase-swift-sdk',
       example: {
         event: 'purchase',
-        ecommerce: {
-          transaction_id: 'T_100',
-          shipping_tier: 'Express',
-          items: [
-            {
-              item_id: 'SKU_123',
-              item_name: 'jeggings',
-              item_category2: 'bottoms',
-              item_category5: 'sale',
-            },
-          ],
-        },
+        transaction_id: 'T_100',
+        shipping_tier: 'Express',
+        items: [
+          {
+            item_id: 'SKU_123',
+            item_name: 'jeggings',
+            item_category2: 'bottoms',
+            item_category5: 'sale',
+          },
+        ],
       },
       schema: { properties: {} },
     });
@@ -588,11 +605,9 @@ describe('snippetTargets', () => {
       targetId: 'ios-firebase-objc-sdk',
       example: {
         event: 'add_to_cart',
-        ecommerce: {
-          item_list_id: 'LIST_42',
-          item_list_name: 'Homepage Picks',
-          coupon: 'WELCOME10',
-        },
+        item_list_id: 'LIST_42',
+        item_list_name: 'Homepage Picks',
+        coupon: 'WELCOME10',
       },
       schema: { properties: {} },
     });
