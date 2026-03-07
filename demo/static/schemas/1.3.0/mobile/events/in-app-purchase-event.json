@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/events/in-app-purchase-event.json",
+  "title": "In-App Purchase",
+  "description": "An in_app_purchase event example focused on Android and iOS Firebase implementations.",
+  "x-tracking-targets": [
+    "android-firebase-kotlin-sdk",
+    "android-firebase-java-sdk",
+    "ios-firebase-swift-sdk",
+    "ios-firebase-objc-sdk"
+  ],
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/in-app-purchase-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "in_app_purchase",
+      "description": "The event name for an in-app purchase."
+    },
+    "product_id": {
+      "type": "string",
+      "description": "The purchased product identifier.",
+      "examples": ["sku_premium"]
+    },
+    "product_name": {
+      "type": "string",
+      "description": "Display name of the purchased product.",
+      "examples": ["Premium Plan"]
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["USD"]
+    },
+    "value": {
+      "type": "number",
+      "description": "Purchase value.",
+      "examples": [9.99]
+    },
+    "subscription": {
+      "type": "boolean",
+      "description": "Whether the purchase is a subscription.",
+      "examples": [true]
+    },
+    "free_trial": {
+      "type": "boolean",
+      "description": "Whether a free trial was used.",
+      "examples": [false]
+    },
+    "price_is_discounted": {
+      "type": "boolean",
+      "description": "Whether the listed price is discounted.",
+      "examples": [true]
+    }
+  },
+  "required": [
+    "$schema",
+    "event",
+    "product_id",
+    "product_name",
+    "currency",
+    "value"
+  ]
+}

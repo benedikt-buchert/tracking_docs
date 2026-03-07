@@ -53,7 +53,7 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           routeBasePath: '/',
-          lastVersion: '1.2.0',
+          lastVersion: '1.3.0',
           includeCurrentVersion: !isProduction,
           versions: {
             ...(!isProduction && {
@@ -145,6 +145,7 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ['java', 'kotlin', 'swift', 'objectivec'],
       },
     }),
   plugins: ['docusaurus-plugin-generate-schema-docs'],
