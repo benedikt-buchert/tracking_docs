@@ -1,5 +1,10 @@
+/**
+ * @jest-environment node
+ */
+
 import { processOneOfSchema } from '../../helpers/schema-processing';
 import path from 'path';
+import fs from 'fs';
 
 describe('schema-processing', () => {
   describe('processOneOfSchema', () => {
@@ -77,6 +82,57 @@ describe('schema-processing', () => {
       const filePath = '/path/to/schema.json';
       const result = await processOneOfSchema(rootSchema, filePath);
       expect(result[0].schema.$id).toBe('root.json#option-1');
+    });
+
+    it('preserves parent property metadata when an option refines the same property', async () => {
+      const rootSchema = {
+        $id: 'root.json',
+        title: 'Root',
+        oneOf: [
+          {
+            title: 'Purchase',
+            properties: {
+              ecommerce: {
+                type: 'object',
+                properties: {
+                  transaction_id: { type: 'string' },
+                },
+              },
+            },
+          },
+        ],
+        properties: {
+          ecommerce: {
+            type: 'object',
+            'x-gtm-clear': true,
+          },
+        },
+      };
+
+      const result = await processOneOfSchema(
+        rootSchema,
+        '/path/to/schema.json',
+      );
+      const mergedEcommerce = result[0].schema.properties.ecommerce;
+
+      expect(mergedEcommerce['x-gtm-clear']).toBe(true);
+      expect(mergedEcommerce.properties.transaction_id.type).toBe('string');
+    });
+
+    it('preserves parent allOf metadata when root oneOf options are file refs', async () => {
+      const rootFile = path.join(
+        __dirname,
+        '..',
+        '__fixtures__',
+        'schema-processing',
+        'event-reference.json',
+      );
+      const rootSchema = JSON.parse(fs.readFileSync(rootFile, 'utf8'));
+      const result = await processOneOfSchema(rootSchema, rootFile);
+      const mergedEcommerce = result[0].schema.properties.ecommerce;
+
+      expect(mergedEcommerce['x-gtm-clear']).toBe(true);
+      expect(mergedEcommerce.properties.transaction_id.type).toBe('string');
     });
   });
 });
