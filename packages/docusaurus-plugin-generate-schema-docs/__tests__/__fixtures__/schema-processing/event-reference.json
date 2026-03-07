@@ -1,0 +1,14 @@
+{
+  "title": "Event Reference",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "./components/dataLayer.json"
+    }
+  ],
+  "oneOf": [
+    {
+      "$ref": "./purchase-event.json"
+    }
+  ]
+}

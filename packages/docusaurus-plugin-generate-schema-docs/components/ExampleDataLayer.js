@@ -3,10 +3,8 @@ import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Heading from '@theme/Heading';
-import {
-  buildExampleModel,
-  findClearableProperties,
-} from '../helpers/exampleModel';
+import { buildExampleModel } from '../helpers/exampleModel';
+import { findClearableProperties } from '../helpers/snippetTargets';
 
 export default function ExampleDataLayer({ schema, dataLayerName }) {
   const model = buildExampleModel(schema, { dataLayerName });
@@ -44,5 +42,4 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
     </>
   );
 }
-
 export { findClearableProperties };
