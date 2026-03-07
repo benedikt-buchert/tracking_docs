@@ -21,9 +21,6 @@
     "prettier": "prettier --write .",
     "sync:gtm": "npm run sync-gtm -w demo"
   },
-  "overrides": {
-    "minimatch": ">=10.2.1"
-  },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/eslint-parser": "^7.28.5",
