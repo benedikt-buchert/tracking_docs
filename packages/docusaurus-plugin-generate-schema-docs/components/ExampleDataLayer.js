@@ -122,6 +122,10 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
     return null;
   }
 
+  const getLanguageForTarget = (targetIdForSnippet) =>
+    model.targets.find((target) => target.id === targetIdForSnippet)
+      ?.language || 'javascript';
+
   const renderVariantGroups = (currentTargetId) => (
     <>
       {exampleGroups.map((group) => {
@@ -135,7 +139,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
                   <code>{group.property}</code> options:
                 </Heading>
               )}
-              <CodeBlock language="javascript">
+              <CodeBlock language={getLanguageForTarget(currentTargetId)}>
                 {group.options[0].snippets[currentTargetId]}
               </CodeBlock>
             </div>
@@ -150,7 +154,7 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
             <Tabs>
               {group.options.map(({ id, title, snippets }) => (
                 <TabItem value={id} label={title} key={id}>
-                  <CodeBlock language="javascript">
+                  <CodeBlock language={getLanguageForTarget(currentTargetId)}>
                     {snippets[currentTargetId]}
                   </CodeBlock>
                 </TabItem>
@@ -165,7 +169,11 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
   // Single target + single default variant => keep old layout
   if (!showTargetTabs && model.isSimpleDefault) {
     const codeSnippet = exampleGroups[0].options[0].snippets[targetId];
-    return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
+    return (
+      <CodeBlock language={getLanguageForTarget(targetId)}>
+        {codeSnippet}
+      </CodeBlock>
+    );
   }
 
   if (!showTargetTabs) {
