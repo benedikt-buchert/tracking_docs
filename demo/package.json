@@ -24,7 +24,7 @@
     "@docusaurus/theme-mermaid": "3.9.2",
     "@mdx-js/react": "^3.0.0",
     "clsx": "^2.0.0",
-    "docusaurus-plugin-generate-schema-docs": "workspace:*",
+    "docusaurus-plugin-generate-schema-docs": "file:../packages/docusaurus-plugin-generate-schema-docs",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
