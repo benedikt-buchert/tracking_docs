@@ -3,27 +3,21 @@ import CodeBlock from '@theme/CodeBlock';
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 import Heading from '@theme/Heading';
-import { schemaToExamples } from '../helpers/schemaToExamples';
-import {
-  findClearableProperties,
-  generateSnippetForTarget,
-} from '../helpers/snippetTargets';
+import { buildExampleModel } from '../helpers/exampleModel';
+import { findClearableProperties } from '../helpers/snippetTargets';
 
 export default function ExampleDataLayer({ schema, dataLayerName }) {
-  const exampleGroups = schemaToExamples(schema);
+  const model = buildExampleModel(schema, { dataLayerName });
+  const exampleGroups = model.variantGroups;
+  const targetId = model.targets[0].id;
 
   if (!exampleGroups || exampleGroups.length === 0) {
     return null;
   }
 
   // Handle the simple case of a single default example with no choices
-  if (exampleGroups.length === 1 && exampleGroups[0].property === 'default') {
-    const codeSnippet = generateSnippetForTarget({
-      targetId: 'web-datalayer-js',
-      example: exampleGroups[0].options[0].example,
-      schema,
-      dataLayerName,
-    });
+  if (model.isSimpleDefault) {
+    const codeSnippet = exampleGroups[0].options[0].snippets[targetId];
     return <CodeBlock language="javascript">{codeSnippet}</CodeBlock>;
   }
 
@@ -35,15 +29,10 @@ export default function ExampleDataLayer({ schema, dataLayerName }) {
             <code>{group.property}</code> options:
           </Heading>
           <Tabs>
-            {group.options.map(({ title, example }, index) => (
+            {group.options.map(({ title, snippets }, index) => (
               <TabItem value={index} label={title} key={index}>
                 <CodeBlock language="javascript">
-                  {generateSnippetForTarget({
-                    targetId: 'web-datalayer-js',
-                    example,
-                    schema,
-                    dataLayerName,
-                  })}
+                  {snippets[targetId]}
                 </CodeBlock>
               </TabItem>
             ))}
