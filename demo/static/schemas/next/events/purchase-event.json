@@ -3,13 +3,7 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/events/purchase-event.json",
   "title": "Purchase Event",
   "description": "A purchase event fires when a user completes a purchase. Based on Google Analytics 4 ecommerce event specifications.",
-  "x-tracking-targets": [
-    "web-datalayer-js",
-    "android-firebase-kotlin-sdk",
-    "android-firebase-java-sdk",
-    "ios-firebase-swift-sdk",
-    "ios-firebase-objc-sdk"
-  ],
+  "x-tracking-targets": ["web-datalayer-js"],
   "type": "object",
   "properties": {
     "$schema": {
