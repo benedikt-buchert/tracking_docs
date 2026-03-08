@@ -2,13 +2,23 @@
 
 This repository contains a Docusaurus v3 plugin for generating documentation from JSON schemas.
 
+## Documentation Map
+
+- [Main README (this file)](./README.md): Monorepo usage, demo workflows, release process, and contributor quick start.
+- [Plugin README](./packages/docusaurus-plugin-generate-schema-docs/README.md): Plugin API, options, schema layout, and CLI command behavior.
+
+## Prerequisites
+
+- Node.js `>=20.0` (see `demo/package.json`)
+- npm `>=10`
+
 ## Live Demo
 
 You can find a live demo of the site [here](https://tracking-docs-demo.buchert.digital/).
 
 ## Bootstrapping from Template (new Docusaurus site)
 
-Run the following to bootstrap a Docusaurus v3 site (classic theme) with docusaurus-plugin-generate-schema-docs:
+Run the following to bootstrap a Docusaurus v3 site (classic theme) with `docusaurus-plugin-generate-schema-docs`:
 
 ```bash
 npx create-docusaurus@3.7.0 my-website https://github.com/benedikt-buchert/tracking_docs.git --git-strategy copy
@@ -75,7 +85,7 @@ npm run validate-schemas
 
 ## GTM Sync Workflow Setup
 
-The GTM sync Github workflow (`.github/workflows/sync-gtm.yml`) is manual execution and uses service-account auth in CI. This can be set up to be run with evry deployment in your repo.
+The GTM sync GitHub workflow (`.github/workflows/sync-gtm.yml`) is manual (`workflow_dispatch`) and uses service-account auth in CI.
 
 ### Required GitHub configuration
 
@@ -91,24 +101,37 @@ That is all required to run the workflow.
 For local usage, authenticate with `gtm auth login` (or other supported auth methods) per the official GTM CLI docs:
 https://github.com/owntag/gtm-cli#authentication
 
+Important: `sync:gtm` applies real changes to the configured GTM workspace/container. Run it only against the intended account/container.
+
+## Contributor Quick Start
+
+```bash
+npm ci
+npm test
+npm run lint
+npm run gen-docs
+npm run validate-schemas
+npm run build
+```
+
 ## Release Process
 
-This project has a separated release process for the demo site and the plugin.
+This project has separate release processes for the demo site and the plugin.
 
 ### Demo Site Release
 
-1.  **Create a Pull Request**: Make your changes to the schemas in the `static/schemas/next` directory on a new branch and open a pull request.
+1.  **Create a Pull Request**: Make your changes in `demo/static/schemas/next` on a new branch and open a pull request.
 2.  **Create a Demo Version**: To create a new version of the demo site for previewing, add a comment to your pull request with the following format:
     `/release-demo <version>`
     For example: `/release-demo 1.2.0`
 3.  **CI Magic**: A GitHub Action will automatically run, generate the new version of the documentation and schemas, and push a new commit to your pull request branch.
-4.  **Preview**: The existing CI workflow will then build a preview of your pull request on Netlify, which will include the new version of the demo site.
+4.  **Preview/Test**: The existing CI workflow will run validation, tests, docs generation, and build checks for the PR.
 5.  **Merge**: Once you are happy with the preview, you can merge the pull request. The `gh-pages` workflow will then deploy the updated site to production.
 
 Alternatively, you can run the versioning command manually:
 
 ```bash
-npm run version 1.2.0
+npm run version -- 1.2.0
 ```
 
 This is a shortcut for:
@@ -145,9 +168,9 @@ demo/
 
 ### Plugin Release
 
-1.  **Tag the `main` branch**: To release a new version of the plugin, create a tag on the `main` branch with the format `plugin-v<version>` and push it to the repository.
-    `git tag plugin-v1.2.0`
-    `git push origin plugin-v1.2.0`
+1.  **Tag the `main` branch**: To release a new version of the plugin, create a semantic version tag (for example `1.2.0`) on `main` and push it to the repository.
+    `git tag 1.2.0`
+    `git push origin 1.2.0`
 2.  **CI Magic**: A GitHub Action will automatically run, update the plugin's version, publish it to npm, and create a GitHub Release.
 
 ### Other Versioning Commands
@@ -155,7 +178,7 @@ demo/
 Update schema IDs for a specific version (useful if you need to change the base URL):
 
 ```bash
-npm run update-schema-ids 1.2.0
+npm run update-schema-ids -- 1.2.0
 ```
 
 Update schema IDs for all versions:
