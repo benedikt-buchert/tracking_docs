@@ -1,6 +1,6 @@
 # Docusaurus Plugin: Generate Schema Docs
 
-This Docusaurus v2 plugin generates documentation from JSON schemas. It provides a set of tools to automatically create and validate documentation for your event schemas.
+This Docusaurus v3 plugin generates documentation from JSON schemas. It provides a set of tools to automatically create and validate documentation for your event schemas.
 
 ## Features
 
@@ -37,9 +37,22 @@ npm install --save docusaurus-plugin-generate-schema-docs
     };
     ```
 
-    The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
+    The `dataLayerName` option allows you to customize the name of the data layer variable in generated examples. If not provided, it defaults to `dataLayer`.
 
-2.  Place your JSON schemas in the `schemas` directory at the root of your project.
+2.  Place your JSON schemas in `static/schemas` in your Docusaurus site directory.
+    If versioning is enabled, use `static/schemas/next` for the current working version.
+
+## Plugin Options
+
+The plugin currently supports the following configuration options:
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dataLayerName` | `string` | `dataLayer` | Sets the data layer variable name used in generated example snippets. |
+
+Notes:
+- No other plugin-specific options are currently exposed.
+- `siteDir`, `url`, `organizationName`, and `projectName` are derived from Docusaurus context and do not need to be configured manually.
 
 ## CLI Commands
 
@@ -61,7 +74,7 @@ To validate your schemas, run the following command:
 npm run validate-schemas
 ```
 
-This will validate the schemas in the `schemas` directory.
+This will validate schemas in `static/schemas` (or `static/schemas/next` when versioning is enabled).
 
 ### Update Schema IDs
 
