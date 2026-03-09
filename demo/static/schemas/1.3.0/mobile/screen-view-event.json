@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/screen-view-event.json",
+  "title": "Screen View",
+  "description": "A screen_view event example focused on Android and iOS Firebase implementations.",
+  "x-tracking-targets": [
+    "android-firebase-kotlin-sdk",
+    "android-firebase-java-sdk",
+    "ios-firebase-swift-sdk",
+    "ios-firebase-objc-sdk"
+  ],
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/screen-view-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "screen_view",
+      "description": "The event name for a screen view."
+    },
+    "screen_name": {
+      "type": "string",
+      "description": "Human-readable screen name.",
+      "examples": ["Checkout"]
+    },
+    "screen_class": {
+      "type": "string",
+      "description": "Screen class or view controller name.",
+      "examples": ["CheckoutScreen"]
+    }
+  },
+  "required": ["$schema", "event", "screen_name", "screen_class"]
+}

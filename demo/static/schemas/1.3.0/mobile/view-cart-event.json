@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/view-cart-event.json",
+  "title": "View Cart",
+  "description": "Triggered when a user views the cart.",
+  "x-tracking-targets": [
+    "android-firebase-kotlin-sdk",
+    "android-firebase-java-sdk",
+    "ios-firebase-swift-sdk",
+    "ios-firebase-objc-sdk"
+  ],
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/events/view-cart-event.json"
+    },
+    "event": {
+      "type": "string",
+      "const": "view_cart",
+      "description": "The event name view_cart."
+    },
+    "currency": {
+      "type": "string",
+      "description": "ISO 4217 currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["USD"]
+    },
+    "value": {
+      "type": "number",
+      "description": "Monetary value of the event.",
+      "examples": [72.05]
+    },
+    "items": {
+      "$ref": "../components/items.json"
+    }
+  },
+  "required": ["$schema", "event", "currency", "items"]
+}

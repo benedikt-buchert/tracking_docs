@@ -6,66 +6,66 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "./events/components/dataLayer.json"
+      "$ref": "./web/components/dataLayer.json"
     }
   ],
   "oneOf": [
     {
-      "$ref": "./mobile/events/screen-view-event.json"
+      "$ref": "./mobile/screen-view-event.json"
     },
     {
-      "$ref": "./mobile/events/login-with-user-properties-event.json"
+      "$ref": "./mobile/login-with-user-properties-event.json"
     },
     {
-      "$ref": "./mobile/events/checkout-options-event.json"
+      "$ref": "./mobile/checkout-options-event.json"
     },
     {
-      "$ref": "./mobile/events/view-promotion-event.json"
+      "$ref": "./mobile/view-promotion-event.json"
     },
     {
-      "$ref": "./mobile/events/select-promotion-event.json"
+      "$ref": "./mobile/select-promotion-event.json"
     },
     {
-      "$ref": "./mobile/events/view-item-list-event.json"
+      "$ref": "./mobile/view-item-list-event.json"
     },
     {
-      "$ref": "./mobile/events/select-item-event.json"
+      "$ref": "./mobile/select-item-event.json"
     },
     {
-      "$ref": "./mobile/events/view-item-event.json"
+      "$ref": "./mobile/view-item-event.json"
     },
     {
-      "$ref": "./mobile/events/add-to-wishlist-event.json"
+      "$ref": "./mobile/add-to-wishlist-event.json"
     },
     {
-      "$ref": "./mobile/events/add-to-cart-event.json"
+      "$ref": "./mobile/add-to-cart-event.json"
     },
     {
-      "$ref": "./mobile/events/view-cart-event.json"
+      "$ref": "./mobile/view-cart-event.json"
     },
     {
-      "$ref": "./mobile/events/remove-from-cart-event.json"
+      "$ref": "./mobile/remove-from-cart-event.json"
     },
     {
-      "$ref": "./mobile/events/begin-checkout-event.json"
+      "$ref": "./mobile/begin-checkout-event.json"
     },
     {
-      "$ref": "./mobile/events/add-shipping-info-event.json"
+      "$ref": "./mobile/add-shipping-info-event.json"
     },
     {
-      "$ref": "./mobile/events/add-payment-info-event.json"
+      "$ref": "./mobile/add-payment-info-event.json"
     },
     {
-      "$ref": "./mobile/events/purchase-event.json"
+      "$ref": "./mobile/purchase-event.json"
     },
     {
-      "$ref": "./mobile/events/refund-event.json"
+      "$ref": "./mobile/refund-event.json"
     },
     {
-      "$ref": "./mobile/events/in-app-purchase-event.json"
+      "$ref": "./mobile/in-app-purchase-event.json"
     },
     {
-      "$ref": "./mobile/events/custom-event.json"
+      "$ref": "./mobile/custom-event.json"
     }
   ]
 }

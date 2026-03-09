@@ -6,36 +6,36 @@
   "type": "object",
   "allOf": [
     {
-      "$ref": "./events/components/dataLayer.json"
+      "$ref": "./web/components/dataLayer.json"
     }
   ],
   "oneOf": [
     {
-      "$ref": "./events/complex-event.json"
+      "$ref": "./web/complex-event.json"
     },
     {
-      "$ref": "./events/purchase-event.json"
+      "$ref": "./web/purchase-event.json"
     },
     {
-      "$ref": "./events/add-to-cart-event.json"
+      "$ref": "./web/add-to-cart-event.json"
     },
     {
-      "$ref": "./events/root-any-of-event.json"
+      "$ref": "./web/root-any-of-event.json"
     },
     {
-      "$ref": "./events/root-choice-event.json"
+      "$ref": "./web/root-choice-event.json"
     },
     {
-      "$ref": "./events/choice-event.json"
+      "$ref": "./web/choice-event.json"
     },
     {
-      "$ref": "./events/conditional-event.json"
+      "$ref": "./web/conditional-event.json"
     },
     {
-      "$ref": "./events/nested-conditional-event.json"
+      "$ref": "./web/nested-conditional-event.json"
     },
     {
-      "$ref": "./events/battle-test-event.json"
+      "$ref": "./web/battle-test-event.json"
     }
   ]
 }
