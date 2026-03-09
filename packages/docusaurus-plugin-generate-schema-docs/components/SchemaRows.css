@@ -63,7 +63,7 @@
 }
 
 .schema-table th:first-child,
-.schema-table td:first-child {
+.schema-table td.property-cell {
   border-left: none;
 }
 

@@ -79,6 +79,36 @@ describe('PropertyRow', () => {
     expect(getByText('maxLength: 10')).toBeInTheDocument();
   });
 
+  it('marks only the property column cell with property-cell class', () => {
+    const row = {
+      name: 'name',
+      level: 0,
+      required: true,
+      propertyType: 'string',
+      description: '',
+      example: '',
+      constraints: ['required', 'minLength: 1'],
+      path: ['name'],
+    };
+
+    const { container } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={row} />
+        </tbody>
+      </table>,
+    );
+
+    const propertyCell = container.querySelector('td.property-cell');
+    expect(propertyCell).toBeInTheDocument();
+
+    const subsequentConstraintRows = container.querySelectorAll('tbody tr');
+    expect(subsequentConstraintRows.length).toBeGreaterThan(1);
+    expect(
+      subsequentConstraintRows[1].querySelector('td.property-cell'),
+    ).not.toBeInTheDocument();
+  });
+
   it('renders an example', () => {
     const row = {
       name: 'name',

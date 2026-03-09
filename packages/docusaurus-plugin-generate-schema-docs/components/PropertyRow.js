@@ -125,6 +125,7 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
           rowSpan={rowSpan}
           style={{ ...indentStyle, ...continuingLinesStyle }}
           className={clsx(
+            'property-cell',
             level > 0 && `level-${level}`,
             isLastInGroup && 'is-last',
             hasChildren && 'has-children',
