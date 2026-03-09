@@ -1,3 +1,4 @@
+/* eslint jest/expect-expect: ["warn", { "assertFunctionNames": ["expect", "expectPayloadContract"] }] */
 const { generateSnippetForTarget } = require('../helpers/snippetTargets');
 const { PAYLOAD_CONTRACTS } = require('../test-data/payloadContracts');
 
