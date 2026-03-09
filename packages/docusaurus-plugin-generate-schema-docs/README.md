@@ -1,6 +1,6 @@
 # Docusaurus Plugin: Generate Schema Docs
 
-This Docusaurus v3 plugin generates documentation from JSON schemas. It provides a set of tools to automatically create and validate documentation for your event schemas.
+This Docusaurus v2 plugin generates documentation from JSON schemas. It provides a set of tools to automatically create and validate documentation for your event schemas.
 
 ## Features
 
@@ -37,22 +37,9 @@ npm install --save docusaurus-plugin-generate-schema-docs
     };
     ```
 
-    The `dataLayerName` option allows you to customize the name of the data layer variable in generated examples. If not provided, it defaults to `dataLayer`.
+    The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
 
-2.  Place your JSON schemas in `static/schemas` in your Docusaurus site directory.
-    If versioning is enabled, use `static/schemas/next` for the current working version.
-
-## Plugin Options
-
-The plugin currently supports the following configuration options:
-
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `dataLayerName` | `string` | `dataLayer` | Sets the data layer variable name used in generated example snippets. |
-
-Notes:
-- No other plugin-specific options are currently exposed.
-- `siteDir`, `url`, `organizationName`, and `projectName` are derived from Docusaurus context and do not need to be configured manually.
+2.  Place your JSON schemas in the `schemas` directory at the root of your project.
 
 ## CLI Commands
 
@@ -74,7 +61,7 @@ To validate your schemas, run the following command:
 npm run validate-schemas
 ```
 
-This will validate schemas in `static/schemas` (or `static/schemas/next` when versioning is enabled).
+This will validate the schemas in the `schemas` directory.
 
 ### Update Schema IDs
 
@@ -102,6 +89,28 @@ docusaurus sync-gtm
 ```
 
 By default, it resolves schemas from the project root. Use `--path=<siteDir>` to target a different site directory.
+
+### Firebase Snippet Targets
+
+`ExampleDataLayer` supports Firebase snippet targets for:
+
+- `android-firebase-kotlin-sdk`
+- `android-firebase-java-sdk`
+- `ios-firebase-swift-sdk`
+- `ios-firebase-objc-sdk`
+
+Mapping rules for generated parameters:
+
+- `string` -> string parameter
+- `integer`/`boolean` -> integer/long parameter (`true` = `1`, `false` = `0`)
+- `number` -> double parameter
+- `items` -> non-empty array of flat item objects
+- unsupported nested values cause a generation error (no automatic flattening or JSON-string fallback)
+
+Reference docs used for syntax and kept as source of truth:
+
+- https://firebase.google.com/docs/analytics/android/events
+- https://firebase.google.com/docs/analytics/ios/events
 
 ## How it Works
 

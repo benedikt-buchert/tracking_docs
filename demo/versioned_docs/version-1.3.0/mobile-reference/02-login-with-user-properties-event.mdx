@@ -1,0 +1,25 @@
+---
+title: Login With User Properties
+description: "A login event example with Firebase user_properties for Android and iOS."
+sidebar_label: Login With User Properties
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/1.3.0/mobile/login-with-user-properties-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Login With User Properties
+
+A login event example with Firebase user_properties for Android and iOS.
+
+
+
+<SchemaViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/login-with-user-properties-event.json","title":"Login With User Properties","description":"A login event example with Firebase user_properties for Android and iOS.","type":"object","required":["$schema","event","method","user_properties"],"$defs":{"strictObject":{"type":"object","propertyNames":{"maxLength":40,"pattern":"^(\\$schema)|[a-z0-9_]+$"},"additionalProperties":{"anyOf":[{"$ref":"#/allOf/0/$defs/strictObject"},{"type":"array","items":{"$ref":"#/allOf/0/$defs/strictObject"}},{"not":{"type":"object"}}]}}},"$ref":"#/allOf/0/$defs/strictObject","properties":{"event":{"type":"string","description":"The name of the event.","const":"login"},"ecommerce":{"type":"object","description":"Ecommerce related data.","x-gtm-clear":true},"user_data":{"type":"object","description":"User related data.","x-gtm-clear":true},"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/login-with-user-properties-event.json"},"method":{"type":"string","description":"Login method.","examples":["email"]},"user_properties":{"type":"object","description":"Firebase user properties to set before logging the event.","required":["sign_up_method"],"properties":{"sign_up_method":{"type":"string","description":"The sign up method user property.","examples":["email"]},"allow_ad_personalization_signals":{"type":["string","null"],"description":"Whether ad personalization signals are allowed.","examples":["false",null]}}}},"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"]}}
+  
+/>
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/login-with-user-properties-event.json","title":"Login With User Properties","description":"A login event example with Firebase user_properties for Android and iOS.","type":"object","required":["$schema","event","method","user_properties"],"$defs":{"strictObject":{"type":"object","propertyNames":{"maxLength":40,"pattern":"^(\\$schema)|[a-z0-9_]+$"},"additionalProperties":{"anyOf":[{"$ref":"#/allOf/0/$defs/strictObject"},{"type":"array","items":{"$ref":"#/allOf/0/$defs/strictObject"}},{"not":{"type":"object"}}]}}},"$ref":"#/allOf/0/$defs/strictObject","properties":{"event":{"type":"string","description":"The name of the event.","const":"login"},"ecommerce":{"type":"object","description":"Ecommerce related data.","x-gtm-clear":true},"user_data":{"type":"object","description":"User related data.","x-gtm-clear":true},"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/login-with-user-properties-event.json"},"method":{"type":"string","description":"Login method.","examples":["email"]},"user_properties":{"type":"object","description":"Firebase user properties to set before logging the event.","required":["sign_up_method"],"properties":{"sign_up_method":{"type":"string","description":"The sign up method user property.","examples":["email"]},"allow_ad_personalization_signals":{"type":["string","null"],"description":"Whether ad personalization signals are allowed.","examples":["false",null]}}}},"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"]}} />
+
+

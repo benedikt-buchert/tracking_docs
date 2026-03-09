@@ -1,0 +1,34 @@
+---
+title: Mobile Reference
+description: "Dedicated Android and iOS Firebase snippets and schema examples."
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/mobile-reference.json
+---
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+# Mobile Reference
+
+Dedicated Android and iOS Firebase snippets and schema examples.
+
+Please select one of the following options:
+
+- [Screen View](./screen-view-event)
+- [Login With User Properties](./login-with-user-properties-event)
+- [Checkout Options](./checkout-options-event)
+- [View Promotion](./view-promotion-event)
+- [Select Promotion](./select-promotion-event)
+- [View Item List](./view-item-list-event)
+- [Select Item](./select-item-event)
+- [View Item](./view-item-event)
+- [Add To Wishlist](./add-to-wishlist-event)
+- [Add To Cart](./add-to-cart-event)
+- [View Cart](./view-cart-event)
+- [Remove From Cart](./remove-from-cart-event)
+- [Begin Checkout](./begin-checkout-event)
+- [Add Shipping Info](./add-shipping-info-event)
+- [Add Payment Info](./add-payment-info-event)
+- [Purchase](./purchase-event)
+- [Refund](./refund-event)
+- [In-App Purchase](./in-app-purchase-event)
+- [Custom Event](./custom-event)
+
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/next/mobile-reference.json","title":"Mobile Reference","description":"Dedicated Android and iOS Firebase snippets and schema examples.","type":"object","allOf":[{"$ref":"./web/components/dataLayer.json"}],"oneOf":[{"$ref":"./mobile/screen-view-event.json"},{"$ref":"./mobile/login-with-user-properties-event.json"},{"$ref":"./mobile/checkout-options-event.json"},{"$ref":"./mobile/view-promotion-event.json"},{"$ref":"./mobile/select-promotion-event.json"},{"$ref":"./mobile/view-item-list-event.json"},{"$ref":"./mobile/select-item-event.json"},{"$ref":"./mobile/view-item-event.json"},{"$ref":"./mobile/add-to-wishlist-event.json"},{"$ref":"./mobile/add-to-cart-event.json"},{"$ref":"./mobile/view-cart-event.json"},{"$ref":"./mobile/remove-from-cart-event.json"},{"$ref":"./mobile/begin-checkout-event.json"},{"$ref":"./mobile/add-shipping-info-event.json"},{"$ref":"./mobile/add-payment-info-event.json"},{"$ref":"./mobile/purchase-event.json"},{"$ref":"./mobile/refund-event.json"},{"$ref":"./mobile/in-app-purchase-event.json"},{"$ref":"./mobile/custom-event.json"}]}} />

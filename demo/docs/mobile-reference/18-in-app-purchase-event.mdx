@@ -1,0 +1,25 @@
+---
+title: In-App Purchase
+description: "An in_app_purchase event example focused on Android and iOS Firebase implementations."
+sidebar_label: In-App Purchase
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/mobile/in-app-purchase-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# In-App Purchase
+
+An in_app_purchase event example focused on Android and iOS Firebase implementations.
+
+
+
+<SchemaViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/in-app-purchase-event.json","title":"In-App Purchase","description":"An in_app_purchase event example focused on Android and iOS Firebase implementations.","type":"object","required":["$schema","event","product_id","product_name","currency","value"],"$defs":{"strictObject":{"type":"object","propertyNames":{"maxLength":40,"pattern":"^(\\$schema)|[a-z0-9_]+$"},"additionalProperties":{"anyOf":[{"$ref":"#/allOf/0/$defs/strictObject"},{"type":"array","items":{"$ref":"#/allOf/0/$defs/strictObject"}},{"not":{"type":"object"}}]}}},"$ref":"#/allOf/0/$defs/strictObject","properties":{"event":{"type":"string","description":"The name of the event.","const":"in_app_purchase"},"ecommerce":{"type":"object","description":"Ecommerce related data.","x-gtm-clear":true},"user_data":{"type":"object","description":"User related data.","x-gtm-clear":true},"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/in-app-purchase-event.json"},"product_id":{"type":"string","description":"The purchased product identifier.","examples":["sku_premium"]},"product_name":{"type":"string","description":"Display name of the purchased product.","examples":["Premium Plan"]},"currency":{"type":"string","description":"ISO 4217 currency code.","minLength":3,"maxLength":3,"examples":["USD"]},"value":{"type":"number","description":"Purchase value.","examples":[9.99]},"subscription":{"type":"boolean","description":"Whether the purchase is a subscription.","examples":[true]},"free_trial":{"type":"boolean","description":"Whether a free trial was used.","examples":[false]},"price_is_discounted":{"type":"boolean","description":"Whether the listed price is discounted.","examples":[true]}},"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"]}}
+  
+/>
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/in-app-purchase-event.json","title":"In-App Purchase","description":"An in_app_purchase event example focused on Android and iOS Firebase implementations.","type":"object","required":["$schema","event","product_id","product_name","currency","value"],"$defs":{"strictObject":{"type":"object","propertyNames":{"maxLength":40,"pattern":"^(\\$schema)|[a-z0-9_]+$"},"additionalProperties":{"anyOf":[{"$ref":"#/allOf/0/$defs/strictObject"},{"type":"array","items":{"$ref":"#/allOf/0/$defs/strictObject"}},{"not":{"type":"object"}}]}}},"$ref":"#/allOf/0/$defs/strictObject","properties":{"event":{"type":"string","description":"The name of the event.","const":"in_app_purchase"},"ecommerce":{"type":"object","description":"Ecommerce related data.","x-gtm-clear":true},"user_data":{"type":"object","description":"User related data.","x-gtm-clear":true},"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/in-app-purchase-event.json"},"product_id":{"type":"string","description":"The purchased product identifier.","examples":["sku_premium"]},"product_name":{"type":"string","description":"Display name of the purchased product.","examples":["Premium Plan"]},"currency":{"type":"string","description":"ISO 4217 currency code.","minLength":3,"maxLength":3,"examples":["USD"]},"value":{"type":"number","description":"Purchase value.","examples":[9.99]},"subscription":{"type":"boolean","description":"Whether the purchase is a subscription.","examples":[true]},"free_trial":{"type":"boolean","description":"Whether a free trial was used.","examples":[false]},"price_is_discounted":{"type":"boolean","description":"Whether the listed price is discounted.","examples":[true]}},"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"]}} />
+
+

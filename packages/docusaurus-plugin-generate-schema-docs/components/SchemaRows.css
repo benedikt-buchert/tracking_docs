@@ -63,8 +63,17 @@
 }
 
 .schema-table th:first-child,
-.schema-table td:first-child {
+.schema-table td.property-cell {
   border-left: none;
+}
+
+/*
+ * Constraint-only continuation rows render a single cell; in those rows that
+ * cell is also :first-child, but it still needs the separator before the
+ * "Constraints" column.
+ */
+.schema-table td.constraint-cell {
+  border-left: 1px solid var(--ifm-table-border-color);
 }
 
 .schema-table thead th {
