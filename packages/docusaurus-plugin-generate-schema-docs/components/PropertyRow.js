@@ -125,6 +125,7 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
           rowSpan={rowSpan}
           style={{ ...indentStyle, ...continuingLinesStyle }}
           className={clsx(
+            'property-cell',
             level > 0 && `level-${level}`,
             isLastInGroup && 'is-last',
             hasChildren && 'has-children',
@@ -143,7 +144,7 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
         </td>
 
         {/* The first constraint cell */}
-        <td>
+        <td className="constraint-cell">
           {firstConstraint && (
             <code
               className={clsx(
@@ -181,7 +182,7 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
       {/* Render subsequent constraints in their own rows */}
       {remainingConstraints.map((constraint) => (
         <tr className={clsx(required && 'required-row')} key={constraint}>
-          <td>
+          <td className="constraint-cell">
             <code
               className={clsx(
                 'constraint-code',

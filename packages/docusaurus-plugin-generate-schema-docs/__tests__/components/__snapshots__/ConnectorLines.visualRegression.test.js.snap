@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`connector lines visual regressions keeps cvv row open when payment choice has following options 1`] = `"<td rowspan="1" style="padding-left: 1.75rem;" class="level-1"><span class="property-name"><strong>cvv</strong></span></td>"`;
+exports[`connector lines visual regressions keeps cvv row open when payment choice has following options 1`] = `"<td rowspan="1" style="padding-left: 1.75rem;" class="property-cell level-1"><span class="property-name"><strong>cvv</strong></span></td>"`;
 
-exports[`connector lines visual regressions keeps user_id option row open when user conditional follows 1`] = `"<td rowspan="1" style="padding-left: 1.75rem;" class="level-1"><span class="property-name"><strong>user_id</strong></span></td>"`;
+exports[`connector lines visual regressions keeps user_id option row open when user conditional follows 1`] = `"<td rowspan="1" style="padding-left: 1.75rem;" class="property-cell level-1"><span class="property-name"><strong>user_id</strong></span></td>"`;
 
-exports[`connector lines visual regressions keeps wallet_provider option row open when wallet_email follows 1`] = `"<td rowspan="2" style="padding-left: 1.75rem;" class="level-1"><span class="property-name"><strong>wallet_provider</strong></span></td>"`;
+exports[`connector lines visual regressions keeps wallet_provider option row open when wallet_email follows 1`] = `"<td rowspan="2" style="padding-left: 1.75rem;" class="property-cell level-1"><span class="property-name"><strong>wallet_provider</strong></span></td>"`;
