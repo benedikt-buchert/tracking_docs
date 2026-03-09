@@ -63,6 +63,9 @@
     },
     {
       "$ref": "./mobile/events/in-app-purchase-event.json"
+    },
+    {
+      "$ref": "./mobile/events/custom-event.json"
     }
   ]
 }

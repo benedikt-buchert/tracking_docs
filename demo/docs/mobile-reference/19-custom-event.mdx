@@ -1,0 +1,25 @@
+---
+title: Custom Event
+description: "A custom Firebase event example for mobile apps."
+sidebar_label: Custom Event
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/mobile/events/custom-event.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Custom Event
+
+A custom Firebase event example for mobile apps.
+
+
+
+<SchemaViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","type":"object","allOf":[{"$ref":"./events/components/dataLayer.json"}],"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"required":["$schema","event"],"properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]}}}}
+  
+/>
+<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","type":"object","allOf":[{"$ref":"./events/components/dataLayer.json"}],"x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"required":["$schema","event"],"properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/events/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]}}}} />
+
+
