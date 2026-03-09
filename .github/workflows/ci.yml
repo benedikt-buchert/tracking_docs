@@ -12,7 +12,7 @@ on:
       - main
 
 jobs:
-  validate:
+  validate-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,8 +35,14 @@ jobs:
       - name: Run lint
         run: npm run lint
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests (Linux lane)
+        run: npm test -- --testPathIgnorePatterns=runtimePayload\\.ios\\.test\\.js
+
+      - name: Verify native fixture sync
+        run: npm run check:native-fixtures
+
+      - name: Run Android native payload tests
+        run: npm run test:native:android
 
       - name: Generate docs
         run: npm run gen-docs
@@ -46,3 +52,78 @@ jobs:
 
       - name: Validate Schemas
         run: npm run validate-schemas
+
+  validate-ios-payload:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run iOS runtime payload tests
+        run: npm run test:payload:ios
+
+      - name: Run iOS native payload tests
+        run: npm run test:native:ios
+
+  validate-android-realsdk-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        firebase_android_analytics_version: ['22.4.0', '22.5.0']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Android real SDK compile tests
+        run: npm run test:realsdk:android
+        env:
+          FIREBASE_ANDROID_ANALYTICS_VERSION: ${{ matrix.firebase_android_analytics_version }}
+
+  validate-ios-realsdk-matrix:
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        firebase_ios_sdk_version: ['11.14.0', '11.15.0']
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run iOS real SDK compile tests
+        run: npm run test:realsdk:ios
+        env:
+          FIREBASE_IOS_SDK_VERSION: ${{ matrix.firebase_ios_sdk_version }}
