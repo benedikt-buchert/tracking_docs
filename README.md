@@ -108,11 +108,60 @@ Important: `sync:gtm` applies real changes to the configured GTM workspace/conta
 ```bash
 npm ci
 npm test
+npm run test:payload
 npm run lint
 npm run gen-docs
 npm run validate-schemas
 npm run build
 ```
+
+## Payload Contract Test Matrix
+
+Canonical emitted-payload contracts live in:
+`packages/docusaurus-plugin-generate-schema-docs/test-data/payloadContracts.js`
+
+Representative event classes covered:
+- predefined event (`screen_view`)
+- ecommerce event with `items` (`add_to_cart`)
+- custom event (`my_custom_event`)
+- fallback JSON serialization case (`metadata_capture`, web target)
+
+Local commands:
+
+```bash
+npm run sync:native-fixtures
+npm run test:payload:web
+npm run test:payload:android
+npm run test:payload:ios
+npm run test:native:android
+npm run test:native:ios
+npm run test:realsdk:android
+npm run test:realsdk:ios
+```
+
+Native fixture sources are auto-generated from `generateSnippetForTarget`:
+- iOS: `native-tests/ios/Sources/NativePayloadFixtures/GeneratedSnippets.swift`
+- iOS Obj-C: `native-tests/ios/Sources/NativePayloadFixturesObjC/GeneratedObjCSnippets.m`
+- Android: `native-tests/android/src/test/java/com/trackingdocs/nativepayload/GeneratedAndroidSnippets.java`
+- Android Kotlin: `native-tests/android/src/test/kotlin/com/trackingdocs/nativepayloadkotlin/GeneratedAndroidKotlinSnippets.kt`
+
+Use `npm run check:native-fixtures` to regenerate and fail if committed files are stale.
+
+Real SDK compile checks:
+- Android: `scripts/test-android-realsdk.mjs` downloads the real `firebase-analytics` + measurement artifacts and validates both Java and Kotlin call shapes against `FirebaseAnalytics`.
+- iOS: `native-tests/ios-sdk` validates Swift API usage (`Analytics`) and Obj-C symbols (`FIRAnalytics` constants/selectors) against the real Firebase iOS SDK (`FirebaseAnalytics`).
+
+Version overrides:
+- Android real SDK check reads `FIREBASE_ANDROID_ANALYTICS_VERSION` (default: `22.5.0`).
+- iOS real SDK check reads `FIREBASE_IOS_SDK_VERSION` (default: `11.15.0`).
+
+CI runs real SDK checks in matrix mode:
+- Android analytics versions: `22.4.0`, `22.5.0`
+- iOS SDK versions: `11.14.0`, `11.15.0`
+
+CI lanes:
+- `validate-linux` (ubuntu-latest): lint, full Jest suite except iOS runtime payload lane, Android native payload tests (`mvn test`), docs generation, build, schema validation
+- `validate-ios-payload` (macos-latest): iOS runtime payload contract tests (`npm run test:payload:ios`) and iOS native payload tests (`swift test`)
 
 ## Release Process
 
