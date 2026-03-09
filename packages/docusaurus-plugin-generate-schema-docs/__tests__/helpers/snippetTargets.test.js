@@ -5,6 +5,16 @@ import {
   SNIPPET_TARGETS,
 } from '../../helpers/snippetTargets';
 
+function executeWebSnippet(snippet, dataLayerName = 'dataLayer') {
+  const push = jest.fn();
+  const runtimeWindow = {
+    [dataLayerName]: { push },
+  };
+  const runner = new Function('window', snippet);
+  runner(runtimeWindow);
+  return push.mock.calls.map(([payload]) => payload);
+}
+
 describe('snippetTargets', () => {
   it('exposes expected baseline target ids', () => {
     expect(SNIPPET_TARGETS.map((target) => target.id)).toEqual(
@@ -46,6 +56,51 @@ describe('snippetTargets', () => {
 
     expect(snippet).toContain('window.customDataLayer.push');
     expect(snippet).toContain('"event": "test_event"');
+  });
+
+  it('executes web-datalayer snippet and pushes expected payload', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-datalayer-js',
+      example: {
+        event: 'purchase',
+        ecommerce: {
+          currency: 'EUR',
+          value: 72.05,
+        },
+      },
+      schema: { properties: {} },
+    });
+
+    const pushedPayloads = executeWebSnippet(snippet);
+    expect(pushedPayloads).toEqual([
+      {
+        event: 'purchase',
+        ecommerce: { currency: 'EUR', value: 72.05 },
+      },
+    ]);
+  });
+
+  it('executes web-datalayer snippet with clearable properties reset first', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-datalayer-js',
+      example: {
+        event: 'purchase',
+        ecommerce: { value: 10 },
+      },
+      schema: {
+        properties: {
+          ecommerce: { 'x-gtm-clear': true, type: 'object' },
+          user_data: { 'x-gtm-clear': true, type: 'object' },
+          event: { type: 'string' },
+        },
+      },
+    });
+
+    const pushedPayloads = executeWebSnippet(snippet);
+    expect(pushedPayloads).toEqual([
+      { ecommerce: null },
+      { event: 'purchase', ecommerce: { value: 10 } },
+    ]);
   });
 
   it('generates android kotlin firebase snippet', () => {
