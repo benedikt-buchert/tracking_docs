@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-target-constraints.example/schemas/firebase/v1/flat-event-params.json",
+  "title": "Firebase Flat Event Params Constraint v1",
+  "description": "Constrains Firebase event payloads to flat scalar params, with explicit support for the items array.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string"
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/firebaseItem"
+      }
+    }
+  },
+  "additionalProperties": {
+    "$ref": "#/$defs/firebaseScalar"
+  },
+  "$defs": {
+    "firebaseScalar": {
+      "type": ["string", "number", "integer", "boolean", "null"]
+    },
+    "firebaseItem": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/firebaseScalar"
+      }
+    }
+  }
+}
