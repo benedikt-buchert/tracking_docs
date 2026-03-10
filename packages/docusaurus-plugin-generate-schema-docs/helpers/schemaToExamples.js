@@ -63,18 +63,61 @@ const generateExampleForChoice = (rootSchema, path, option) => {
   }
 };
 
+const pruneSiblingConditionalProperties = (
+  mergedSchema,
+  activeBranchSchema,
+  inactiveBranchSchema,
+  baseRequired = [],
+) => {
+  const branchesOnlyAdjustRequired =
+    !activeBranchSchema?.properties && !inactiveBranchSchema?.properties;
+
+  if (
+    !mergedSchema?.properties ||
+    !branchesOnlyAdjustRequired ||
+    !Array.isArray(inactiveBranchSchema?.required)
+  ) {
+    return mergedSchema;
+  }
+
+  const activeRequired = new Set(activeBranchSchema?.required || []);
+  const protectedRequired = new Set(baseRequired);
+
+  inactiveBranchSchema.required.forEach((name) => {
+    if (activeRequired.has(name) || protectedRequired.has(name)) {
+      return;
+    }
+
+    delete mergedSchema.properties[name];
+    if (Array.isArray(mergedSchema.required)) {
+      mergedSchema.required = mergedSchema.required.filter(
+        (requiredName) => requiredName !== name,
+      );
+    }
+  });
+
+  return mergedSchema;
+};
+
 const generateConditionalExample = (rootSchema, path, branch) => {
   const schemaVariant = JSON.parse(JSON.stringify(rootSchema));
+  const siblingBranch = branch === 'then' ? 'else' : 'then';
 
   if (path.length === 0) {
     const branchSchema = schemaVariant[branch];
+    const siblingBranchSchema = schemaVariant[siblingBranch];
+    const baseRequired = schemaVariant.required || [];
     delete schemaVariant.if;
     delete schemaVariant.then;
     delete schemaVariant.else;
     if (branchSchema) {
-      return buildExampleFromSchema(
+      const merged = pruneSiblingConditionalProperties(
         mergeJsonSchema({ allOf: [schemaVariant, branchSchema] }),
+        branchSchema,
+        siblingBranchSchema,
+        baseRequired,
       );
+      return buildExampleFromSchema(merged);
     }
     return buildExampleFromSchema(schemaVariant);
   }
@@ -84,11 +127,18 @@ const generateConditionalExample = (rootSchema, path, branch) => {
     target = target[segment];
   }
   const branchSchema = target[branch];
+  const siblingBranchSchema = target[siblingBranch];
+  const baseRequired = target.required || [];
   delete target.if;
   delete target.then;
   delete target.else;
   if (branchSchema) {
-    const merged = mergeJsonSchema({ allOf: [target, branchSchema] });
+    const merged = pruneSiblingConditionalProperties(
+      mergeJsonSchema({ allOf: [target, branchSchema] }),
+      branchSchema,
+      siblingBranchSchema,
+      baseRequired,
+    );
     Object.keys(target).forEach((k) => delete target[k]);
     Object.assign(target, merged);
   }

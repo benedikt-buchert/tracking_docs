@@ -278,6 +278,47 @@ describe('schemaToTableData', () => {
       expect(conditionalRow.branches[0].title).toBe('Then');
     });
 
+    it('materializes required-only branch rows from parent properties', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          platform: { type: 'string' },
+          att_status: { type: 'string' },
+          ad_personalization_enabled: { type: 'boolean' },
+        },
+        required: ['platform'],
+        if: {
+          properties: {
+            platform: { const: 'ios' },
+          },
+          required: ['platform'],
+        },
+        then: {
+          required: ['att_status'],
+        },
+        else: {
+          required: ['ad_personalization_enabled'],
+        },
+      };
+
+      const tableData = schemaToTableData(schema);
+      const conditionalRow = tableData.find((r) => r.type === 'conditional');
+      const thenBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Then',
+      );
+      const elseBranch = conditionalRow.branches.find(
+        (b) => b.title === 'Else',
+      );
+
+      expect(thenBranch.rows).toHaveLength(1);
+      expect(thenBranch.rows[0].name).toBe('att_status');
+      expect(thenBranch.rows[0].required).toBe(true);
+
+      expect(elseBranch.rows).toHaveLength(1);
+      expect(elseBranch.rows[0].name).toBe('ad_personalization_enabled');
+      expect(elseBranch.rows[0].required).toBe(true);
+    });
+
     it('renders regular properties alongside conditional rows', () => {
       const tableData = schemaToTableData(conditionalEventSchema);
       const propRows = tableData.filter((r) => r.type === 'property');
