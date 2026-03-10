@@ -136,6 +136,7 @@ npm run test:payload:ios
 npm run test:native:android
 npm run test:native:ios
 npm run test:realsdk:android
+npm run test:realsdk:android:runtime
 npm run test:realsdk:ios
 ```
 
@@ -149,7 +150,12 @@ Use `npm run check:native-fixtures` to regenerate and fail if committed files ar
 
 Real SDK compile checks:
 - Android: `scripts/test-android-realsdk.mjs` downloads the real `firebase-analytics` + measurement artifacts and validates both Java and Kotlin call shapes against `FirebaseAnalytics`.
+- Android runtime smoke: `native-tests/android-runtime` executes a Robolectric test against the real Firebase Android SDK and verifies runtime calls do not throw for unsupported event/key string usage.
 - iOS: `native-tests/ios-sdk` validates Swift API usage (`Analytics`) and Obj-C symbols (`FIRAnalytics` constants/selectors) against the real Firebase iOS SDK (`FirebaseAnalytics`).
+
+Android runtime smoke prerequisites:
+- Set `ANDROID_HOME` (or `ANDROID_SDK_ROOT`) to your local Android SDK path.
+- Use a supported JDK for Android Gradle Plugin (JDK 21 recommended).
 
 Version overrides:
 - Android real SDK check reads `FIREBASE_ANDROID_ANALYTICS_VERSION` (default: `22.5.0`).

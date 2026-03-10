@@ -37,4 +37,26 @@ final class GeneratedAndroidSnippets {
     eventParams.putLong("premium", 1L);
     mFirebaseAnalytics.logEvent("my_custom_event", eventParams);
   }
+
+  // Generated from contract: firebase-unsupported-ecommerce-key
+  static void runFirebaseUnsupportedEcommerceKey(FakeFirebaseAnalytics mFirebaseAnalytics) {
+    Bundle item1 = new Bundle();
+    item1.putString(FirebaseAnalytics.Param.ITEM_ID, "sku-unsupported-1");
+    item1.putString(FirebaseAnalytics.Param.ITEM_NAME, "Hat");
+    item1.putString("unsupported_dimension", "blue-xl");
+
+    Bundle eventParams = new Bundle();
+    eventParams.putString(FirebaseAnalytics.Param.CURRENCY, "EUR");
+    eventParams.putDouble(FirebaseAnalytics.Param.VALUE, 19.99);
+    eventParams.putParcelableArray(FirebaseAnalytics.Param.ITEMS, new Parcelable[]{item1});
+    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, eventParams);
+  }
+
+  // Generated from contract: firebase-unsupported-event-name
+  static void runFirebaseUnsupportedEventName(FakeFirebaseAnalytics mFirebaseAnalytics) {
+    Bundle eventParams = new Bundle();
+    eventParams.putString("plan", "basic");
+    eventParams.putLong("count", 1L);
+    mFirebaseAnalytics.logEvent("unsupported_mobile_event_name", eventParams);
+  }
 }

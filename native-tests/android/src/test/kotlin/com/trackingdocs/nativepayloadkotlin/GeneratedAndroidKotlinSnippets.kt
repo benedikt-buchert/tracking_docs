@@ -36,4 +36,27 @@ object GeneratedAndroidKotlinSnippets {
       param("premium", 1L)
     }
   }
+
+  // Generated from contract: firebase-unsupported-ecommerce-key
+  fun runFirebaseUnsupportedEcommerceKey(firebaseAnalytics: FakeFirebaseAnalyticsKotlin) {
+    val item1 = Bundle().apply {
+      putString(FirebaseAnalytics.Param.ITEM_ID, "sku-unsupported-1")
+      putString(FirebaseAnalytics.Param.ITEM_NAME, "Hat")
+      putString("unsupported_dimension", "blue-xl")
+    }
+
+    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART) {
+      param(FirebaseAnalytics.Param.CURRENCY, "EUR")
+      param(FirebaseAnalytics.Param.VALUE, 19.99)
+      param(FirebaseAnalytics.Param.ITEMS, arrayOf(item1))
+    }
+  }
+
+  // Generated from contract: firebase-unsupported-event-name
+  fun runFirebaseUnsupportedEventName(firebaseAnalytics: FakeFirebaseAnalyticsKotlin) {
+    firebaseAnalytics.logEvent("unsupported_mobile_event_name") {
+      param("plan", "basic")
+      param("count", 1L)
+    }
+  }
 }

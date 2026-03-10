@@ -67,6 +67,43 @@ public class NativePayloadAndroidTest {
         analytics.userProperties);
   }
 
+  @Test
+  void unsupportedEcommerceKey() {
+    FakeFirebaseAnalytics analytics = new FakeFirebaseAnalytics();
+
+    GeneratedAndroidSnippets.runFirebaseUnsupportedEcommerceKey(analytics);
+
+    assertEquals("add_to_cart", analytics.lastEventName);
+    assertEquals(
+        mapOf(
+            entry("currency", "EUR"),
+            entry("value", Double.valueOf(19.99)),
+            entry(
+                "items",
+                List.of(
+                    mapOf(
+                        entry("item_id", "sku-unsupported-1"),
+                        entry("item_name", "Hat"),
+                        entry("unsupported_dimension", "blue-xl"))))),
+        analytics.lastEventParams);
+    assertEquals(Map.of(), analytics.userProperties);
+  }
+
+  @Test
+  void unsupportedEventName() {
+    FakeFirebaseAnalytics analytics = new FakeFirebaseAnalytics();
+
+    GeneratedAndroidSnippets.runFirebaseUnsupportedEventName(analytics);
+
+    assertEquals("unsupported_mobile_event_name", analytics.lastEventName);
+    assertEquals(
+        mapOf(
+            entry("plan", "basic"),
+            entry("count", Long.valueOf(1L))),
+        analytics.lastEventParams);
+    assertEquals(Map.of(), analytics.userProperties);
+  }
+
   private static Map<String, Object> mapOf(Map.Entry<String, Object>... entries) {
     Map<String, Object> map = new LinkedHashMap<>();
     for (Map.Entry<String, Object> entry : entries) {

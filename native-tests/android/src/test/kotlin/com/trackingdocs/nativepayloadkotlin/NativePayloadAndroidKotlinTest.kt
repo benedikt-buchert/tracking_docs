@@ -69,4 +69,45 @@ class NativePayloadAndroidKotlinTest {
       analytics.userProperties,
     )
   }
+
+  @Test
+  fun unsupportedEcommerceKey() {
+    val analytics = FakeFirebaseAnalyticsKotlin()
+
+    GeneratedAndroidKotlinSnippets.runFirebaseUnsupportedEcommerceKey(analytics)
+
+    assertEquals("add_to_cart", analytics.lastEventName)
+    assertEquals(
+      linkedMapOf(
+        "currency" to "EUR",
+        "value" to 19.99,
+        "items" to listOf(
+          linkedMapOf(
+            "item_id" to "sku-unsupported-1",
+            "item_name" to "Hat",
+            "unsupported_dimension" to "blue-xl",
+          ),
+        ),
+      ),
+      analytics.lastEventParams,
+    )
+    assertEquals(emptyMap<String, String?>(), analytics.userProperties)
+  }
+
+  @Test
+  fun unsupportedEventName() {
+    val analytics = FakeFirebaseAnalyticsKotlin()
+
+    GeneratedAndroidKotlinSnippets.runFirebaseUnsupportedEventName(analytics)
+
+    assertEquals("unsupported_mobile_event_name", analytics.lastEventName)
+    assertEquals(
+      linkedMapOf(
+        "plan" to "basic",
+        "count" to 1L,
+      ),
+      analytics.lastEventParams,
+    )
+    assertEquals(emptyMap<String, String?>(), analytics.userProperties)
+  }
 }

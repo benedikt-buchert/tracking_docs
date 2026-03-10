@@ -35,3 +35,26 @@ void RunObjCSnippetCustomEventWithUserProperties(void) {
   } mutableCopy];
   [FIRAnalytics logEventWithName:@"my_custom_event" parameters:eventParams];
 }
+
+void RunObjCSnippetFirebaseUnsupportedEcommerceKey(void) {
+  NSMutableDictionary *item1 = [@{
+    kFIRParameterItemID: @"sku-unsupported-1",
+    kFIRParameterItemName: @"Hat",
+    @"unsupported_dimension": @"blue-xl"
+  } mutableCopy];
+
+  NSMutableDictionary *eventParams = [@{
+    kFIRParameterCurrency: @"EUR",
+    kFIRParameterValue: @(19.99)
+  } mutableCopy];
+  eventParams[kFIRParameterItems] = @[item1];
+  [FIRAnalytics logEventWithName:kFIREventAddToCart parameters:eventParams];
+}
+
+void RunObjCSnippetFirebaseUnsupportedEventName(void) {
+  NSMutableDictionary *eventParams = [@{
+    @"plan": @"basic",
+    @"count": @(1)
+  } mutableCopy];
+  [FIRAnalytics logEventWithName:@"unsupported_mobile_event_name" parameters:eventParams];
+}

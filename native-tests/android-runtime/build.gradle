@@ -1,0 +1,30 @@
+plugins {
+  id 'com.android.library' version '8.8.2'
+}
+
+android {
+  namespace 'com.trackingdocs.realsdk'
+  compileSdk 35
+
+  defaultConfig {
+    minSdk 24
+  }
+
+  testOptions {
+    unitTests {
+      includeAndroidResources = true
+    }
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+}
+
+dependencies {
+  testImplementation 'junit:junit:4.13.2'
+  testImplementation 'org.robolectric:robolectric:4.13'
+  testImplementation 'androidx.test:core:1.6.1'
+  testImplementation 'com.google.firebase:firebase-analytics:22.5.0'
+}

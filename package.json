@@ -29,6 +29,7 @@
     "test:native:ios": "swift test --package-path native-tests/ios",
     "test:realsdk": "npm run test:realsdk:android && npm run test:realsdk:ios",
     "test:realsdk:android": "node scripts/test-android-realsdk.mjs",
+    "test:realsdk:android:runtime": "cd native-tests/android-runtime && ./gradlew test --no-daemon",
     "test:realsdk:ios": "swift test --package-path native-tests/ios-sdk",
     "check:deps": "node scripts/check-dependency-specs.mjs",
     "prettier": "prettier --write .",

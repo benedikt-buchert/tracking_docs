@@ -148,6 +148,81 @@ const PAYLOAD_CONTRACTS = [
       },
     },
   },
+  {
+    id: 'firebase-unsupported-ecommerce-key',
+    class: 'unsupported_ecommerce_key',
+    example: {
+      event: 'add_to_cart',
+      currency: 'EUR',
+      value: 19.99,
+      items: [
+        {
+          item_id: 'sku-unsupported-1',
+          item_name: 'Hat',
+          unsupported_dimension: 'blue-xl',
+        },
+      ],
+    },
+    expected: {
+      web: {
+        eventName: 'add_to_cart',
+        payload: {
+          event: 'add_to_cart',
+          currency: 'EUR',
+          value: 19.99,
+          items: [
+            {
+              item_id: 'sku-unsupported-1',
+              item_name: 'Hat',
+              unsupported_dimension: 'blue-xl',
+            },
+          ],
+        },
+      },
+      firebase: {
+        eventName: 'add_to_cart',
+        parameters: {
+          currency: 'EUR',
+          value: 19.99,
+          items: [
+            {
+              item_id: 'sku-unsupported-1',
+              item_name: 'Hat',
+              unsupported_dimension: 'blue-xl',
+            },
+          ],
+        },
+        userProperties: {},
+      },
+    },
+  },
+  {
+    id: 'firebase-unsupported-event-name',
+    class: 'unsupported_event_name',
+    example: {
+      event: 'unsupported_mobile_event_name',
+      plan: 'basic',
+      count: 1,
+    },
+    expected: {
+      web: {
+        eventName: 'unsupported_mobile_event_name',
+        payload: {
+          event: 'unsupported_mobile_event_name',
+          plan: 'basic',
+          count: 1,
+        },
+      },
+      firebase: {
+        eventName: 'unsupported_mobile_event_name',
+        parameters: {
+          plan: 'basic',
+          count: 1,
+        },
+        userProperties: {},
+      },
+    },
+  },
 ];
 
 module.exports = {

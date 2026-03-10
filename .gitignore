@@ -12,3 +12,5 @@ coverage/
 native-tests/**/.build/
 native-tests/**/target/
 native-tests/**/.swiftpm/
+native-tests/**/.gradle/
+native-tests/**/build/

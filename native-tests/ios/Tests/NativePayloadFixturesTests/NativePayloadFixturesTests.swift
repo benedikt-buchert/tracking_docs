@@ -97,6 +97,45 @@ struct NativePayloadFixturesTests {
   }
 
   @Test
+  func unsupportedEcommerceKey() throws {
+    AnalyticsRecorder.reset()
+    GeneratedIosSnippets.runFirebaseUnsupportedEcommerceKey()
+
+    #expect(AnalyticsRecorder.lastEventName == "add_to_cart")
+    #expect(
+      try canonicalJSON(AnalyticsRecorder.lastEventParameters)
+        == canonicalJSON([
+          "currency": "EUR",
+          "value": 19.99,
+          "items": [
+            [
+              "item_id": "sku-unsupported-1",
+              "item_name": "Hat",
+              "unsupported_dimension": "blue-xl",
+            ],
+          ],
+        ])
+    )
+    #expect(AnalyticsRecorder.userProperties.count == 0)
+  }
+
+  @Test
+  func unsupportedEventName() throws {
+    AnalyticsRecorder.reset()
+    GeneratedIosSnippets.runFirebaseUnsupportedEventName()
+
+    #expect(AnalyticsRecorder.lastEventName == "unsupported_mobile_event_name")
+    #expect(
+      try canonicalJSON(AnalyticsRecorder.lastEventParameters)
+        == canonicalJSON([
+          "plan": "basic",
+          "count": 1,
+        ])
+    )
+    #expect(AnalyticsRecorder.userProperties.count == 0)
+  }
+
+  @Test
   func objcScreenViewPredefined() throws {
     ObjCAnalyticsRecorderReset()
     RunObjCSnippetScreenViewPredefined()
@@ -157,5 +196,44 @@ struct NativePayloadFixturesTests {
           "allow_personalized_ads": "false",
         ])
     )
+  }
+
+  @Test
+  func objcUnsupportedEcommerceKey() throws {
+    ObjCAnalyticsRecorderReset()
+    RunObjCSnippetFirebaseUnsupportedEcommerceKey()
+
+    #expect(ObjCAnalyticsLastEventName() == "add_to_cart")
+    #expect(
+      try canonicalJSON(ObjCAnalyticsLastEventParameters())
+        == canonicalJSON([
+          "currency": "EUR",
+          "value": 19.99,
+          "items": [
+            [
+              "item_id": "sku-unsupported-1",
+              "item_name": "Hat",
+              "unsupported_dimension": "blue-xl",
+            ],
+          ],
+        ])
+    )
+    #expect(try canonicalJSON(ObjCAnalyticsUserProperties()) == canonicalJSON([:]))
+  }
+
+  @Test
+  func objcUnsupportedEventName() throws {
+    ObjCAnalyticsRecorderReset()
+    RunObjCSnippetFirebaseUnsupportedEventName()
+
+    #expect(ObjCAnalyticsLastEventName() == "unsupported_mobile_event_name")
+    #expect(
+      try canonicalJSON(ObjCAnalyticsLastEventParameters())
+        == canonicalJSON([
+          "plan": "basic",
+          "count": 1,
+        ])
+    )
+    #expect(try canonicalJSON(ObjCAnalyticsUserProperties()) == canonicalJSON([:]))
   }
 }

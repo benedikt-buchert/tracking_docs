@@ -40,4 +40,29 @@ public enum GeneratedIosSnippets {
     ]
     Analytics.logEvent("my_custom_event", parameters: eventParams)
   }
+
+  // Generated from contract: firebase-unsupported-ecommerce-key
+  public static func runFirebaseUnsupportedEcommerceKey() {
+    var item1: [String: Any] = [
+      AnalyticsParameterItemID: "sku-unsupported-1",
+      AnalyticsParameterItemName: "Hat",
+      "unsupported_dimension": "blue-xl"
+    ]
+
+    var eventParams: [String: Any] = [
+      AnalyticsParameterCurrency: "EUR",
+      AnalyticsParameterValue: 19.99
+    ]
+    eventParams[AnalyticsParameterItems] = [item1]
+    Analytics.logEvent(AnalyticsEventAddToCart, parameters: eventParams)
+  }
+
+  // Generated from contract: firebase-unsupported-event-name
+  public static func runFirebaseUnsupportedEventName() {
+    var eventParams: [String: Any] = [
+      "plan": "basic",
+      "count": 1
+    ]
+    Analytics.logEvent("unsupported_mobile_event_name", parameters: eventParams)
+  }
 }

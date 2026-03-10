@@ -9,6 +9,17 @@ bool FirebaseObjCCompileProbeValidate(void) {
   NSString *eventName = kFIREventScreenView;
   NSString *paramName = kFIRParameterItems;
   NSString *propertyName = kFIRUserPropertySignUpMethod;
+  NSDictionary *unsupportedParams = @{
+    @"unsupported_dimension": @"blue-xl",
+    kFIRParameterItems: @[
+      @{
+        kFIRParameterItemID: @"sku-unsupported-1",
+        @"unsupported_dimension": @"blue-xl"
+      }
+    ]
+  };
+
+  [FIRAnalytics logEventWithName:@"unsupported_mobile_event_name" parameters:unsupportedParams];
 
   return analyticsClass != Nil &&
     logSelector != NULL &&

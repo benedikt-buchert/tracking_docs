@@ -142,6 +142,10 @@ public final class FirebaseSdkCompileProbe {
   void probe(FirebaseAnalytics analytics) {
     analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, new Bundle());
     analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, new Bundle());
+    Bundle unsupportedParams = new Bundle();
+    unsupportedParams.putString("unsupported_dimension", "blue-xl");
+    analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, unsupportedParams);
+    analytics.logEvent("unsupported_mobile_event_name", unsupportedParams);
     analytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email");
     String itemsParam = FirebaseAnalytics.Param.ITEMS;
     String signUpProperty = FirebaseAnalytics.UserProperty.SIGN_UP_METHOD;
@@ -160,6 +164,11 @@ class FirebaseSdkCompileProbeKt(private val analytics: FirebaseAnalytics) {
   fun probe() {
     analytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, Bundle())
     analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, Bundle())
+    val unsupportedParams = Bundle().apply {
+      putString("unsupported_dimension", "blue-xl")
+    }
+    analytics.logEvent(FirebaseAnalytics.Event.ADD_TO_CART, unsupportedParams)
+    analytics.logEvent("unsupported_mobile_event_name", unsupportedParams)
     analytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email")
     val itemsParam: String = FirebaseAnalytics.Param.ITEMS
     val signUpProperty: String = FirebaseAnalytics.UserProperty.SIGN_UP_METHOD
