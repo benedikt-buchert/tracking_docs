@@ -54,6 +54,53 @@ describe('buildExampleModel', () => {
     );
   });
 
+  it('builds distinct conditional examples for required-only branches', () => {
+    const model = buildExampleModel({
+      type: 'object',
+      properties: {
+        platform: {
+          type: 'string',
+          examples: ['ios'],
+        },
+        att_status: {
+          type: 'string',
+          examples: ['authorized'],
+        },
+        ad_personalization_enabled: {
+          type: 'boolean',
+          examples: [true],
+        },
+      },
+      if: {
+        properties: {
+          platform: {
+            const: 'ios',
+          },
+        },
+        required: ['platform'],
+      },
+      then: {
+        required: ['att_status'],
+      },
+      else: {
+        required: ['ad_personalization_enabled'],
+      },
+    });
+    const conditionalGroup = model.variantGroups.find(
+      (group) => group.property === 'conditional',
+    );
+
+    expect(conditionalGroup).toBeDefined();
+    expect(conditionalGroup.options[0].example).toEqual({
+      platform: 'ios',
+      att_status: 'authorized',
+    });
+    expect(conditionalGroup.options[1].example).toEqual({
+      platform: 'ios',
+      ad_personalization_enabled: true,
+    });
+  });
+
   it('uses configured dataLayerName in snippets', () => {
     const schema = {
       type: 'object',

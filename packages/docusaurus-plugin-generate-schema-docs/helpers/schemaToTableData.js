@@ -11,6 +11,36 @@ function computeOwnBracket(level, parentGroupBrackets) {
   return { level, bracketIndex };
 }
 
+function materializeConditionalBranchSchema(branchSchema, parentSchema) {
+  if (
+    !branchSchema ||
+    branchSchema.properties ||
+    branchSchema.oneOf ||
+    branchSchema.anyOf ||
+    branchSchema.if ||
+    !Array.isArray(branchSchema.required) ||
+    !parentSchema?.properties
+  ) {
+    return branchSchema;
+  }
+
+  const branchProperties = Object.fromEntries(
+    branchSchema.required
+      .filter((name) => parentSchema.properties[name])
+      .map((name) => [name, parentSchema.properties[name]]),
+  );
+
+  if (Object.keys(branchProperties).length === 0) {
+    return branchSchema;
+  }
+
+  return {
+    ...branchSchema,
+    type: 'object',
+    properties: branchProperties,
+  };
+}
+
 function processOptions(
   choices,
   level,
@@ -144,11 +174,15 @@ export function schemaToTableData(
       // Then is NOT the last branch if Else exists — use innerContinuingLevels
       // to keep the parent line flowing. If Then IS the last branch, use original.
       const thenLevels = hasElse ? innerContinuingLevels : continuingLevels;
+      const thenSchema = materializeConditionalBranchSchema(
+        subSchema.then,
+        subSchema,
+      );
       branches.push({
         title: 'Then',
         description: subSchema.then.description,
         rows: schemaToTableData(
-          subSchema.then,
+          thenSchema,
           currentLevel,
           currentPath,
           thenLevels,
@@ -160,11 +194,15 @@ export function schemaToTableData(
     }
     if (hasElse) {
       // Else is always the last branch — use original continuingLevels
+      const elseSchema = materializeConditionalBranchSchema(
+        subSchema.else,
+        subSchema,
+      );
       branches.push({
         title: 'Else',
         description: subSchema.else.description,
         rows: schemaToTableData(
-          subSchema.else,
+          elseSchema,
           currentLevel,
           currentPath,
           continuingLevels,
