@@ -74,5 +74,10 @@
     "currency",
     "value",
     "items"
+  ],
+  "allOf": [
+    {
+      "$ref": "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"
+    }
   ]
 }

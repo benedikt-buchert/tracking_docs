@@ -57,5 +57,10 @@
       "$ref": "../components/items.json"
     }
   },
-  "required": ["$schema", "event", "transaction_id"]
+  "required": ["$schema", "event", "transaction_id"],
+  "allOf": [
+    {
+      "$ref": "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"
+    }
+  ]
 }
