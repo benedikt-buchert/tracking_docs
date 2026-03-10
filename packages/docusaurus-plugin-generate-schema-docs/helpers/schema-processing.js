@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import processSchema from './processSchema.js';
-import mergeJsonSchema from 'json-schema-merge-allof';
+import { mergeSchema } from './mergeSchema.js';
 
 function mergePropertySchemas(baseProperties = {}, optionProperties = {}) {
   const mergedProperties = {
@@ -14,16 +14,9 @@ function mergePropertySchemas(baseProperties = {}, optionProperties = {}) {
       continue;
     }
 
-    mergedProperties[key] = mergeJsonSchema(
-      {
-        allOf: [baseProperties[key], optionProperties[key]],
-      },
-      {
-        resolvers: {
-          defaultResolver: mergeJsonSchema.options.resolvers.title,
-        },
-      },
-    );
+    mergedProperties[key] = mergeSchema({
+      allOf: [baseProperties[key], optionProperties[key]],
+    });
   }
 
   return mergedProperties;

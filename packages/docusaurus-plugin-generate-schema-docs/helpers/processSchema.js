@@ -1,5 +1,7 @@
 import $RefParser from '@apidevtools/json-schema-ref-parser';
-import mergeJsonSchema from 'json-schema-merge-allof';
+import fs from 'fs';
+import { resolveConstraintSchemaPath } from './constraintSchemaPaths.js';
+import { mergeSchema } from './mergeSchema.js';
 
 /**
  * Processes a JSON schema file by bundling external references,
@@ -12,6 +14,21 @@ export default async function processSchema(filePath) {
   // 1. Bundle all external references into a single, self-contained schema
   const bundledSchema = await $RefParser.bundle(filePath, {
     mutateInputSchema: false,
+    resolve: {
+      constraints: {
+        order: 1,
+        canRead: (file) => Boolean(resolveConstraintSchemaPath(file.url)),
+        read: (file) => {
+          const localPath = resolveConstraintSchemaPath(file.url);
+          if (!localPath) {
+            throw new Error(
+              `Could not resolve local path for constraint ref: ${file.url}`,
+            );
+          }
+          return fs.readFileSync(localPath, 'utf8');
+        },
+      },
+    },
   });
 
   // 2. Dereference the bundled schema to resolve internal refs for allOf merging
@@ -22,11 +39,7 @@ export default async function processSchema(filePath) {
   });
 
   // Then merge allOf properties
-  const mergedSchema = mergeJsonSchema(dereferencedSchema, {
-    resolvers: {
-      defaultResolver: mergeJsonSchema.options.resolvers.title,
-    },
-  });
+  const mergedSchema = mergeSchema(dereferencedSchema);
 
   return mergedSchema;
 }
