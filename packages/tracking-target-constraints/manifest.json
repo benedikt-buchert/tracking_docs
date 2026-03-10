@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "version": "1.0.0",
+  "name": "tracking-target-constraints",
+  "schemaVersion": "v1",
+  "targets": {
+    "android-firebase-kotlin-sdk": {
+      "family": "firebase",
+      "version": "v1",
+      "constraintSchema": "./schemas/firebase/v1/flat-event-params.json"
+    },
+    "android-firebase-java-sdk": {
+      "family": "firebase",
+      "version": "v1",
+      "constraintSchema": "./schemas/firebase/v1/flat-event-params.json"
+    },
+    "ios-firebase-swift-sdk": {
+      "family": "firebase",
+      "version": "v1",
+      "constraintSchema": "./schemas/firebase/v1/flat-event-params.json"
+    },
+    "ios-firebase-objc-sdk": {
+      "family": "firebase",
+      "version": "v1",
+      "constraintSchema": "./schemas/firebase/v1/flat-event-params.json"
+    }
+  }
+}
