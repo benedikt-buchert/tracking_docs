@@ -53,4 +53,33 @@ describe('processSchema', () => {
     expect(mergedSchema.properties.b.title).toBe('Schema B');
     expect(mergedSchema.properties.b.properties.a.$ref).toBe('#');
   });
+
+  it('resolves published /constraints refs when bundling and merging allOf', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'main-schema-with-constraints-ref.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    expect(mergedSchema.title).toBe('Main Schema with Constraints Ref');
+    expect(mergedSchema.additionalProperties).toEqual(
+      expect.objectContaining({
+        type: expect.arrayContaining([
+          'string',
+          'number',
+          'integer',
+          'boolean',
+          'null',
+        ]),
+      }),
+    );
+    expect(mergedSchema.properties.items).toEqual(
+      expect.objectContaining({
+        type: 'array',
+      }),
+    );
+  });
 });

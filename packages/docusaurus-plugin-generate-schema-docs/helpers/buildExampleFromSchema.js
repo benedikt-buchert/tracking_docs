@@ -1,5 +1,5 @@
 import { getSingleExampleValue } from './example-helper';
-import mergeJsonSchema from 'json-schema-merge-allof';
+import { mergeSchema } from './mergeSchema.js';
 
 const getPrimitivePlaceholder = (type) => {
   switch (type) {
@@ -26,7 +26,7 @@ const buildExampleFromSchema = (schema) => {
     const newSchema = { ...schema };
     const choice = newSchema[choiceType][0];
     delete newSchema[choiceType];
-    const merged = mergeJsonSchema({ allOf: [newSchema, choice] });
+    const merged = mergeSchema({ allOf: [newSchema, choice] });
     return buildExampleFromSchema(merged);
   }
 
@@ -37,7 +37,7 @@ const buildExampleFromSchema = (schema) => {
     delete newSchema.if;
     delete newSchema.then;
     delete newSchema.else;
-    const merged = mergeJsonSchema({ allOf: [newSchema, thenBranch] });
+    const merged = mergeSchema({ allOf: [newSchema, thenBranch] });
     return buildExampleFromSchema(merged);
   }
 

@@ -4,11 +4,6 @@
   "title": "Mobile Reference",
   "description": "Dedicated Android and iOS Firebase snippets and schema examples.",
   "type": "object",
-  "allOf": [
-    {
-      "$ref": "./web/components/dataLayer.json"
-    }
-  ],
   "oneOf": [
     {
       "$ref": "./mobile/screen-view-event.json"

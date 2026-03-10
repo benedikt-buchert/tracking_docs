@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Main Schema with Constraints Ref",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"
+    }
+  ],
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "screen_view"
+    },
+    "screen_name": {
+      "type": "string"
+    }
+  },
+  "required": ["event", "screen_name"]
+}

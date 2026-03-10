@@ -1,5 +1,5 @@
 import buildExampleFromSchema from './buildExampleFromSchema';
-import mergeJsonSchema from 'json-schema-merge-allof';
+import { mergeSchema } from './mergeSchema.js';
 
 const findChoicePoints = (subSchema, path = []) => {
   if (!subSchema) {
@@ -47,7 +47,7 @@ const generateExampleForChoice = (rootSchema, path, option) => {
   if (path.length === 0) {
     delete schemaVariant.oneOf;
     delete schemaVariant.anyOf;
-    const newSchemaVariant = mergeJsonSchema({
+    const newSchemaVariant = mergeSchema({
       allOf: [schemaVariant, option],
     });
     return buildExampleFromSchema(newSchemaVariant);
@@ -112,7 +112,7 @@ const generateConditionalExample = (rootSchema, path, branch) => {
     delete schemaVariant.else;
     if (branchSchema) {
       const merged = pruneSiblingConditionalProperties(
-        mergeJsonSchema({ allOf: [schemaVariant, branchSchema] }),
+        mergeSchema({ allOf: [schemaVariant, branchSchema] }),
         branchSchema,
         siblingBranchSchema,
         baseRequired,
@@ -134,7 +134,7 @@ const generateConditionalExample = (rootSchema, path, branch) => {
   delete target.else;
   if (branchSchema) {
     const merged = pruneSiblingConditionalProperties(
-      mergeJsonSchema({ allOf: [target, branchSchema] }),
+      mergeSchema({ allOf: [target, branchSchema] }),
       branchSchema,
       siblingBranchSchema,
       baseRequired,

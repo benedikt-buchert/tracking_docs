@@ -7,11 +7,18 @@ import ajvKeywords from 'ajv-keywords';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { URL } from 'url';
+import { resolveConstraintSchemaPath } from './constraintSchemaPaths.js';
 
 function createAjvInstance(schemas, mainSchema, schemaPath) {
   const schemaVersion = mainSchema?.$schema;
 
   const loadSchema = async (uri) => {
+    const constraintPath = resolveConstraintSchemaPath(uri);
+    if (constraintPath) {
+      const schemaContent = await fs.readFile(constraintPath, 'utf-8');
+      return JSON.parse(schemaContent);
+    }
+
     let localPath;
     if (uri.startsWith('http')) {
       const url = new URL(uri);

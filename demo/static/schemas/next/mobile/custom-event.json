@@ -37,5 +37,10 @@
       "examples": [true]
     }
   },
-  "required": ["$schema", "event"]
+  "required": ["$schema", "event"],
+  "allOf": [
+    {
+      "$ref": "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"
+    }
+  ]
 }
