@@ -26,6 +26,25 @@ const getContainerSymbol = (containerType) => {
   return '';
 };
 
+const KEYWORD_HELP_TEXT = {
+  additionalProperties:
+    'Controls properties not listed in properties and not matched by patternProperties.',
+  patternProperties:
+    'Applies the subschema to property names that match the given regular expression.',
+};
+
+function splitKeywordLabel(name) {
+  const match = /^patternProperties (\/.+\/)$/.exec(name);
+  if (!match) {
+    return null;
+  }
+
+  return {
+    keyword: 'patternProperties',
+    pattern: match[1],
+  };
+}
+
 /**
  * Renders a single property row in the schema table.
  * All data is passed in via the `row` prop, which comes from `tableData`.
@@ -49,6 +68,8 @@ export default function PropertyRow({
     containerType,
     continuingLevels = [],
     groupBrackets = [],
+    isSchemaKeywordRow = false,
+    keepConnectorOpen = false,
   } = row;
 
   const indentStyle = {
@@ -117,6 +138,15 @@ export default function PropertyRow({
   const bracketStyle = getBracketLinesStyle(groupBrackets, bracketCaps);
 
   const containerSymbol = getContainerSymbol(containerType);
+  const shouldCloseConnector = isLastInGroup && !keepConnectorOpen;
+  const splitKeyword = splitKeywordLabel(name);
+  const keywordHelpKey = name.startsWith('patternProperties ')
+    ? 'patternProperties'
+    : name;
+  const keywordHelpText = KEYWORD_HELP_TEXT[keywordHelpKey];
+  const keywordHelpId = keywordHelpText
+    ? `schema-keyword-help-${name}`
+    : undefined;
   const zebraClassName =
     stripeIndex === undefined
       ? undefined
@@ -138,17 +168,57 @@ export default function PropertyRow({
           style={{ ...indentStyle, ...continuingLinesStyle }}
           className={clsx(
             'property-cell',
+            isSchemaKeywordRow && 'property-cell--keyword',
+            required && 'property-cell--required',
+            level > 0 && 'property-cell--tree',
             level > 0 && `level-${level}`,
-            isLastInGroup && 'is-last',
+            shouldCloseConnector && 'is-last',
             hasChildren && 'has-children',
             containerType && `container-${containerType}`,
           )}
         >
-          <span className="property-name">
+          <span
+            className={clsx(
+              'property-name',
+              isSchemaKeywordRow && 'property-name--keyword',
+            )}
+          >
             {containerSymbol && (
               <span className="container-symbol">{containerSymbol}</span>
             )}
-            <strong>{name}</strong>
+            {isSchemaKeywordRow ? (
+              <span className="property-keyword-wrapper">
+                {splitKeyword ? (
+                  <span className="property-keyword-stack">
+                    <code
+                      className="property-keyword"
+                      aria-describedby={keywordHelpId}
+                    >
+                      {splitKeyword.keyword}
+                    </code>
+                    <code className="property-keyword-pattern">
+                      {splitKeyword.pattern}
+                    </code>
+                  </span>
+                ) : (
+                  <code
+                    className="property-keyword"
+                    aria-describedby={keywordHelpId}
+                  >
+                    {name}
+                  </code>
+                )}
+                <span
+                  id={keywordHelpId}
+                  className="property-keyword-tooltip"
+                  role="tooltip"
+                >
+                  {keywordHelpText}
+                </span>
+              </span>
+            ) : (
+              <strong>{name}</strong>
+            )}
           </span>
         </td>
         <td rowSpan={rowSpan}>

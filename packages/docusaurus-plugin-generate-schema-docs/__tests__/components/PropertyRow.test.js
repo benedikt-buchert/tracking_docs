@@ -77,6 +77,9 @@ describe('PropertyRow', () => {
     );
 
     expect(container.querySelector('.required-row')).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-cell--required'),
+    ).toBeInTheDocument();
     expect(container.querySelector('.required')).toBeInTheDocument();
     expect(getByText('required')).toBeInTheDocument();
   });
@@ -207,6 +210,107 @@ describe('PropertyRow', () => {
     // The cell for constraints is the 3rd cell (index 2)
     const cells = container.querySelectorAll('td');
     expect(cells[2].innerHTML).toBe('');
+  });
+
+  it('renders additionalProperties as a schema keyword row and keeps its connector open', () => {
+    const row = {
+      name: 'additionalProperties',
+      level: 1,
+      required: false,
+      propertyType: 'string',
+      description: 'Catch-all values.',
+      examples: ['beta_tester'],
+      constraints: [],
+      path: ['user_properties', 'additionalProperties'],
+      hasChildren: false,
+      containerType: null,
+      continuingLevels: [],
+      isSchemaKeywordRow: true,
+      keepConnectorOpen: false,
+    };
+
+    const { container, getByText } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={row} isLastInGroup={true} />
+        </tbody>
+      </table>,
+    );
+
+    const keyword = getByText('additionalProperties');
+    expect(keyword).toBeInTheDocument();
+    expect(container.querySelector('.property-keyword')).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-cell--keyword'),
+    ).toBeInTheDocument();
+    expect(container.querySelector('.property-cell--tree')).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-name--keyword'),
+    ).toBeInTheDocument();
+    expect(keyword).not.toHaveAttribute('title');
+    expect(keyword).toHaveAttribute(
+      'aria-describedby',
+      'schema-keyword-help-additionalProperties',
+    );
+    expect(
+      container.querySelector('.property-keyword-tooltip'),
+    ).toBeInTheDocument();
+    expect(
+      container.querySelector('#schema-keyword-help-additionalProperties'),
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Controls properties not listed in properties and not matched by patternProperties.',
+      ),
+    ).toBeInTheDocument();
+    expect(container.querySelector('.is-last')).toBeInTheDocument();
+  });
+
+  it('renders patternProperties rows as schema keywords with tooltip help', () => {
+    const row = {
+      name: 'patternProperties /^custom_/',
+      level: 1,
+      required: false,
+      propertyType: 'number',
+      description: 'Numeric custom attribute values.',
+      examples: [5],
+      constraints: ['minimum: 0'],
+      path: ['attributes', 'patternProperties /^custom_/'],
+      hasChildren: false,
+      containerType: null,
+      continuingLevels: [],
+      isSchemaKeywordRow: true,
+      keepConnectorOpen: false,
+    };
+
+    const { container, getByText } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={row} isLastInGroup={true} />
+        </tbody>
+      </table>,
+    );
+
+    const keyword = getByText('patternProperties');
+    expect(getByText('/^custom_/')).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-keyword-pattern'),
+    ).toBeInTheDocument();
+    expect(keyword).toHaveAttribute(
+      'aria-describedby',
+      'schema-keyword-help-patternProperties /^custom_/',
+    );
+    expect(
+      container.ownerDocument.getElementById(
+        'schema-keyword-help-patternProperties /^custom_/',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      getByText(
+        'Applies the subschema to property names that match the given regular expression.',
+      ),
+    ).toBeInTheDocument();
+    expect(container.querySelector('.is-last')).toBeInTheDocument();
   });
 
   describe('hierarchical lines feature', () => {
@@ -421,6 +525,65 @@ describe('PropertyRow', () => {
       );
 
       expect(container.querySelector('.level-2')).toBeInTheDocument();
+      expect(
+        container.querySelector('.property-cell--tree'),
+      ).toBeInTheDocument();
+    });
+
+    it('does not add a separator-suppression class to nested tree cells', () => {
+      const row = {
+        name: 'nested_item',
+        level: 2,
+        required: false,
+        propertyType: 'string',
+        description: '',
+        example: '',
+        constraints: [],
+        path: ['parent', 'nested_item'],
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <PropertyRow row={row} />
+          </tbody>
+        </table>,
+      );
+
+      expect(
+        container.querySelector('.property-cell--tree-no-separator'),
+      ).not.toBeInTheDocument();
+    });
+
+    it('does not mark root-level cells as tree cells', () => {
+      const row = {
+        name: 'root_item',
+        level: 0,
+        required: false,
+        propertyType: 'string',
+        description: '',
+        example: '',
+        constraints: [],
+        path: ['root_item'],
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [],
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <PropertyRow row={row} />
+          </tbody>
+        </table>,
+      );
+
+      expect(
+        container.querySelector('.property-cell--tree'),
+      ).not.toBeInTheDocument();
     });
 
     it('applies padding-left based on level using rem units', () => {
