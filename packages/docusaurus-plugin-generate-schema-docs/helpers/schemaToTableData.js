@@ -41,6 +41,36 @@ function materializeConditionalBranchSchema(branchSchema, parentSchema) {
   };
 }
 
+function hasRenderableAdditionalProperties(schemaNode) {
+  return !!(
+    schemaNode &&
+    schemaNode.additionalProperties &&
+    typeof schemaNode.additionalProperties === 'object' &&
+    !Array.isArray(schemaNode.additionalProperties)
+  );
+}
+
+function getRenderablePatternProperties(schemaNode) {
+  if (!schemaNode?.patternProperties) {
+    return [];
+  }
+
+  return Object.entries(schemaNode.patternProperties)
+    .filter(
+      ([, patternSchema]) =>
+        patternSchema &&
+        typeof patternSchema === 'object' &&
+        !Array.isArray(patternSchema),
+    )
+    .map(([pattern, patternSchema]) => [
+      `patternProperties /${pattern}/`,
+      {
+        ...patternSchema,
+        'x-schema-keyword-row': true,
+      },
+    ]);
+}
+
 function processOptions(
   choices,
   level,
@@ -247,8 +277,26 @@ export function schemaToTableData(
   ) {
     if (!subSchema) return;
 
-    if (subSchema.properties) {
-      const propKeys = Object.keys(subSchema.properties);
+    const patternPropertyEntries = getRenderablePatternProperties(subSchema);
+
+    if (
+      subSchema.properties ||
+      hasRenderableAdditionalProperties(subSchema) ||
+      patternPropertyEntries.length > 0
+    ) {
+      const propEntries = subSchema.properties
+        ? Object.entries(subSchema.properties)
+        : [];
+      if (hasRenderableAdditionalProperties(subSchema)) {
+        propEntries.push([
+          'additionalProperties',
+          {
+            ...subSchema.additionalProperties,
+            'x-schema-keyword-row': true,
+          },
+        ]);
+      }
+      propEntries.push(...patternPropertyEntries);
       const hasSiblingChoices = !!(
         subSchema.oneOf ||
         subSchema.anyOf ||
@@ -256,19 +304,17 @@ export function schemaToTableData(
       );
 
       // Filter out properties that should be skipped to get accurate count
-      const visiblePropKeys = propKeys.filter((name) => {
-        const propSchema = subSchema.properties[name];
+      const visiblePropEntries = propEntries.filter(([name, propSchema]) => {
         return !(
           propSchema['x-gtm-clear'] === true && isEffectivelyEmpty(propSchema)
         );
       });
 
-      visiblePropKeys.forEach((name, index) => {
-        const propSchema = subSchema.properties[name];
+      visiblePropEntries.forEach(([name, propSchema], index) => {
         const newPath = [...currentPath, name];
 
         const isLastProp =
-          index === visiblePropKeys.length - 1 && !hasSiblingChoices;
+          index === visiblePropEntries.length - 1 && !hasSiblingChoices;
 
         // Updated Logic:
         // A property is visually "last" only if it is the last property
@@ -283,6 +329,8 @@ export function schemaToTableData(
 
         // Determine if this property has children and what type
         const hasNestedProperties = !!propSchema.properties;
+        const hasAdditionalProperties =
+          hasRenderableAdditionalProperties(propSchema);
         const hasArrayItems =
           propSchema.type === 'array' &&
           !!(propSchema.items?.properties || propSchema.items?.if);
@@ -290,6 +338,7 @@ export function schemaToTableData(
         const hasNestedConditional = isConditionalWrapper;
         const hasChildren =
           hasNestedProperties ||
+          hasAdditionalProperties ||
           hasArrayItems ||
           hasNestedChoice ||
           hasNestedConditional;
@@ -302,6 +351,7 @@ export function schemaToTableData(
           choiceOptions.some((opt) => opt.type === 'object' || opt.properties);
         if (
           hasNestedProperties ||
+          hasAdditionalProperties ||
           (isChoiceWrapper && propSchema.type === 'object') ||
           (isConditionalWrapper && propSchema.type === 'object') ||
           choiceOptionsAreObjects
@@ -388,6 +438,8 @@ export function schemaToTableData(
             containerType,
             continuingLevels: [...continuingLevels],
             groupBrackets: [...currentGroupBrackets],
+            isSchemaKeywordRow: propSchema['x-schema-keyword-row'] === true,
+            keepConnectorOpen: propSchema['x-keep-connector-open'] === true,
           });
 
           if (propSchema.properties) {
@@ -396,6 +448,15 @@ export function schemaToTableData(
               currentLevel + 1,
               newPath,
               propSchema.required,
+              childContinuingLevels,
+              currentGroupBrackets,
+            );
+          } else if (propSchema.type === 'object' && hasAdditionalProperties) {
+            buildRows(
+              propSchema,
+              currentLevel + 1,
+              newPath,
+              [],
               childContinuingLevels,
               currentGroupBrackets,
             );
