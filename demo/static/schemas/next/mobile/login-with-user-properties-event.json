@@ -46,6 +46,13 @@
         "description": "Additional Firebase user property values keyed by property name.",
         "examples": ["beta_tester", null]
       },
+      "patternProperties": {
+        "^custom_": {
+          "type": ["string", "null"],
+          "description": "Custom Firebase user properties for keys prefixed with custom_.",
+          "examples": ["vip_member", null]
+        }
+      },
       "required": ["sign_up_method"]
     }
   },

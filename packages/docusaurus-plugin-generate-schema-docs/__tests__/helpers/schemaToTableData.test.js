@@ -241,7 +241,7 @@ describe('schemaToTableData', () => {
     const additionalPropertiesRow = tableData.find(
       (row) =>
         row.type === 'property' &&
-        row.name === 'additional properties' &&
+        row.name === 'additionalProperties' &&
         row.level === 1,
     );
 
@@ -251,6 +251,82 @@ describe('schemaToTableData', () => {
     expect(additionalPropertiesRow.constraints).toContain(
       'pattern: /^[a-z]+$/',
     );
+    expect(additionalPropertiesRow.isSchemaKeywordRow).toBe(true);
+    expect(additionalPropertiesRow.keepConnectorOpen).toBe(false);
+    expect(additionalPropertiesRow.isLastInGroup).toBe(true);
+  });
+
+  it('treats additionalProperties as the last sibling after declared properties', () => {
+    const schema = {
+      properties: {
+        user_properties: {
+          type: 'object',
+          properties: {
+            allow_ad_personalization_signals: {
+              type: ['string', 'null'],
+            },
+          },
+          additionalProperties: {
+            type: ['string', 'null'],
+          },
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+
+    const explicitPropertyRow = tableData.find(
+      (row) =>
+        row.name === 'allow_ad_personalization_signals' && row.level === 1,
+    );
+    const additionalPropertiesRow = tableData.find(
+      (row) => row.name === 'additionalProperties' && row.level === 1,
+    );
+
+    expect(explicitPropertyRow).toBeDefined();
+    expect(additionalPropertiesRow).toBeDefined();
+    expect(explicitPropertyRow.isLastInGroup).toBe(false);
+    expect(additionalPropertiesRow.isLastInGroup).toBe(true);
+  });
+
+  it('renders schema-valued patternProperties as synthetic keyword rows', () => {
+    const schema = {
+      properties: {
+        attributes: {
+          type: 'object',
+          properties: {
+            segment: { type: 'string' },
+          },
+          patternProperties: {
+            '^custom_': {
+              type: 'number',
+              description: 'Numeric custom attribute values.',
+              minimum: 0,
+            },
+          },
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+
+    const explicitPropertyRow = tableData.find(
+      (row) => row.name === 'segment' && row.level === 1,
+    );
+    const patternPropertyRow = tableData.find(
+      (row) => row.name === 'patternProperties /^custom_/' && row.level === 1,
+    );
+
+    expect(explicitPropertyRow).toBeDefined();
+    expect(patternPropertyRow).toBeDefined();
+    expect(explicitPropertyRow.isLastInGroup).toBe(false);
+    expect(patternPropertyRow.isLastInGroup).toBe(true);
+    expect(patternPropertyRow.propertyType).toBe('number');
+    expect(patternPropertyRow.description).toBe(
+      'Numeric custom attribute values.',
+    );
+    expect(patternPropertyRow.constraints).toContain('minimum: 0');
+    expect(patternPropertyRow.isSchemaKeywordRow).toBe(true);
   });
 
   describe('if/then/else conditional support', () => {
