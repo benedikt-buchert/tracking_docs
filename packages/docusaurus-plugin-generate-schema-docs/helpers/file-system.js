@@ -23,6 +23,30 @@ export function readSchemas(directory) {
   });
 }
 
+export function readSchemaSources(directory) {
+  const schemaSources = {};
+
+  function walk(currentDirectory) {
+    const entries = fs.readdirSync(currentDirectory, { withFileTypes: true });
+
+    entries.forEach((entry) => {
+      const entryPath = path.join(currentDirectory, entry.name);
+      if (entry.isDirectory()) {
+        walk(entryPath);
+        return;
+      }
+
+      if (!entry.name.endsWith('.json')) return;
+      schemaSources[entryPath] = JSON.parse(
+        fs.readFileSync(entryPath, 'utf-8'),
+      );
+    });
+  }
+
+  walk(directory);
+  return schemaSources;
+}
+
 export function writeDoc(outputDir, fileName, content) {
   fs.writeFileSync(path.join(outputDir, fileName), content);
   console.log(

@@ -1,7 +1,12 @@
 import path from 'path';
 import fs from 'fs';
 import { getPathsForVersion } from './helpers/path-helpers.js';
-import { readSchemas, writeDoc, createDir } from './helpers/file-system.js';
+import {
+  readSchemas,
+  readSchemaSources,
+  writeDoc,
+  createDir,
+} from './helpers/file-system.js';
 import { processOneOfSchema, slugify } from './helpers/schema-processing.js';
 import SchemaDocTemplate from './helpers/schema-doc-template.js';
 import ChoiceIndexTemplate from './helpers/choice-index-template.js';
@@ -35,6 +40,57 @@ function resolvePartial({
     import: `import ${componentPrefix} from '${fileImportPath}';`,
     component: `<${componentPrefix} />`,
   };
+}
+
+function isPlainObject(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function resolveLocalSchemaRef(currentPath, ref) {
+  if (!ref || ref.startsWith('#') || /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(ref)) {
+    return null;
+  }
+
+  const [fileRef] = ref.split('#');
+  return path.resolve(path.dirname(currentPath), fileRef);
+}
+
+function collectReachableSchemaSources(sourcePath, allSchemaSources) {
+  if (!sourcePath || !allSchemaSources[sourcePath]) return {};
+
+  const visited = new Set();
+  const reachableSources = {};
+
+  function walkSchema(currentPath) {
+    if (visited.has(currentPath) || !allSchemaSources[currentPath]) return;
+    visited.add(currentPath);
+
+    const schema = allSchemaSources[currentPath];
+    reachableSources[currentPath] = schema;
+
+    function walkNode(node) {
+      if (Array.isArray(node)) {
+        node.forEach(walkNode);
+        return;
+      }
+
+      if (!isPlainObject(node)) return;
+
+      if (typeof node.$ref === 'string') {
+        const resolvedRefPath = resolveLocalSchemaRef(currentPath, node.$ref);
+        if (resolvedRefPath) {
+          walkSchema(resolvedRefPath);
+        }
+      }
+
+      Object.values(node).forEach(walkNode);
+    }
+
+    walkNode(schema);
+  }
+
+  walkSchema(sourcePath);
+  return reachableSources;
 }
 
 async function collectLeafEventNames(schema, filePath, eventNames) {
@@ -86,6 +142,7 @@ async function generateAndWriteDoc(
   alreadyMergedSchema = null,
   editFilePath = null,
   partialNameConflicts = new Set(),
+  schemaSources = {},
 ) {
   const { organizationName, projectName, siteDir, dataLayerName, version } =
     options;
@@ -134,6 +191,11 @@ async function generateAndWriteDoc(
     topPartialComponent: top.component,
     bottomPartialComponent: bottom.component,
     dataLayerName,
+    sourcePath: editFilePath || filePath,
+    schemaSources: collectReachableSchemaSources(
+      editFilePath || filePath,
+      schemaSources,
+    ),
   });
 
   const outputFilename = path.basename(filePath).replace('.json', '.mdx');
@@ -147,6 +209,7 @@ async function generateOneOfDocs(
   outputDir,
   options,
   partialNameConflicts,
+  schemaSources,
 ) {
   const { organizationName, projectName, siteDir } = options;
   const editUrl = buildEditUrl(
@@ -194,6 +257,7 @@ async function generateOneOfDocs(
         processedSchema,
         sourceFilePath || filePath,
         partialNameConflicts,
+        schemaSources,
       );
     }
   }
@@ -205,6 +269,7 @@ export default async function generateEventDocs(options) {
 
   createDir(outputDir);
   const schemas = readSchemas(schemaDir);
+  const schemaSources = readSchemaSources(schemaDir);
   const partialNameConflicts = await getPartialNameConflicts(schemas);
 
   console.log(`🚀 Generating documentation for ${schemas.length} schemas...`);
@@ -229,6 +294,7 @@ export default async function generateEventDocs(options) {
         outputDir,
         options,
         partialNameConflicts,
+        schemaSources,
       );
     } else {
       await generateAndWriteDoc(
@@ -240,6 +306,7 @@ export default async function generateEventDocs(options) {
         null,
         null,
         partialNameConflicts,
+        schemaSources,
       );
     }
   }

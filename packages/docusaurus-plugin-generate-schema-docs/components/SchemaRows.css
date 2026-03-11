@@ -26,6 +26,26 @@
   margin-bottom: 1em;
 }
 
+.schema-json-viewer__controls {
+  margin: 0.5rem 0;
+}
+
+.schema-json-viewer__link {
+  appearance: none;
+  background: none;
+  border: none;
+  color: var(--ifm-link-color);
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: none;
+}
+
+.schema-json-viewer__link:hover {
+  color: var(--ifm-link-hover-color);
+  text-decoration: underline;
+}
+
 /* --- Property Name and Container Symbol Styles --- */
 
 .property-name {
