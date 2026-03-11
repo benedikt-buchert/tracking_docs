@@ -31,7 +31,12 @@ const getContainerSymbol = (containerType) => {
  * All data is passed in via the `row` prop, which comes from `tableData`.
  * This component handles multi-row constraints using `rowSpan`.
  */
-export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
+export default function PropertyRow({
+  row,
+  stripeIndex,
+  isLastInGroup,
+  bracketEnds,
+}) {
   const {
     name,
     level,
@@ -112,11 +117,18 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
   const bracketStyle = getBracketLinesStyle(groupBrackets, bracketCaps);
 
   const containerSymbol = getContainerSymbol(containerType);
+  const zebraClassName =
+    stripeIndex === undefined
+      ? undefined
+      : stripeIndex % 2 === 0
+        ? 'schema-row--zebra-even'
+        : 'schema-row--zebra-odd';
 
   return (
     <>
       <tr
         className={clsx(
+          zebraClassName,
           required && 'required-row',
           row.isCondition && 'conditional-condition-row',
         )}
@@ -181,7 +193,10 @@ export default function PropertyRow({ row, isLastInGroup, bracketEnds }) {
 
       {/* Render subsequent constraints in their own rows */}
       {remainingConstraints.map((constraint) => (
-        <tr className={clsx(required && 'required-row')} key={constraint}>
+        <tr
+          className={clsx(zebraClassName, required && 'required-row')}
+          key={constraint}
+        >
           <td className="constraint-cell">
             <code
               className={clsx(

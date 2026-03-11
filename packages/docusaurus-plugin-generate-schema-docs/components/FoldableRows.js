@@ -17,8 +17,9 @@ const ChoiceRow = ({
   isRadio,
   name,
   continuingLinesStyle,
+  stripeClassName,
 }) => (
-  <tr className="choice-row">
+  <tr className={clsx('choice-row', stripeClassName)}>
     <td colSpan={5} style={continuingLinesStyle}>
       <label className="choice-row-header">
         <input
@@ -41,7 +42,12 @@ const ChoiceRow = ({
  * Renders 'oneOf' and 'anyOf' choices as a set of foldable `<tr>` elements
  * that integrate directly into the main table body.
  */
-export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
+export default function FoldableRows({
+  row,
+  stripeIndex = 0,
+  stripeState,
+  bracketEnds: parentBracketEnds,
+}) {
   const {
     choiceType,
     options,
@@ -52,6 +58,8 @@ export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
     continuingLevels = [],
     groupBrackets = [],
   } = row;
+  const stripeClassName =
+    stripeIndex % 2 === 0 ? 'schema-row--zebra-even' : 'schema-row--zebra-odd';
   const radioGroupId = useId();
   const [openOneOf, setOpenOneOf] = useState(0); // For oneOf, track the single open index
   const [openAnyOf, setOpenAnyOf] = useState({}); // For anyOf, track each option's state
@@ -136,7 +144,7 @@ export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
   return (
     <>
       {/* A header row for the entire choice block */}
-      <tr>
+      <tr className={stripeClassName}>
         <td colSpan={5} style={headerStyle}>
           <Heading as="h4" className="choice-row-header-headline">
             {header}
@@ -171,11 +179,13 @@ export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
                   : `anyOf-${option.title}-${radioGroupId}`
               }
               continuingLinesStyle={toggleStyle}
+              stripeClassName={stripeClassName}
             />
             {/* If the option is active, render its rows directly into the table body */}
             {isActive && (
               <SchemaRows
                 tableData={option.rows}
+                stripeState={stripeState}
                 bracketEnds={
                   isLastOption
                     ? [ownBracket, ...(parentBracketEnds || [])]

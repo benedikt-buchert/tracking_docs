@@ -12,7 +12,11 @@ import ConditionalRows from './ConditionalRows';
  * @param {Array} props.tableData - Flat array of row objects
  * @param {Array} [props.bracketEnds] - Bracket descriptors that end on the last row
  */
-export default function SchemaRows({ tableData, bracketEnds }) {
+export default function SchemaRows({
+  tableData,
+  bracketEnds,
+  stripeState = { current: 0 },
+}) {
   if (!tableData) {
     return null;
   }
@@ -20,12 +24,15 @@ export default function SchemaRows({ tableData, bracketEnds }) {
   return tableData.map((row, index) => {
     const key = row.path.join('.');
     const isLast = index === tableData.length - 1;
+    const stripeIndex = stripeState.current++;
 
     if (row.type === 'choice') {
       return (
         <FoldableRows
           key={key}
           row={row}
+          stripeIndex={stripeIndex}
+          stripeState={stripeState}
           bracketEnds={isLast ? bracketEnds : undefined}
         />
       );
@@ -36,6 +43,8 @@ export default function SchemaRows({ tableData, bracketEnds }) {
         <ConditionalRows
           key={key}
           row={row}
+          stripeIndex={stripeIndex}
+          stripeState={stripeState}
           bracketEnds={isLast ? bracketEnds : undefined}
         />
       );
@@ -46,6 +55,7 @@ export default function SchemaRows({ tableData, bracketEnds }) {
         <PropertyRow
           key={key}
           row={row}
+          stripeIndex={stripeIndex}
           isLastInGroup={row.isLastInGroup}
           bracketEnds={isLast ? bracketEnds : undefined}
         />
