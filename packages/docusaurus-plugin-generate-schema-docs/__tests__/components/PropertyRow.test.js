@@ -1,9 +1,27 @@
 import '@testing-library/jest-dom';
+import fs from 'fs';
 import React from 'react';
+import path from 'path';
 import { render } from '@testing-library/react';
 import PropertyRow from '../../components/PropertyRow';
 
 describe('PropertyRow', () => {
+  it('does not suppress first-column separators for nested tree cells in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).not.toContain(
+      '.schema-table tbody tr + tr td.property-cell--tree',
+    );
+  });
+
+  it('removes the extra left border from full-width schema rows in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain(".schema-table td[colspan='5']");
+    expect(css).toContain('border-left: none;');
+  });
   it('renders a basic property', () => {
     const row = {
       name: 'name',
