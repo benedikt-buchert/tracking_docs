@@ -46,13 +46,20 @@ function isPlainObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
+function toSchemaSourceKey(schemaDir, filePath) {
+  return path.relative(schemaDir, filePath).split(path.sep).join('/');
+}
+
 function resolveLocalSchemaRef(currentPath, ref) {
   if (!ref || ref.startsWith('#') || /^[a-zA-Z][a-zA-Z\d+\-.]*:/.test(ref)) {
     return null;
   }
 
   const [fileRef] = ref.split('#');
-  return path.resolve(path.dirname(currentPath), fileRef);
+  return path
+    .normalize(path.join(path.dirname(currentPath), fileRef))
+    .split(path.sep)
+    .join('/');
 }
 
 function collectReachableSchemaSources(sourcePath, allSchemaSources) {
@@ -143,6 +150,7 @@ async function generateAndWriteDoc(
   editFilePath = null,
   partialNameConflicts = new Set(),
   schemaSources = {},
+  schemaDir,
 ) {
   const { organizationName, projectName, siteDir, dataLayerName, version } =
     options;
@@ -191,9 +199,9 @@ async function generateAndWriteDoc(
     topPartialComponent: top.component,
     bottomPartialComponent: bottom.component,
     dataLayerName,
-    sourcePath: editFilePath || filePath,
+    sourcePath: toSchemaSourceKey(schemaDir, editFilePath || filePath),
     schemaSources: collectReachableSchemaSources(
-      editFilePath || filePath,
+      toSchemaSourceKey(schemaDir, editFilePath || filePath),
       schemaSources,
     ),
   });
@@ -210,6 +218,7 @@ async function generateOneOfDocs(
   options,
   partialNameConflicts,
   schemaSources,
+  schemaDir,
 ) {
   const { organizationName, projectName, siteDir } = options;
   const editUrl = buildEditUrl(
@@ -228,8 +237,11 @@ async function generateOneOfDocs(
     schema,
     processedOptions: processed,
     editUrl,
-    sourcePath: filePath,
-    schemaSources: collectReachableSchemaSources(filePath, schemaSources),
+    sourcePath: toSchemaSourceKey(schemaDir, filePath),
+    schemaSources: collectReachableSchemaSources(
+      toSchemaSourceKey(schemaDir, filePath),
+      schemaSources,
+    ),
   });
   writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
 
@@ -249,6 +261,7 @@ async function generateOneOfDocs(
         options,
         partialNameConflicts,
         schemaSources,
+        schemaDir,
       );
     } else {
       await generateAndWriteDoc(
@@ -261,6 +274,7 @@ async function generateOneOfDocs(
         sourceFilePath || filePath,
         partialNameConflicts,
         schemaSources,
+        schemaDir,
       );
     }
   }
@@ -298,6 +312,7 @@ export default async function generateEventDocs(options) {
         options,
         partialNameConflicts,
         schemaSources,
+        schemaDir,
       );
     } else {
       await generateAndWriteDoc(
@@ -310,6 +325,7 @@ export default async function generateEventDocs(options) {
         null,
         partialNameConflicts,
         schemaSources,
+        schemaDir,
       );
     }
   }

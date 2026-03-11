@@ -37,7 +37,11 @@ export function readSchemaSources(directory) {
       }
 
       if (!entry.name.endsWith('.json')) return;
-      schemaSources[entryPath] = JSON.parse(
+      const relativePath = path
+        .relative(directory, entryPath)
+        .split(path.sep)
+        .join('/');
+      schemaSources[relativePath] = JSON.parse(
         fs.readFileSync(entryPath, 'utf-8'),
       );
     });
