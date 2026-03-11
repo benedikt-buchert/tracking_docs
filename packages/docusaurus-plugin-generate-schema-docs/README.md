@@ -175,21 +175,31 @@ You can provide additional content to the generated documentation pages by creat
 
 ### Naming Convention
 
-Partials must be named after the schema file they correspond to. For a schema named `my-event.json`, the partials would be:
+Partials must be named after the generated page/event name and prefixed with an underscore. For a page/event named `my-event`, the partials are:
 
-- `my-event.mdx`: This partial is rendered directly after the schema's main description.
-- `my-event_bottom.mdx`: This partial is rendered at the very bottom of the page.
+- `_my-event.mdx`: Rendered directly after the page description.
+- `_my-event_bottom.mdx`: Rendered at the very bottom of the page.
 
 ### Location
 
-Place your partial files in the `/docs/partials` directory at the root of your docusaurus project. The plugin will automatically find and include them.
+Place partial files in `/docs/partials` (or `versioned_docs/version-<x>/partials` for versioned docs).
+
+The plugin supports two lookup modes:
+
+- **Scoped partials (recommended):** `partials/<doc-subpath>/_my-event.mdx`  
+  Example: `docs/partials/event-reference/_add-to-cart-event.mdx`
+- **Basename fallback:** `partials/_my-event.mdx`  
+  Fallback is only applied when the page/event name is unique. If the same name exists in multiple places, fallback is disabled to avoid accidental cross-page injection.
+
+For authoring MDX content in partials, see the official Docusaurus docs:  
+https://docusaurus.io/docs/markdown-features/react
 
 ### Example
 
-If you have a schema `add-to-cart-event.json`, you can create the following files:
+If you have `event-reference/add-to-cart-event` and `mobile-reference/add-to-cart-event`, use scoped partials to target only the web page:
 
-- `docs/partials/add-to-cart-event.mdx`: For content to appear after the description.
-- `docs/partials/add-to-cart-event_bottom.mdx`: For content to appear at the bottom.
+- `docs/partials/event-reference/_add-to-cart-event.mdx`
+- `docs/partials/event-reference/_add-to-cart-event_bottom.mdx`
 
 ## Contributing
 
