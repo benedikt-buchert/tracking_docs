@@ -17,7 +17,11 @@ Please select one of the following options:
 - [Child Event Anchor](./child-event-with-anchor)
 - [Child Event Title](./child-event-title)
 
-<SchemaJsonViewer schema={{"$id":"https://example.com/parent-event-anchor.json","title":"Parent Event Anchor","description":"This is a parent event with oneOf.","type":"object","oneOf":[{"title":"Child Event Anchor","description":"This is a child event with an anchor.","$anchor":"child-event-with-anchor","type":"object","properties":{"property_a":{"type":"string"}}},{"title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}]}} />
+<SchemaJsonViewer
+  schema={{"$id":"https://example.com/parent-event-anchor.json","title":"Parent Event Anchor","description":"This is a parent event with oneOf.","type":"object","oneOf":[{"title":"Child Event Anchor","description":"This is a child event with an anchor.","$anchor":"child-event-with-anchor","type":"object","properties":{"property_a":{"type":"string"}}},{"title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}]}}
+  sourcePath={"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_anchor__/static/schemas/parent-event-anchor.json"}
+  schemaSources={{"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_anchor__/static/schemas/parent-event-anchor.json":{"$id":"https://example.com/parent-event-anchor.json","title":"Parent Event Anchor","description":"This is a parent event with oneOf.","type":"object","oneOf":[{"title":"Child Event Anchor","description":"This is a child event with an anchor.","$anchor":"child-event-with-anchor","type":"object","properties":{"property_a":{"type":"string"}}},{"title":"Child Event Title","description":"This is a child event with only a title.","type":"object","properties":{"property_b":{"type":"string"}}}]}}}
+/>
 "
 `;
 

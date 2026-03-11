@@ -228,6 +228,8 @@ async function generateOneOfDocs(
     schema,
     processedOptions: processed,
     editUrl,
+    sourcePath: filePath,
+    schemaSources: collectReachableSchemaSources(filePath, schemaSources),
   });
   writeDoc(eventOutputDir, 'index.mdx', indexPageContent);
 
@@ -246,6 +248,7 @@ async function generateOneOfDocs(
         eventOutputDir,
         options,
         partialNameConflicts,
+        schemaSources,
       );
     } else {
       await generateAndWriteDoc(

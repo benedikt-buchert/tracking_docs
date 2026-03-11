@@ -16,7 +16,11 @@ Please select one of the following options:
 
 - [Child Event](./child-event)
 
-<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/parent-event.json","title":"Parent Event","type":"object","oneOf":[{"$ref":"./child-event.json"}]}} />
+<SchemaJsonViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/parent-event.json","title":"Parent Event","type":"object","oneOf":[{"$ref":"./child-event.json"}]}}
+  sourcePath={"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/parent-event.json"}
+  schemaSources={{"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/parent-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/parent-event.json","title":"Parent Event","type":"object","oneOf":[{"$ref":"./child-event.json"}]},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
+/>
 "
 `;
 
@@ -37,7 +41,11 @@ Please select one of the following options:
 - [Grandchild A](./grandchild-a)
 - [Grandchild B](./grandchild-b)
 
-<SchemaJsonViewer schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}],"properties":{}}} />
+<SchemaJsonViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}],"properties":{}}}
+  sourcePath={"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json"}
+  schemaSources={{"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
+/>
 "
 `;
 
@@ -67,7 +75,7 @@ undefined
 <SchemaJsonViewer
   schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}}}
   sourcePath={"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json"}
-  schemaSources={{}}
+  schemaSources={{"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
 />
 
 
@@ -100,7 +108,7 @@ undefined
 <SchemaJsonViewer
   schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}
   sourcePath={"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json"}
-  schemaSources={{}}
+  schemaSources={{"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"/Users/benedikt/Documents/gitrepos/tracking_docs/packages/docusaurus-plugin-generate-schema-docs/__tests__/__fixtures_nested__/static/schemas/grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
 />
 
 
