@@ -20,7 +20,8 @@ jest.mock('../../components/FoldableRows', () => {
   const MockFoldableRows = (props) => (
     <tr>
       <td>
-        Mocked FoldableRows: {props.row.choiceType} ({props.stripeIndex})
+        Mocked FoldableRows: {props.row.choiceType} ({props.stripeIndex},{' '}
+        {String(!!props.stripeState)})
       </td>
     </tr>
   );
@@ -33,7 +34,7 @@ jest.mock('../../components/ConditionalRows', () => {
     <tr>
       <td>
         Mocked ConditionalRows: {props.row.condition.title} ({props.stripeIndex}
-        )
+        , {String(!!props.stripeState)})
       </td>
     </tr>
   );
@@ -97,7 +98,9 @@ describe('SchemaRows', () => {
       </table>,
     );
 
-    expect(getByText('Mocked FoldableRows: oneOf (0)')).toBeInTheDocument();
+    expect(
+      getByText('Mocked FoldableRows: oneOf (0, true)'),
+    ).toBeInTheDocument();
   });
 
   it('renders a mix of properties and choices', () => {
@@ -121,7 +124,9 @@ describe('SchemaRows', () => {
     );
 
     expect(getByText('Mocked PropertyRow: prop1 (0)')).toBeInTheDocument();
-    expect(getByText('Mocked FoldableRows: anyOf (1)')).toBeInTheDocument();
+    expect(
+      getByText('Mocked FoldableRows: anyOf (1, true)'),
+    ).toBeInTheDocument();
     expect(getByText('Mocked PropertyRow: prop2 (2)')).toBeInTheDocument();
   });
 
@@ -143,7 +148,9 @@ describe('SchemaRows', () => {
       </table>,
     );
 
-    expect(getByText('Mocked ConditionalRows: If (0)')).toBeInTheDocument();
+    expect(
+      getByText('Mocked ConditionalRows: If (0, true)'),
+    ).toBeInTheDocument();
   });
 
   it('increments stripe indices across logical rows', () => {
@@ -173,8 +180,12 @@ describe('SchemaRows', () => {
     );
 
     expect(getByText('Mocked PropertyRow: prop1 (0)')).toBeInTheDocument();
-    expect(getByText('Mocked FoldableRows: anyOf (1)')).toBeInTheDocument();
-    expect(getByText('Mocked ConditionalRows: If (2)')).toBeInTheDocument();
+    expect(
+      getByText('Mocked FoldableRows: anyOf (1, true)'),
+    ).toBeInTheDocument();
+    expect(
+      getByText('Mocked ConditionalRows: If (2, true)'),
+    ).toBeInTheDocument();
     expect(getByText('Mocked PropertyRow: prop2 (3)')).toBeInTheDocument();
   });
 });

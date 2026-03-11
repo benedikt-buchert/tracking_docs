@@ -30,8 +30,6 @@ export default function ConditionalRows({
   } = row;
   const [activeBranch, setActiveBranch] = useState(0);
   const radioGroupId = useId();
-  const stripeClassName =
-    stripeIndex % 2 === 0 ? 'schema-row--zebra-even' : 'schema-row--zebra-odd';
 
   // Compute this group's own bracket and combine with any parent brackets.
   // bracketIndex = total number of existing brackets, so each group gets a unique position.
@@ -95,7 +93,7 @@ export default function ConditionalRows({
   return (
     <>
       {/* Condition (if) section - always visible */}
-      <tr className={clsx('conditional-condition-header', stripeClassName)}>
+      <tr className="conditional-condition-header schema-row--control">
         <td colSpan={5} style={headerStyle}>
           <span className="conditional-condition-label">
             <span className="conditional-info-icon-wrapper">
@@ -125,7 +123,7 @@ export default function ConditionalRows({
           isLastBranch && !isActive ? lastToggleStyle : middleStyle;
         return (
           <React.Fragment key={branch.title}>
-            <tr className={clsx('choice-row', stripeClassName)}>
+            <tr className="choice-row schema-row--control">
               <td colSpan={5} style={toggleStyle}>
                 <label className="choice-row-header">
                   <input
