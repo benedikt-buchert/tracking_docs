@@ -41,6 +41,11 @@
           "examples": ["false", null]
         }
       },
+      "additionalProperties": {
+        "type": ["string", "null"],
+        "description": "Additional Firebase user property values keyed by property name.",
+        "examples": ["beta_tester", null]
+      },
       "required": ["sign_up_method"]
     }
   },

@@ -58,6 +58,11 @@
               "description": "Engagement score.",
               "examples": [95]
             }
+          },
+          "additionalProperties": {
+            "type": "string",
+            "description": "Additional user attribute values keyed by attribute name.",
+            "examples": ["newsletter_subscriber"]
           }
         },
         "addresses": {

@@ -217,6 +217,42 @@ describe('schemaToTableData', () => {
     expect(tableData[0].examples).toEqual(['default-value']);
   });
 
+  it('renders schema-valued additionalProperties as a synthetic row', () => {
+    const schema = {
+      properties: {
+        metadata: {
+          type: 'object',
+          description: 'Free-form metadata.',
+          additionalProperties: {
+            type: 'string',
+            description: 'Metadata value.',
+            pattern: '^[a-z]+$',
+          },
+        },
+      },
+    };
+
+    const tableData = schemaToTableData(schema);
+
+    const metadataRow = tableData.find((row) => row.name === 'metadata');
+    expect(metadataRow).toBeDefined();
+    expect(metadataRow.containerType).toBe('object');
+
+    const additionalPropertiesRow = tableData.find(
+      (row) =>
+        row.type === 'property' &&
+        row.name === 'additional properties' &&
+        row.level === 1,
+    );
+
+    expect(additionalPropertiesRow).toBeDefined();
+    expect(additionalPropertiesRow.propertyType).toBe('string');
+    expect(additionalPropertiesRow.description).toBe('Metadata value.');
+    expect(additionalPropertiesRow.constraints).toContain(
+      'pattern: /^[a-z]+$/',
+    );
+  });
+
   describe('if/then/else conditional support', () => {
     it('creates a conditional row for schema with if/then/else at root level', () => {
       const tableData = schemaToTableData(conditionalEventSchema);

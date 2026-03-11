@@ -41,6 +41,15 @@ function materializeConditionalBranchSchema(branchSchema, parentSchema) {
   };
 }
 
+function hasRenderableAdditionalProperties(schemaNode) {
+  return !!(
+    schemaNode &&
+    schemaNode.additionalProperties &&
+    typeof schemaNode.additionalProperties === 'object' &&
+    !Array.isArray(schemaNode.additionalProperties)
+  );
+}
+
 function processOptions(
   choices,
   level,
@@ -283,6 +292,8 @@ export function schemaToTableData(
 
         // Determine if this property has children and what type
         const hasNestedProperties = !!propSchema.properties;
+        const hasAdditionalProperties =
+          hasRenderableAdditionalProperties(propSchema);
         const hasArrayItems =
           propSchema.type === 'array' &&
           !!(propSchema.items?.properties || propSchema.items?.if);
@@ -290,6 +301,7 @@ export function schemaToTableData(
         const hasNestedConditional = isConditionalWrapper;
         const hasChildren =
           hasNestedProperties ||
+          hasAdditionalProperties ||
           hasArrayItems ||
           hasNestedChoice ||
           hasNestedConditional;
@@ -302,6 +314,7 @@ export function schemaToTableData(
           choiceOptions.some((opt) => opt.type === 'object' || opt.properties);
         if (
           hasNestedProperties ||
+          hasAdditionalProperties ||
           (isChoiceWrapper && propSchema.type === 'object') ||
           (isConditionalWrapper && propSchema.type === 'object') ||
           choiceOptionsAreObjects
@@ -396,6 +409,33 @@ export function schemaToTableData(
               currentLevel + 1,
               newPath,
               propSchema.required,
+              childContinuingLevels,
+              currentGroupBrackets,
+            );
+            if (hasAdditionalProperties) {
+              buildRows(
+                {
+                  properties: {
+                    'additional properties': propSchema.additionalProperties,
+                  },
+                },
+                currentLevel + 1,
+                newPath,
+                [],
+                childContinuingLevels,
+                currentGroupBrackets,
+              );
+            }
+          } else if (propSchema.type === 'object' && hasAdditionalProperties) {
+            buildRows(
+              {
+                properties: {
+                  'additional properties': propSchema.additionalProperties,
+                },
+              },
+              currentLevel + 1,
+              newPath,
+              [],
               childContinuingLevels,
               currentGroupBrackets,
             );
