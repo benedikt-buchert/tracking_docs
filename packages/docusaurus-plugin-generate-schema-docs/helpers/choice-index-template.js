@@ -1,5 +1,5 @@
 export default function ChoiceIndexTemplate(data) {
-  const { schema, processedOptions, editUrl } = data;
+  const { schema, processedOptions, editUrl, sourcePath, schemaSources } = data;
 
   return `---
 title: ${schema.title}
@@ -18,6 +18,10 @@ ${processedOptions
   .map((option) => `- [${option.schema.title}](./${option.slug})`)
   .join('\n')}
 
-<SchemaJsonViewer schema={${JSON.stringify(schema)}} />
+<SchemaJsonViewer
+  schema={${JSON.stringify(schema)}}
+  sourcePath={${JSON.stringify(sourcePath)}}
+  schemaSources={${JSON.stringify(schemaSources)}}
+/>
 `;
 }

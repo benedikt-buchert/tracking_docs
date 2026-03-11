@@ -56,6 +56,9 @@ describe('generateEventDocs (non-versioned)', () => {
       'utf-8',
     );
     expect(addToCart).toMatchSnapshot();
+    expect(addToCart).toContain('sourcePath={"add-to-cart-event.json"}');
+    expect(addToCart).toContain(JSON.stringify('components/product.json'));
+    expect(addToCart).toContain('"$ref":"./components/product.json"');
 
     const choiceEvent = fs.readFileSync(
       path.join(outputDir, 'choice-event.mdx'),
