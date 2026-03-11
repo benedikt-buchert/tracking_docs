@@ -45,6 +45,48 @@ describe('generateEventDocs (partials)', () => {
     readDirRecursive(fixturesDir);
   });
 
+  function writeDuplicateNameOneOfSchemas() {
+    const schemaA = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $id: 'https://example.com/schemas/duplicate-a.json',
+      title: 'Duplicate A',
+      oneOf: [
+        {
+          title: 'Shared Option',
+          type: 'object',
+          properties: {
+            event: { type: 'string', const: 'dup_a' },
+          },
+          required: ['event'],
+        },
+      ],
+    };
+    const schemaB = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $id: 'https://example.com/schemas/duplicate-b.json',
+      title: 'Duplicate B',
+      oneOf: [
+        {
+          title: 'Shared Option',
+          type: 'object',
+          properties: {
+            event: { type: 'string', const: 'dup_b' },
+          },
+          required: ['event'],
+        },
+      ],
+    };
+
+    fs.vol.writeFileSync(
+      path.join(fixturesDir, 'static', 'schemas', 'duplicate-a.json'),
+      JSON.stringify(schemaA, null, 2),
+    );
+    fs.vol.writeFileSync(
+      path.join(fixturesDir, 'static', 'schemas', 'duplicate-b.json'),
+      JSON.stringify(schemaB, null, 2),
+    );
+  }
+
   it('injects top partial when _<eventName>.mdx exists in partials dir', async () => {
     console.log = jest.fn();
     fs.vol.mkdirSync(partialsDir, { recursive: true });
@@ -130,5 +172,58 @@ describe('generateEventDocs (partials)', () => {
 
     expect(output).not.toContain('TopPartial');
     expect(output).not.toContain('BottomPartial');
+  });
+
+  it('skips basename fallback partials when event names are ambiguous', async () => {
+    console.log = jest.fn();
+    writeDuplicateNameOneOfSchemas();
+    fs.vol.mkdirSync(partialsDir, { recursive: true });
+    fs.vol.writeFileSync(
+      path.join(partialsDir, '_shared-option.mdx'),
+      'Shared',
+    );
+
+    await generateEventDocs(options);
+
+    const outputA = fs.readFileSync(
+      path.join(outputDir, 'duplicate-a', '01-shared-option.mdx'),
+      'utf-8',
+    );
+    const outputB = fs.readFileSync(
+      path.join(outputDir, 'duplicate-b', '01-shared-option.mdx'),
+      'utf-8',
+    );
+
+    expect(outputA).not.toContain('TopPartial');
+    expect(outputB).not.toContain('TopPartial');
+  });
+
+  it('uses scoped partials for ambiguous event names', async () => {
+    console.log = jest.fn();
+    writeDuplicateNameOneOfSchemas();
+    fs.vol.mkdirSync(path.join(partialsDir, 'duplicate-a'), {
+      recursive: true,
+    });
+    fs.vol.writeFileSync(
+      path.join(partialsDir, 'duplicate-a', '_shared-option.mdx'),
+      'Scoped shared',
+    );
+
+    await generateEventDocs(options);
+
+    const outputA = fs.readFileSync(
+      path.join(outputDir, 'duplicate-a', '01-shared-option.mdx'),
+      'utf-8',
+    );
+    const outputB = fs.readFileSync(
+      path.join(outputDir, 'duplicate-b', '01-shared-option.mdx'),
+      'utf-8',
+    );
+
+    expect(outputA).toContain(
+      "import TopPartial from '@site/docs/partials/duplicate-a/_shared-option.mdx'",
+    );
+    expect(outputA).toContain('<TopPartial />');
+    expect(outputB).not.toContain('TopPartial');
   });
 });

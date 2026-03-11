@@ -12,13 +12,69 @@ function buildEditUrl(organizationName, projectName, siteDir, filePath) {
   return `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
 }
 
-function resolvePartial(partialPath, relativePartialsDir, componentPrefix) {
-  if (!fs.existsSync(partialPath)) return { import: '', component: '' };
-  const fileName = path.basename(partialPath);
+function toSiteImportPath(siteDir, absolutePath) {
+  return `@site/${path.relative(siteDir, absolutePath).split(path.sep).join('/')}`;
+}
+
+function resolvePartial({
+  scopedPartialPath,
+  fallbackPartialPath,
+  componentPrefix,
+  siteDir,
+  allowFallback,
+}) {
+  const selectedPartialPath = fs.existsSync(scopedPartialPath)
+    ? scopedPartialPath
+    : allowFallback && fs.existsSync(fallbackPartialPath)
+      ? fallbackPartialPath
+      : null;
+
+  if (!selectedPartialPath) return { import: '', component: '' };
+  const fileImportPath = toSiteImportPath(siteDir, selectedPartialPath);
   return {
-    import: `import ${componentPrefix} from '@site/${relativePartialsDir}/${fileName}';`,
+    import: `import ${componentPrefix} from '${fileImportPath}';`,
     component: `<${componentPrefix} />`,
   };
+}
+
+async function collectLeafEventNames(schema, filePath, eventNames) {
+  if (!schema.oneOf) {
+    eventNames.push(path.basename(filePath, '.json'));
+    return;
+  }
+
+  const processed = await processOneOfSchema(schema, filePath);
+  for (const { slug, schema: processedSchema, sourceFilePath } of processed) {
+    if (processedSchema.oneOf) {
+      await collectLeafEventNames(
+        processedSchema,
+        sourceFilePath || filePath,
+        eventNames,
+      );
+      continue;
+    }
+    eventNames.push(slug);
+  }
+}
+
+async function getPartialNameConflicts(schemas) {
+  const eventNames = [];
+
+  for (const { fileName, filePath, schema } of schemas) {
+    if (schema.oneOf) {
+      await collectLeafEventNames(schema, filePath, eventNames);
+      continue;
+    }
+    eventNames.push(fileName.replace('.json', ''));
+  }
+
+  const counts = new Map();
+  eventNames.forEach((name) => counts.set(name, (counts.get(name) || 0) + 1));
+  return new Set(
+    [...counts.entries()]
+      .filter(([, count]) => count > 1)
+      .map(([name]) => name),
+  );
 }
 
 async function generateAndWriteDoc(
@@ -29,27 +85,37 @@ async function generateAndWriteDoc(
   options,
   alreadyMergedSchema = null,
   editFilePath = null,
+  partialNameConflicts = new Set(),
 ) {
   const { organizationName, projectName, siteDir, dataLayerName, version } =
     options;
 
   const { outputDir: versionOutputDir } = getPathsForVersion(version, siteDir);
   const PARTIALS_DIR = path.join(versionOutputDir, 'partials');
-  const relativePartialsDir = path.relative(siteDir, PARTIALS_DIR);
+  const docRelativeDir = path.relative(versionOutputDir, outputDir);
+  const scopedPartialsDir =
+    !docRelativeDir || docRelativeDir === '.'
+      ? PARTIALS_DIR
+      : path.join(PARTIALS_DIR, docRelativeDir);
+  const allowBasenameFallback = !partialNameConflicts.has(eventName);
 
   const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
 
-  // Check for partials
-  const top = resolvePartial(
-    path.join(PARTIALS_DIR, `_${eventName}.mdx`),
-    relativePartialsDir,
-    'TopPartial',
-  );
-  const bottom = resolvePartial(
-    path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`),
-    relativePartialsDir,
-    'BottomPartial',
-  );
+  // Resolve scoped partials first; basename fallback is disabled for ambiguous names.
+  const top = resolvePartial({
+    scopedPartialPath: path.join(scopedPartialsDir, `_${eventName}.mdx`),
+    fallbackPartialPath: path.join(PARTIALS_DIR, `_${eventName}.mdx`),
+    componentPrefix: 'TopPartial',
+    siteDir,
+    allowFallback: allowBasenameFallback,
+  });
+  const bottom = resolvePartial({
+    scopedPartialPath: path.join(scopedPartialsDir, `_${eventName}_bottom.mdx`),
+    fallbackPartialPath: path.join(PARTIALS_DIR, `_${eventName}_bottom.mdx`),
+    componentPrefix: 'BottomPartial',
+    siteDir,
+    allowFallback: allowBasenameFallback,
+  });
 
   const editUrl = buildEditUrl(
     organizationName,
@@ -80,6 +146,7 @@ async function generateOneOfDocs(
   filePath,
   outputDir,
   options,
+  partialNameConflicts,
 ) {
   const { organizationName, projectName, siteDir } = options;
   const editUrl = buildEditUrl(
@@ -115,6 +182,7 @@ async function generateOneOfDocs(
         sourceFilePath || filePath,
         eventOutputDir,
         options,
+        partialNameConflicts,
       );
     } else {
       await generateAndWriteDoc(
@@ -125,6 +193,7 @@ async function generateOneOfDocs(
         options,
         processedSchema,
         sourceFilePath || filePath,
+        partialNameConflicts,
       );
     }
   }
@@ -136,6 +205,7 @@ export default async function generateEventDocs(options) {
 
   createDir(outputDir);
   const schemas = readSchemas(schemaDir);
+  const partialNameConflicts = await getPartialNameConflicts(schemas);
 
   console.log(`🚀 Generating documentation for ${schemas.length} schemas...`);
 
@@ -152,7 +222,14 @@ export default async function generateEventDocs(options) {
     }
 
     if (schema.oneOf) {
-      await generateOneOfDocs(eventName, schema, filePath, outputDir, options);
+      await generateOneOfDocs(
+        eventName,
+        schema,
+        filePath,
+        outputDir,
+        options,
+        partialNameConflicts,
+      );
     } else {
       await generateAndWriteDoc(
         filePath,
@@ -160,6 +237,9 @@ export default async function generateEventDocs(options) {
         eventName,
         outputDir,
         options,
+        null,
+        null,
+        partialNameConflicts,
       );
     }
   }
