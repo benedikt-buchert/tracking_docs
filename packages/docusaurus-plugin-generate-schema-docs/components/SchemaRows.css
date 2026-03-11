@@ -160,6 +160,14 @@
   box-shadow: inset 0 1px 0 var(--ifm-table-border-color);
 }
 
+.schema-table tbody tr.schema-row--zebra-even {
+  background-color: var(--ifm-table-stripe-background);
+}
+
+.schema-table tbody tr.schema-row--zebra-odd {
+  background-color: transparent;
+}
+
 /* --- Organigram Connector Line Styles --- */
 
 /*

@@ -8,6 +8,7 @@ import styles from './PropertiesTable.module.css';
 export default function PropertiesTable({ schema }) {
   const [isWordWrapOn, setIsWordWrapOn] = useState(true);
   const tableData = schemaToTableData(schema);
+  const stripeState = { current: 0 };
 
   return (
     <div
@@ -24,7 +25,7 @@ export default function PropertiesTable({ schema }) {
       <table className="schema-table">
         <TableHeader />
         <tbody>
-          <SchemaRows tableData={tableData} />
+          <SchemaRows tableData={tableData} stripeState={stripeState} />
         </tbody>
       </table>
     </div>
