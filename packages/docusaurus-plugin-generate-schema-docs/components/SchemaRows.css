@@ -142,6 +142,10 @@
   border-left: none;
 }
 
+.schema-table td[colspan='5'] {
+  border-left: none;
+}
+
 /*
  * Constraint-only continuation rows render a single cell; in those rows that
  * cell is also :first-child, but it still needs the separator before the

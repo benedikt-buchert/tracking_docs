@@ -15,6 +15,14 @@ describe('PropertyRow', () => {
     );
   });
 
+  it('removes the extra left border from full-width schema rows in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain(".schema-table td[colspan='5']");
+    expect(css).toContain('border-left: none;');
+  });
+
   it('renders a basic property', () => {
     const row = {
       name: 'name',
