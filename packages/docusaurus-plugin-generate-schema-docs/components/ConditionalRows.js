@@ -17,6 +17,8 @@ import {
  */
 export default function ConditionalRows({
   row,
+  stripeIndex = 0,
+  stripeState,
   bracketEnds: parentBracketEnds,
 }) {
   const {
@@ -91,7 +93,7 @@ export default function ConditionalRows({
   return (
     <>
       {/* Condition (if) section - always visible */}
-      <tr className="conditional-condition-header">
+      <tr className="conditional-condition-header schema-row--control">
         <td colSpan={5} style={headerStyle}>
           <span className="conditional-condition-label">
             <span className="conditional-info-icon-wrapper">
@@ -111,7 +113,7 @@ export default function ConditionalRows({
           )}
         </td>
       </tr>
-      <SchemaRows tableData={condition.rows} />
+      <SchemaRows tableData={condition.rows} stripeState={stripeState} />
 
       {/* Branch toggles (then / else) */}
       {branches.map((branch, index) => {
@@ -121,7 +123,7 @@ export default function ConditionalRows({
           isLastBranch && !isActive ? lastToggleStyle : middleStyle;
         return (
           <React.Fragment key={branch.title}>
-            <tr className="choice-row">
+            <tr className="choice-row schema-row--control">
               <td colSpan={5} style={toggleStyle}>
                 <label className="choice-row-header">
                   <input
@@ -141,6 +143,7 @@ export default function ConditionalRows({
             {isActive && (
               <SchemaRows
                 tableData={branch.rows}
+                stripeState={stripeState}
                 bracketEnds={
                   isLastBranch
                     ? [ownBracket, ...(parentBracketEnds || [])]

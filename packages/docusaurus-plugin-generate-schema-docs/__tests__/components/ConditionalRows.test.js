@@ -147,4 +147,32 @@ describe('ConditionalRows', () => {
       screen.getByText(JSON.stringify([{ name: 'postal_code' }])),
     ).toBeInTheDocument();
   });
+
+  it('keeps conditional control rows neutral instead of zebra-striped', () => {
+    const { container, getByText } = render(
+      <table>
+        <tbody>
+          <ConditionalRows
+            row={conditionalRow}
+            stripeIndex={1}
+            stripeState={{ current: 2 }}
+          />
+        </tbody>
+      </table>,
+    );
+
+    const ifRow = getByText('If').closest('tr');
+    const thenRow = getByText('Then').closest('tr');
+    const elseRow = getByText('Else').closest('tr');
+
+    expect(ifRow).toHaveClass('schema-row--control');
+    expect(thenRow).toHaveClass('schema-row--control');
+    expect(elseRow).toHaveClass('schema-row--control');
+    expect(ifRow).not.toHaveClass('schema-row--zebra-even');
+    expect(thenRow).not.toHaveClass('schema-row--zebra-even');
+    expect(elseRow).not.toHaveClass('schema-row--zebra-even');
+    expect(
+      container.querySelector('[data-testid="schema-rows"]'),
+    ).toBeInTheDocument();
+  });
 });

@@ -18,7 +18,7 @@ const ChoiceRow = ({
   name,
   continuingLinesStyle,
 }) => (
-  <tr className="choice-row">
+  <tr className="choice-row schema-row--control">
     <td colSpan={5} style={continuingLinesStyle}>
       <label className="choice-row-header">
         <input
@@ -41,7 +41,12 @@ const ChoiceRow = ({
  * Renders 'oneOf' and 'anyOf' choices as a set of foldable `<tr>` elements
  * that integrate directly into the main table body.
  */
-export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
+export default function FoldableRows({
+  row,
+  stripeIndex = 0,
+  stripeState,
+  bracketEnds: parentBracketEnds,
+}) {
   const {
     choiceType,
     options,
@@ -136,7 +141,7 @@ export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
   return (
     <>
       {/* A header row for the entire choice block */}
-      <tr>
+      <tr className="schema-row--control">
         <td colSpan={5} style={headerStyle}>
           <Heading as="h4" className="choice-row-header-headline">
             {header}
@@ -176,6 +181,7 @@ export default function FoldableRows({ row, bracketEnds: parentBracketEnds }) {
             {isActive && (
               <SchemaRows
                 tableData={option.rows}
+                stripeState={stripeState}
                 bracketEnds={
                   isLastOption
                     ? [ownBracket, ...(parentBracketEnds || [])]

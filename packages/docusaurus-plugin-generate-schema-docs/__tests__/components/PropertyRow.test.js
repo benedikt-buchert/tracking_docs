@@ -15,6 +15,21 @@ describe('PropertyRow', () => {
     );
   });
 
+  it('removes the extra left border from full-width schema rows in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain(".schema-table td[colspan='5']");
+    expect(css).toContain('border-left: none;');
+  });
+
+  it('defines an explicit neutral class for control rows in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain('.schema-row--control');
+    expect(css).toContain('background-color: transparent');
+  });
   it('renders a basic property', () => {
     const row = {
       name: 'name',
@@ -67,6 +82,33 @@ describe('PropertyRow', () => {
     ).toBeInTheDocument();
     expect(container.querySelector('.required')).toBeInTheDocument();
     expect(getByText('required')).toBeInTheDocument();
+  });
+
+  it('applies the same zebra class to the main row and continuation rows', () => {
+    const row = {
+      name: 'event',
+      level: 0,
+      required: true,
+      propertyType: 'string',
+      description: 'Event name.',
+      examples: ['purchase'],
+      constraints: ['required', 'const: "purchase"'],
+      path: ['event'],
+    };
+
+    const { container } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={row} stripeIndex={1} />
+        </tbody>
+      </table>,
+    );
+
+    const rows = container.querySelectorAll('tbody tr');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveClass('schema-row--zebra-odd');
+    expect(rows[1]).toHaveClass('schema-row--zebra-odd');
+    expect(rows[0]).not.toHaveClass('schema-row--zebra-even');
   });
 
   it('renders multiple constraints', () => {
