@@ -117,6 +117,10 @@
   background-color: transparent;
 }
 
+.schema-table tbody tr.schema-row--control {
+  background-color: transparent;
+}
+
 /* --- Organigram Connector Line Styles --- */
 
 /*
@@ -203,10 +207,6 @@ td.level-6::after {
  */
 
 /* --- Choice Row Styles --- */
-
-.choice-row {
-  background-color: var(--ifm-table-stripe-background);
-}
 
 .choice-row:hover {
   background-color: var(--ifm-hover-overlay);

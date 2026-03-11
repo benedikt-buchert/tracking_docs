@@ -22,6 +22,14 @@ describe('PropertyRow', () => {
     expect(css).toContain(".schema-table td[colspan='5']");
     expect(css).toContain('border-left: none;');
   });
+
+  it('defines an explicit neutral class for control rows in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain('.schema-row--control');
+    expect(css).toContain('background-color: transparent');
+  });
   it('renders a basic property', () => {
     const row = {
       name: 'name',
