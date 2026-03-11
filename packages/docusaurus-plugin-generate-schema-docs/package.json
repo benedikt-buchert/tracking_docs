@@ -1,6 +1,6 @@
 {
   "name": "docusaurus-plugin-generate-schema-docs",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "Docusaurus plugin to generate documentation from JSON schemas.",
   "main": "index.js",
   "license": "MIT",
