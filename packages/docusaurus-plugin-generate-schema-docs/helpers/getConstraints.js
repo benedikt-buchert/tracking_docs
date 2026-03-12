@@ -1,4 +1,17 @@
 // A list of JSON Schema keywords that have simple key-value constraints.
+function formatNotConstraint(val) {
+  if (!val || typeof val !== 'object' || Array.isArray(val)) {
+    return `not: ${JSON.stringify(val)}`;
+  }
+  if (val.const !== undefined) {
+    return `not: const != ${JSON.stringify(val.const)}`;
+  }
+  if (val.type !== undefined) {
+    return `not: type != ${JSON.stringify(val.type)}`;
+  }
+  return `not: ${JSON.stringify(val)}`;
+}
+
 const constraintHandlers = {
   // Simple key-value constraints
   minLength: (val) => `minLength: ${val}`,
@@ -32,6 +45,7 @@ const constraintHandlers = {
   contains: (val) => `contains: ${JSON.stringify(val)}`,
   enum: (val) => `enum: [${val.join(', ')}]`,
   const: (val) => `const: ${JSON.stringify(val)}`,
+  not: (val) => formatNotConstraint(val),
 };
 
 export const getConstraints = (prop, isReq) => {
