@@ -27,6 +27,7 @@ public enum Analytics {
 
 public let AnalyticsEventScreenView = "screen_view"
 public let AnalyticsEventAddToCart = "add_to_cart"
+public let AnalyticsEventLogin = "login"
 
 public let AnalyticsParameterScreenName = "screen_name"
 public let AnalyticsParameterScreenClass = "screen_class"
@@ -37,6 +38,7 @@ public let AnalyticsParameterItemID = "item_id"
 public let AnalyticsParameterItemName = "item_name"
 public let AnalyticsParameterPrice = "price"
 public let AnalyticsParameterQuantity = "quantity"
+public let AnalyticsParameterMethod = "method"
 
 public let AnalyticsUserPropertySignUpMethod = "sign_up_method"
 public let AnalyticsUserPropertyAllowAdPersonalizationSignals = "allow_personalized_ads"

@@ -1,5 +1,6 @@
 package com.trackingdocs.nativepayloadkotlin
 
+import com.trackingdocs.nativepayload.PayloadSchemaValidator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -19,6 +20,10 @@ class NativePayloadAndroidKotlinTest {
       analytics.lastEventParams,
     )
     assertEquals(emptyMap<String, String?>(), analytics.userProperties)
+    PayloadSchemaValidator.validateRuntimeScreenViewPayload(
+      analytics.lastEventParams,
+      analytics.userProperties,
+    )
   }
 
   @Test
@@ -44,6 +49,25 @@ class NativePayloadAndroidKotlinTest {
       analytics.lastEventParams,
     )
     assertEquals(emptyMap<String, String?>(), analytics.userProperties)
+    PayloadSchemaValidator.validateRuntimeAddToCartPayload(
+      analytics.lastEventParams,
+      analytics.userProperties,
+    )
+    PayloadSchemaValidator.validateSourceSchemaAddToCartExample(
+      linkedMapOf(
+        "event" to "add_to_cart",
+        "currency" to "EUR",
+        "value" to 42.5,
+        "items" to listOf(
+          linkedMapOf(
+            "item_id" to "sku-1",
+            "item_name" to "Socks",
+            "price" to 21.25,
+            "quantity" to 2L,
+          ),
+        ),
+      ),
+    )
   }
 
   @Test
@@ -67,6 +91,42 @@ class NativePayloadAndroidKotlinTest {
         "allow_personalized_ads" to "false",
       ),
       analytics.userProperties,
+    )
+    PayloadSchemaValidator.validateRuntimeCustomEventPayload(
+      analytics.lastEventParams,
+      analytics.userProperties,
+    )
+  }
+
+  @Test
+  fun loginWithUserProperties() {
+    val analytics = FakeFirebaseAnalyticsKotlin()
+
+    GeneratedAndroidKotlinSnippets.runLoginWithUserProperties(analytics)
+
+    assertEquals("login", analytics.lastEventName)
+    assertEquals(
+      linkedMapOf(
+        "method" to "email",
+      ),
+      analytics.lastEventParams,
+    )
+    assertEquals(
+      linkedMapOf(
+        "sign_up_method" to "email",
+        "allow_personalized_ads" to "false",
+      ),
+      analytics.userProperties,
+    )
+    PayloadSchemaValidator.validateSourceSchemaLoginWithUserPropertiesExample(
+      linkedMapOf(
+        "event" to "login",
+        "method" to "email",
+        "user_properties" to linkedMapOf(
+          "sign_up_method" to "email",
+          "allow_ad_personalization_signals" to "false",
+        ),
+      ),
     )
   }
 }

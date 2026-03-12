@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs.local/schemas/mobile/login-with-user-properties-event.schema.json",
+  "title": "Login With User Properties",
+  "description": "Vendored from demo/static/schemas/next/mobile/login-with-user-properties-event.json for local test validation.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "login"
+    },
+    "method": {
+      "type": "string"
+    },
+    "user_properties": {
+      "type": "object",
+      "properties": {
+        "sign_up_method": {
+          "type": "string"
+        },
+        "allow_ad_personalization_signals": {
+          "type": ["string", "null"]
+        }
+      },
+      "additionalProperties": {
+        "type": ["string", "null"]
+      },
+      "patternProperties": {
+        "^custom_": {
+          "type": ["string", "null"]
+        }
+      },
+      "required": ["sign_up_method"]
+    }
+  },
+  "required": ["event", "method", "user_properties"],
+  "additionalProperties": true
+}

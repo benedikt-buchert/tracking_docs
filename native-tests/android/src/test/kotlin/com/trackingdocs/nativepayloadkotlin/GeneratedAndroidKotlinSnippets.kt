@@ -36,4 +36,14 @@ object GeneratedAndroidKotlinSnippets {
       param("premium", 1L)
     }
   }
+
+  // Generated from contract: login-with-user-properties
+  fun runLoginWithUserProperties(firebaseAnalytics: FakeFirebaseAnalyticsKotlin) {
+    firebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email")
+    firebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS, "false")
+
+    firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN) {
+      param(FirebaseAnalytics.Param.METHOD, "email")
+    }
+  }
 }

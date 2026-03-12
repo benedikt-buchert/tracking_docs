@@ -40,4 +40,15 @@ public enum GeneratedIosSnippets {
     ]
     Analytics.logEvent("my_custom_event", parameters: eventParams)
   }
+
+  // Generated from contract: login-with-user-properties
+  public static func runLoginWithUserProperties() {
+    Analytics.setUserProperty("email", forName: AnalyticsUserPropertySignUpMethod)
+    Analytics.setUserProperty("false", forName: AnalyticsUserPropertyAllowAdPersonalizationSignals)
+
+    var eventParams: [String: Any] = [
+      AnalyticsParameterMethod: "email"
+    ]
+    Analytics.logEvent(AnalyticsEventLogin, parameters: eventParams)
+  }
 }

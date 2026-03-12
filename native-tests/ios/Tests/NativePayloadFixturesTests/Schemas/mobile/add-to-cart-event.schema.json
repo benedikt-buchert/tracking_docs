@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs.local/schemas/mobile/add-to-cart-event.schema.json",
+  "title": "Add To Cart",
+  "description": "Vendored from demo/static/schemas/next/mobile/add-to-cart-event.json and flattened for local test validation.",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "add_to_cart"
+    },
+    "currency": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 3
+    },
+    "value": {
+      "type": "number"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "item_id": { "type": "string" },
+          "item_name": { "type": "string" },
+          "price": { "type": "number" },
+          "quantity": { "type": "number" }
+        },
+        "additionalProperties": true,
+        "anyOf": [{ "required": ["item_id"] }, { "required": ["item_name"] }]
+      }
+    }
+  },
+  "required": ["event", "currency", "items"],
+  "additionalProperties": true
+}
