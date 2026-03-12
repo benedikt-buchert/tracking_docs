@@ -119,6 +119,41 @@ const PAYLOAD_CONTRACTS = [
     },
   },
   {
+    id: 'login-with-user-properties',
+    class: 'user_properties',
+    example: {
+      event: 'login',
+      method: 'email',
+      user_properties: {
+        sign_up_method: 'email',
+        allow_ad_personalization_signals: 'false',
+      },
+    },
+    expected: {
+      web: {
+        eventName: 'login',
+        payload: {
+          event: 'login',
+          method: 'email',
+          user_properties: {
+            sign_up_method: 'email',
+            allow_ad_personalization_signals: 'false',
+          },
+        },
+      },
+      firebase: {
+        eventName: 'login',
+        parameters: {
+          method: 'email',
+        },
+        userProperties: {
+          sign_up_method: 'email',
+          allow_personalized_ads: 'false',
+        },
+      },
+    },
+  },
+  {
     id: 'web-fallback-json-serialization',
     class: 'fallback_json_serialization',
     targets: ['web-datalayer-js'],

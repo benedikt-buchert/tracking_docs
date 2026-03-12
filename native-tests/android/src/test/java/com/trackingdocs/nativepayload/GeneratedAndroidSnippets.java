@@ -37,4 +37,14 @@ final class GeneratedAndroidSnippets {
     eventParams.putLong("premium", 1L);
     mFirebaseAnalytics.logEvent("my_custom_event", eventParams);
   }
+
+  // Generated from contract: login-with-user-properties
+  static void runLoginWithUserProperties(FakeFirebaseAnalytics mFirebaseAnalytics) {
+    mFirebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.SIGN_UP_METHOD, "email");
+    mFirebaseAnalytics.setUserProperty(FirebaseAnalytics.UserProperty.ALLOW_AD_PERSONALIZATION_SIGNALS, "false");
+
+    Bundle eventParams = new Bundle();
+    eventParams.putString(FirebaseAnalytics.Param.METHOD, "email");
+    mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN, eventParams);
+  }
 }

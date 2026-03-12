@@ -2,6 +2,7 @@
 
 NSString *const kFIREventScreenView = @"screen_view";
 NSString *const kFIREventAddToCart = @"add_to_cart";
+NSString *const kFIREventLogin = @"login";
 NSString *const kFIRParameterScreenName = @"screen_name";
 NSString *const kFIRParameterScreenClass = @"screen_class";
 NSString *const kFIRParameterCurrency = @"currency";
@@ -11,6 +12,7 @@ NSString *const kFIRParameterItemID = @"item_id";
 NSString *const kFIRParameterItemName = @"item_name";
 NSString *const kFIRParameterPrice = @"price";
 NSString *const kFIRParameterQuantity = @"quantity";
+NSString *const kFIRParameterMethod = @"method";
 NSString *const kFIRUserPropertySignUpMethod = @"sign_up_method";
 NSString *const kFIRUserPropertyAllowAdPersonalizationSignals = @"allow_personalized_ads";
 

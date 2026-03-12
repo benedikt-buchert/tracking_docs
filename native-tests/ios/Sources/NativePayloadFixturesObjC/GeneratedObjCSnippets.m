@@ -35,3 +35,13 @@ void RunObjCSnippetCustomEventWithUserProperties(void) {
   } mutableCopy];
   [FIRAnalytics logEventWithName:@"my_custom_event" parameters:eventParams];
 }
+
+void RunObjCSnippetLoginWithUserProperties(void) {
+  [FIRAnalytics setUserPropertyString:@"email" forName:kFIRUserPropertySignUpMethod];
+  [FIRAnalytics setUserPropertyString:@"false" forName:kFIRUserPropertyAllowAdPersonalizationSignals];
+
+  NSMutableDictionary *eventParams = [@{
+    kFIRParameterMethod: @"email"
+  } mutableCopy];
+  [FIRAnalytics logEventWithName:kFIREventLogin parameters:eventParams];
+}

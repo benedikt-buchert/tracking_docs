@@ -22,6 +22,8 @@ public class NativePayloadAndroidTest {
             entry("screen_class", "CheckoutViewController")),
         analytics.lastEventParams);
     assertEquals(Map.of(), analytics.userProperties);
+    PayloadSchemaValidator.validateScreenView(
+        analytics.lastEventParams, analytics.userProperties);
   }
 
   @Test
@@ -45,6 +47,21 @@ public class NativePayloadAndroidTest {
                         entry("quantity", Long.valueOf(2L)))))),
         analytics.lastEventParams);
     assertEquals(Map.of(), analytics.userProperties);
+    PayloadSchemaValidator.validateAddToCart(
+        analytics.lastEventParams, analytics.userProperties);
+    PayloadSchemaValidator.validateAddToCartSourceExample(
+        mapOf(
+            entry("event", "add_to_cart"),
+            entry("currency", "EUR"),
+            entry("value", Double.valueOf(42.5)),
+            entry(
+                "items",
+                List.of(
+                    mapOf(
+                        entry("item_id", "sku-1"),
+                        entry("item_name", "Socks"),
+                        entry("price", Double.valueOf(21.25)),
+                        entry("quantity", Long.valueOf(2L)))))));
   }
 
   @Test
@@ -65,6 +82,34 @@ public class NativePayloadAndroidTest {
             entry("sign_up_method", "email"),
             entry("allow_personalized_ads", "false")),
         analytics.userProperties);
+    PayloadSchemaValidator.validateCustomEvent(
+        analytics.lastEventParams, analytics.userProperties);
+  }
+
+  @Test
+  void loginWithUserProperties() {
+    FakeFirebaseAnalytics analytics = new FakeFirebaseAnalytics();
+
+    GeneratedAndroidSnippets.runLoginWithUserProperties(analytics);
+
+    assertEquals("login", analytics.lastEventName);
+    assertEquals(
+        mapOf(entry("method", "email")),
+        analytics.lastEventParams);
+    assertEquals(
+        mapOf(
+            entry("sign_up_method", "email"),
+            entry("allow_personalized_ads", "false")),
+        analytics.userProperties);
+    PayloadSchemaValidator.validateLoginWithUserPropertiesSourceExample(
+        mapOf(
+            entry("event", "login"),
+            entry("method", "email"),
+            entry(
+                "user_properties",
+                mapOf(
+                    entry("sign_up_method", "email"),
+                    entry("allow_ad_personalization_signals", "false")))));
   }
 
   private static Map<String, Object> mapOf(Map.Entry<String, Object>... entries) {
@@ -135,6 +180,7 @@ final class FirebaseAnalytics {
   static final class Event {
     static final String SCREEN_VIEW = "screen_view";
     static final String ADD_TO_CART = "add_to_cart";
+    static final String LOGIN = "login";
 
     private Event() {}
   }
@@ -149,6 +195,7 @@ final class FirebaseAnalytics {
     static final String ITEM_NAME = "item_name";
     static final String PRICE = "price";
     static final String QUANTITY = "quantity";
+    static final String METHOD = "method";
 
     private Param() {}
   }

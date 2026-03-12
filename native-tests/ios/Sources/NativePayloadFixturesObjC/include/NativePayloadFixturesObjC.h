@@ -11,6 +11,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern NSString *const kFIREventScreenView;
 extern NSString *const kFIREventAddToCart;
+extern NSString *const kFIREventLogin;
 extern NSString *const kFIRParameterScreenName;
 extern NSString *const kFIRParameterScreenClass;
 extern NSString *const kFIRParameterCurrency;
@@ -20,6 +21,7 @@ extern NSString *const kFIRParameterItemID;
 extern NSString *const kFIRParameterItemName;
 extern NSString *const kFIRParameterPrice;
 extern NSString *const kFIRParameterQuantity;
+extern NSString *const kFIRParameterMethod;
 extern NSString *const kFIRUserPropertySignUpMethod;
 extern NSString *const kFIRUserPropertyAllowAdPersonalizationSignals;
 

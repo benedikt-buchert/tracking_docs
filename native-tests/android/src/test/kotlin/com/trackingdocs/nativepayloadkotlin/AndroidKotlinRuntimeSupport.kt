@@ -60,6 +60,7 @@ object FirebaseAnalytics {
   object Event {
     const val SCREEN_VIEW = "screen_view"
     const val ADD_TO_CART = "add_to_cart"
+    const val LOGIN = "login"
   }
 
   object Param {
@@ -72,6 +73,7 @@ object FirebaseAnalytics {
     const val ITEM_NAME = "item_name"
     const val PRICE = "price"
     const val QUANTITY = "quantity"
+    const val METHOD = "method"
   }
 
   object UserProperty {
