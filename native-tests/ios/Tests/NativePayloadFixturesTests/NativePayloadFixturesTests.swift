@@ -123,18 +123,33 @@ struct NativePayloadFixturesTests {
   }
 
   private func loadSourceSchema(_ schemaNameWithoutExtension: String) throws -> String {
-    guard let url = Bundle.module.url(
+    if let directUrl = Bundle.module.url(
+      forResource: schemaNameWithoutExtension,
+      withExtension: "json"
+    ) {
+      return try String(contentsOf: directUrl, encoding: .utf8)
+    }
+
+    if let nestedUrl = Bundle.module.url(
       forResource: schemaNameWithoutExtension,
       withExtension: "json",
       subdirectory: "Schemas/mobile"
-    ) else {
-      throw NSError(
-        domain: "NativePayloadFixturesTests",
-        code: 1,
-        userInfo: [NSLocalizedDescriptionKey: "Missing schema resource: \(schemaNameWithoutExtension).json"]
-      )
+    ) {
+      return try String(contentsOf: nestedUrl, encoding: .utf8)
     }
-    return try String(contentsOf: url, encoding: .utf8)
+
+    if let allJsonUrls = Bundle.module.urls(forResourcesWithExtension: "json", subdirectory: nil) {
+      let expectedFileName = "\(schemaNameWithoutExtension).json"
+      if let matched = allJsonUrls.first(where: { $0.lastPathComponent == expectedFileName }) {
+        return try String(contentsOf: matched, encoding: .utf8)
+      }
+    }
+
+    throw NSError(
+      domain: "NativePayloadFixturesTests",
+      code: 1,
+      userInfo: [NSLocalizedDescriptionKey: "Missing schema resource: \(schemaNameWithoutExtension).json"]
+    )
   }
 
   @Test
