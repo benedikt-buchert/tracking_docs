@@ -22,7 +22,7 @@ public class NativePayloadAndroidTest {
             entry("screen_class", "CheckoutViewController")),
         analytics.lastEventParams);
     assertEquals(Map.of(), analytics.userProperties);
-    PayloadSchemaValidator.validateScreenView(
+    PayloadSchemaValidator.validateRuntimeScreenViewPayload(
         analytics.lastEventParams, analytics.userProperties);
   }
 
@@ -47,9 +47,9 @@ public class NativePayloadAndroidTest {
                         entry("quantity", Long.valueOf(2L)))))),
         analytics.lastEventParams);
     assertEquals(Map.of(), analytics.userProperties);
-    PayloadSchemaValidator.validateAddToCart(
+    PayloadSchemaValidator.validateRuntimeAddToCartPayload(
         analytics.lastEventParams, analytics.userProperties);
-    PayloadSchemaValidator.validateAddToCartSourceExample(
+    PayloadSchemaValidator.validateSourceSchemaAddToCartExample(
         mapOf(
             entry("event", "add_to_cart"),
             entry("currency", "EUR"),
@@ -82,7 +82,7 @@ public class NativePayloadAndroidTest {
             entry("sign_up_method", "email"),
             entry("allow_personalized_ads", "false")),
         analytics.userProperties);
-    PayloadSchemaValidator.validateCustomEvent(
+    PayloadSchemaValidator.validateRuntimeCustomEventPayload(
         analytics.lastEventParams, analytics.userProperties);
   }
 
@@ -101,7 +101,7 @@ public class NativePayloadAndroidTest {
             entry("sign_up_method", "email"),
             entry("allow_personalized_ads", "false")),
         analytics.userProperties);
-    PayloadSchemaValidator.validateLoginWithUserPropertiesSourceExample(
+    PayloadSchemaValidator.validateSourceSchemaLoginWithUserPropertiesExample(
         mapOf(
             entry("event", "login"),
             entry("method", "email"),

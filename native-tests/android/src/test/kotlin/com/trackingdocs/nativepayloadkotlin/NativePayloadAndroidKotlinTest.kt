@@ -20,7 +20,7 @@ class NativePayloadAndroidKotlinTest {
       analytics.lastEventParams,
     )
     assertEquals(emptyMap<String, String?>(), analytics.userProperties)
-    PayloadSchemaValidator.validateScreenView(
+    PayloadSchemaValidator.validateRuntimeScreenViewPayload(
       analytics.lastEventParams,
       analytics.userProperties,
     )
@@ -49,11 +49,11 @@ class NativePayloadAndroidKotlinTest {
       analytics.lastEventParams,
     )
     assertEquals(emptyMap<String, String?>(), analytics.userProperties)
-    PayloadSchemaValidator.validateAddToCart(
+    PayloadSchemaValidator.validateRuntimeAddToCartPayload(
       analytics.lastEventParams,
       analytics.userProperties,
     )
-    PayloadSchemaValidator.validateAddToCartSourceExample(
+    PayloadSchemaValidator.validateSourceSchemaAddToCartExample(
       linkedMapOf(
         "event" to "add_to_cart",
         "currency" to "EUR",
@@ -92,7 +92,7 @@ class NativePayloadAndroidKotlinTest {
       ),
       analytics.userProperties,
     )
-    PayloadSchemaValidator.validateCustomEvent(
+    PayloadSchemaValidator.validateRuntimeCustomEventPayload(
       analytics.lastEventParams,
       analytics.userProperties,
     )
@@ -118,7 +118,7 @@ class NativePayloadAndroidKotlinTest {
       ),
       analytics.userProperties,
     )
-    PayloadSchemaValidator.validateLoginWithUserPropertiesSourceExample(
+    PayloadSchemaValidator.validateSourceSchemaLoginWithUserPropertiesExample(
       linkedMapOf(
         "event" to "login",
         "method" to "email",

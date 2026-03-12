@@ -113,7 +113,10 @@ struct NativePayloadFixturesTests {
     return value
   }
 
-  private func validateSchema(_ schemaSource: String, instance: Any?) throws {
+  private func validateJsonSchemaInstance(
+    _ schemaSource: String,
+    instance: Any?
+  ) throws {
     let schema = try Schema(instance: schemaSource)
     let normalized = instance.map(normalize) ?? NSNull()
     let data = try JSONSerialization.data(withJSONObject: normalized)
@@ -122,7 +125,9 @@ struct NativePayloadFixturesTests {
     #expect(result.isValid)
   }
 
-  private func loadSourceSchema(_ schemaNameWithoutExtension: String) throws -> String {
+  private func loadSourceEventSchema(
+    _ schemaNameWithoutExtension: String
+  ) throws -> String {
     if let directUrl = Bundle.module.url(
       forResource: schemaNameWithoutExtension,
       withExtension: "json"
@@ -153,7 +158,7 @@ struct NativePayloadFixturesTests {
   }
 
   @Test
-  func screenViewPredefined() throws {
+  func screenViewPredefined_validatesRuntimeFirebasePayload() throws {
     AnalyticsRecorder.reset()
     GeneratedIosSnippets.runScreenViewPredefined()
 
@@ -166,12 +171,15 @@ struct NativePayloadFixturesTests {
         ])
     )
     #expect(AnalyticsRecorder.userProperties.count == 0)
-    try validateSchema(screenViewParamsSchema, instance: AnalyticsRecorder.lastEventParameters)
-    try validateSchema(emptyObjectSchema, instance: AnalyticsRecorder.userProperties)
+    try validateJsonSchemaInstance(
+      screenViewParamsSchema,
+      instance: AnalyticsRecorder.lastEventParameters
+    )
+    try validateJsonSchemaInstance(emptyObjectSchema, instance: AnalyticsRecorder.userProperties)
   }
 
   @Test
-  func addToCartWithItems() throws {
+  func addToCartWithItems_validatesRuntimeAndSourceSchema() throws {
     AnalyticsRecorder.reset()
     GeneratedIosSnippets.runAddToCartWithItems()
 
@@ -192,10 +200,13 @@ struct NativePayloadFixturesTests {
         ])
     )
     #expect(AnalyticsRecorder.userProperties.count == 0)
-    try validateSchema(addToCartParamsSchema, instance: AnalyticsRecorder.lastEventParameters)
-    try validateSchema(emptyObjectSchema, instance: AnalyticsRecorder.userProperties)
-    try validateSchema(
-      loadSourceSchema(addToCartSourceSchemaName),
+    try validateJsonSchemaInstance(
+      addToCartParamsSchema,
+      instance: AnalyticsRecorder.lastEventParameters
+    )
+    try validateJsonSchemaInstance(emptyObjectSchema, instance: AnalyticsRecorder.userProperties)
+    try validateJsonSchemaInstance(
+      loadSourceEventSchema(addToCartSourceSchemaName),
       instance: [
         "event": "add_to_cart",
         "currency": "EUR",
@@ -213,7 +224,7 @@ struct NativePayloadFixturesTests {
   }
 
   @Test
-  func customEventWithUserProperties() throws {
+  func customEventWithUserProperties_validatesRuntimeFirebasePayload() throws {
     AnalyticsRecorder.reset()
     GeneratedIosSnippets.runCustomEventWithUserProperties()
 
@@ -228,12 +239,18 @@ struct NativePayloadFixturesTests {
     )
     #expect(AnalyticsRecorder.userProperties["sign_up_method"]! == "email")
     #expect(AnalyticsRecorder.userProperties["allow_personalized_ads"]! == "false")
-    try validateSchema(customEventParamsSchema, instance: AnalyticsRecorder.lastEventParameters)
-    try validateSchema(customEventUserPropertiesSchema, instance: AnalyticsRecorder.userProperties)
+    try validateJsonSchemaInstance(
+      customEventParamsSchema,
+      instance: AnalyticsRecorder.lastEventParameters
+    )
+    try validateJsonSchemaInstance(
+      customEventUserPropertiesSchema,
+      instance: AnalyticsRecorder.userProperties
+    )
   }
 
   @Test
-  func objcScreenViewPredefined() throws {
+  func objcScreenViewPredefined_validatesRuntimeFirebasePayload() throws {
     ObjCAnalyticsRecorderReset()
     RunObjCSnippetScreenViewPredefined()
 
@@ -246,12 +263,15 @@ struct NativePayloadFixturesTests {
         ])
     )
     #expect(try canonicalJSON(ObjCAnalyticsUserProperties()) == canonicalJSON([:]))
-    try validateSchema(screenViewParamsSchema, instance: ObjCAnalyticsLastEventParameters())
-    try validateSchema(emptyObjectSchema, instance: ObjCAnalyticsUserProperties())
+    try validateJsonSchemaInstance(
+      screenViewParamsSchema,
+      instance: ObjCAnalyticsLastEventParameters()
+    )
+    try validateJsonSchemaInstance(emptyObjectSchema, instance: ObjCAnalyticsUserProperties())
   }
 
   @Test
-  func objcAddToCartWithItems() throws {
+  func objcAddToCartWithItems_validatesRuntimeFirebasePayload() throws {
     ObjCAnalyticsRecorderReset()
     RunObjCSnippetAddToCartWithItems()
 
@@ -272,12 +292,15 @@ struct NativePayloadFixturesTests {
         ])
     )
     #expect(try canonicalJSON(ObjCAnalyticsUserProperties()) == canonicalJSON([:]))
-    try validateSchema(addToCartParamsSchema, instance: ObjCAnalyticsLastEventParameters())
-    try validateSchema(emptyObjectSchema, instance: ObjCAnalyticsUserProperties())
+    try validateJsonSchemaInstance(
+      addToCartParamsSchema,
+      instance: ObjCAnalyticsLastEventParameters()
+    )
+    try validateJsonSchemaInstance(emptyObjectSchema, instance: ObjCAnalyticsUserProperties())
   }
 
   @Test
-  func loginWithUserProperties() throws {
+  func loginWithUserProperties_validatesRuntimeAndSourceSchema() throws {
     AnalyticsRecorder.reset()
     GeneratedIosSnippets.runLoginWithUserProperties()
 
@@ -295,8 +318,8 @@ struct NativePayloadFixturesTests {
           "allow_personalized_ads": "false",
         ])
     )
-    try validateSchema(
-      loadSourceSchema(loginWithUserPropertiesSourceSchemaName),
+    try validateJsonSchemaInstance(
+      loadSourceEventSchema(loginWithUserPropertiesSourceSchemaName),
       instance: [
         "event": "login",
         "method": "email",
@@ -309,7 +332,7 @@ struct NativePayloadFixturesTests {
   }
 
   @Test
-  func objcLoginWithUserProperties() throws {
+  func objcLoginWithUserProperties_validatesRuntimeAndSourceSchema() throws {
     ObjCAnalyticsRecorderReset()
     RunObjCSnippetLoginWithUserProperties()
 
@@ -327,8 +350,8 @@ struct NativePayloadFixturesTests {
           "allow_personalized_ads": "false",
         ])
     )
-    try validateSchema(
-      loadSourceSchema(loginWithUserPropertiesSourceSchemaName),
+    try validateJsonSchemaInstance(
+      loadSourceEventSchema(loginWithUserPropertiesSourceSchemaName),
       instance: [
         "event": "login",
         "method": "email",
@@ -341,7 +364,7 @@ struct NativePayloadFixturesTests {
   }
 
   @Test
-  func objcCustomEventWithUserProperties() throws {
+  func objcCustomEventWithUserProperties_validatesRuntimeFirebasePayload() throws {
     ObjCAnalyticsRecorderReset()
     RunObjCSnippetCustomEventWithUserProperties()
 
@@ -361,7 +384,13 @@ struct NativePayloadFixturesTests {
           "allow_personalized_ads": "false",
         ])
     )
-    try validateSchema(customEventParamsSchema, instance: ObjCAnalyticsLastEventParameters())
-    try validateSchema(customEventUserPropertiesSchema, instance: ObjCAnalyticsUserProperties())
+    try validateJsonSchemaInstance(
+      customEventParamsSchema,
+      instance: ObjCAnalyticsLastEventParameters()
+    )
+    try validateJsonSchemaInstance(
+      customEventUserPropertiesSchema,
+      instance: ObjCAnalyticsUserProperties()
+    )
   }
 }

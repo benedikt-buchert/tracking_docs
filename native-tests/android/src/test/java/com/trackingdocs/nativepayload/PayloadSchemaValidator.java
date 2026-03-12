@@ -93,27 +93,30 @@ public final class PayloadSchemaValidator {
 
   private PayloadSchemaValidator() {}
 
-  public static void validateScreenView(Object parameters, Object userProperties) {
+  public static void validateRuntimeScreenViewPayload(
+      Object parameters, Object userProperties) {
     validateAgainstSchema(SCREEN_VIEW_PARAMS_SCHEMA, parameters);
     validateAgainstSchema(EMPTY_OBJECT_SCHEMA, userProperties);
   }
 
-  public static void validateAddToCart(Object parameters, Object userProperties) {
+  public static void validateRuntimeAddToCartPayload(
+      Object parameters, Object userProperties) {
     validateAgainstSchema(ADD_TO_CART_PARAMS_SCHEMA, parameters);
     validateAgainstSchema(EMPTY_OBJECT_SCHEMA, userProperties);
   }
 
-  public static void validateCustomEvent(Object parameters, Object userProperties) {
+  public static void validateRuntimeCustomEventPayload(
+      Object parameters, Object userProperties) {
     validateAgainstSchema(CUSTOM_EVENT_PARAMS_SCHEMA, parameters);
     validateAgainstSchema(CUSTOM_EVENT_USER_PROPERTIES_SCHEMA, userProperties);
   }
 
-  public static void validateAddToCartSourceExample(Object sourcePayload) {
+  public static void validateSourceSchemaAddToCartExample(Object sourcePayload) {
     validateAgainstResourceSchema(
         "schemas/mobile/add-to-cart-event.schema.json", sourcePayload);
   }
 
-  public static void validateLoginWithUserPropertiesSourceExample(
+  public static void validateSourceSchemaLoginWithUserPropertiesExample(
       Object sourcePayload) {
     validateAgainstResourceSchema(
         "schemas/mobile/login-with-user-properties-event.schema.json",
