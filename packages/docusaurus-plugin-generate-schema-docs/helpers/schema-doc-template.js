@@ -12,6 +12,7 @@ export default function MdxTemplate(data) {
     sourcePath,
     schemaSources,
   } = data;
+  const sourceSchema = schemaSources?.[sourcePath] || schema;
 
   return `---
 title: ${schema.title}
@@ -33,6 +34,9 @@ ${topPartialComponent}
 
 <SchemaViewer
   schema={${JSON.stringify(mergedSchema)}}
+  sourceSchema={${JSON.stringify(sourceSchema)}}
+  sourcePath={${JSON.stringify(sourcePath)}}
+  schemaSources={${JSON.stringify(schemaSources)}}
   ${dataLayerName ? ` dataLayerName={'${dataLayerName}'}` : ''}
 />
 <SchemaJsonViewer
