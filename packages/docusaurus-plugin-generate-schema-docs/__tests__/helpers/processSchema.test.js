@@ -82,4 +82,22 @@ describe('processSchema', () => {
       }),
     );
   });
+
+  it('keeps simple not const constraints readable after allOf merge', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'main-schema-with-not-allof.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    expect(mergedSchema.properties.country).toEqual(
+      expect.objectContaining({
+        type: 'string',
+        not: { const: 'US' },
+      }),
+    );
+  });
 });

@@ -70,7 +70,7 @@ describe('getConstraints', () => {
       'contains: {"type":"string"}',
       'enum: [a, b, c]',
       'const: "hello"',
-      'not: const != "US"',
+      'not: { const: "US" }',
     ];
     expect(getConstraints(prop, false)).toEqual(
       expect.arrayContaining(expected),
@@ -103,17 +103,17 @@ describe('getConstraints', () => {
     );
   });
 
-  it('should render "not" constraint with const in a readable way', () => {
+  it('should render "not" constraint in JSON schema syntax for const', () => {
     const prop = {
       not: { const: 'US' },
     };
-    expect(getConstraints(prop, false)).toEqual(['not: const != "US"']);
+    expect(getConstraints(prop, false)).toEqual(['not: { const: "US" }']);
   });
 
-  it('should render "not" constraint with type in a readable way', () => {
+  it('should render "not" constraint in JSON schema syntax for type', () => {
     const prop = {
       not: { type: 'string' },
     };
-    expect(getConstraints(prop, false)).toEqual(['not: type != "string"']);
+    expect(getConstraints(prop, false)).toEqual(['not: { type: "string" }']);
   });
 });
