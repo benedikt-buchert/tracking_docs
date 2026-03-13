@@ -43,6 +43,50 @@
         "const": "US"
       },
       "examples": ["DE"]
+    },
+    "status_code": {
+      "type": "string",
+      "description": "Complex not example: disallow success-like codes via nested anyOf.",
+      "not": {
+        "anyOf": [
+          { "const": "200" },
+          { "pattern": "^2[0-9]{2}$" },
+          { "enum": ["ok", "success"] }
+        ]
+      },
+      "examples": ["500"]
+    },
+    "region_bucket": {
+      "type": "string",
+      "description": "Complex not example: disallow restricted prefixes and exact values.",
+      "not": {
+        "anyOf": [
+          { "pattern": "^internal-" },
+          { "enum": ["private", "secret"] },
+          {
+            "allOf": [
+              { "minLength": 2 },
+              { "maxLength": 2 },
+              { "pattern": "^[A-Z]{2}$" }
+            ]
+          }
+        ]
+      },
+      "examples": ["public-west"]
+    },
+    "sku": {
+      "type": "string",
+      "description": "Complex not example: disallow short numeric-only IDs and known placeholders.",
+      "not": {
+        "anyOf": [
+          { "pattern": "^[0-9]{1,4}$" },
+          { "enum": ["unknown", "tbd", "na"] },
+          {
+            "allOf": [{ "pattern": "^[A-Z0-9_-]+$" }, { "maxLength": 3 }]
+          }
+        ]
+      },
+      "examples": ["SKU-12345"]
     }
   },
   "required": ["$schema", "event"],

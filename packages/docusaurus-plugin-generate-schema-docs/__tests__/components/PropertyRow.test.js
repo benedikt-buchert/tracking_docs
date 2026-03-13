@@ -56,6 +56,31 @@ describe('PropertyRow', () => {
     expect(getByText('"John Doe"')).toBeInTheDocument();
   });
 
+  it('renders array type values as comma-separated text', () => {
+    const row = {
+      name: 'additionalProperties',
+      level: 0,
+      required: false,
+      propertyType: ['string', 'number', 'integer', 'boolean', 'null'],
+      description: 'Catch-all values.',
+      examples: [],
+      constraints: [],
+      path: ['additionalProperties'],
+    };
+
+    const { getByText } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={row} />
+        </tbody>
+      </table>,
+    );
+
+    expect(
+      getByText('string, number, integer, boolean, null'),
+    ).toBeInTheDocument();
+  });
+
   it('marks required properties', () => {
     const row = {
       name: 'name',
