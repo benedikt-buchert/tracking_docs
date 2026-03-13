@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/main-schema-with-not-allof.json",
+  "title": "Main Schema With Not AllOf",
+  "type": "object",
+  "properties": {
+    "country": {
+      "allOf": [{ "type": "string" }, { "not": { "const": "US" } }]
+    }
+  }
+}

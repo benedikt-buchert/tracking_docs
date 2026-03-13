@@ -70,6 +70,9 @@ undefined
 
 <SchemaViewer
   schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}}}
+  sourceSchema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]}}
+  sourcePath={"child-event.json"}
+  schemaSources={{"child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
   
 />
 <SchemaJsonViewer
@@ -103,6 +106,9 @@ undefined
 
 <SchemaViewer
   schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}
+  sourceSchema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]}}
+  sourcePath={"child-event.json"}
+  schemaSources={{"child-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/child-event.json","title":"Child Event","type":"object","oneOf":[{"$ref":"./grandchild-a.json"},{"$ref":"./grandchild-b.json"}]},"grandchild-a.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-a.json","title":"Grandchild A","type":"object","properties":{"prop_a":{"type":"string"}}},"grandchild-b.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://example.com/schemas/nested/grandchild-b.json","title":"Grandchild B","type":"object","properties":{"prop_b":{"type":"string"}}}}}
   
 />
 <SchemaJsonViewer

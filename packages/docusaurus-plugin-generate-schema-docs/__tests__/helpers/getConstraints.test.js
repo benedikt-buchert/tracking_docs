@@ -59,6 +59,7 @@ describe('getConstraints', () => {
       contains: { type: 'string' },
       enum: ['a', 'b', 'c'],
       const: 'hello',
+      not: { const: 'US' },
     };
     const expected = [
       'pattern: /^[a-z]+$/',
@@ -69,6 +70,7 @@ describe('getConstraints', () => {
       'contains: {"type":"string"}',
       'enum: [a, b, c]',
       'const: "hello"',
+      'not: { const: "US" }',
     ];
     expect(getConstraints(prop, false)).toEqual(
       expect.arrayContaining(expected),
@@ -99,5 +101,19 @@ describe('getConstraints', () => {
     expect(getConstraints(prop, true)).toEqual(
       expect.arrayContaining(['required', ...expected]),
     );
+  });
+
+  it('should render "not" constraint in JSON schema syntax for const', () => {
+    const prop = {
+      not: { const: 'US' },
+    };
+    expect(getConstraints(prop, false)).toEqual(['not: { const: "US" }']);
+  });
+
+  it('should render "not" constraint in JSON schema syntax for type', () => {
+    const prop = {
+      not: { type: 'string' },
+    };
+    expect(getConstraints(prop, false)).toEqual(['not: { type: "string" }']);
   });
 });

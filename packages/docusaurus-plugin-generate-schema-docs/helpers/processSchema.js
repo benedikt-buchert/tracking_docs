@@ -3,6 +3,37 @@ import fs from 'fs';
 import { resolveConstraintSchemaPath } from './constraintSchemaPaths.js';
 import { mergeSchema } from './mergeSchema.js';
 
+function unwrapRedundantNotAnyOf(node) {
+  if (!node || typeof node !== 'object') {
+    return node;
+  }
+
+  if (Array.isArray(node)) {
+    return node.map(unwrapRedundantNotAnyOf);
+  }
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(node)) {
+    normalized[key] = unwrapRedundantNotAnyOf(value);
+  }
+
+  if (normalized.not && typeof normalized.not === 'object') {
+    let candidate = normalized.not;
+    while (
+      candidate &&
+      typeof candidate === 'object' &&
+      !Array.isArray(candidate) &&
+      Array.isArray(candidate.anyOf) &&
+      candidate.anyOf.length === 1
+    ) {
+      candidate = candidate.anyOf[0];
+    }
+    normalized.not = candidate;
+  }
+
+  return normalized;
+}
+
 /**
  * Processes a JSON schema file by bundling external references,
  * dereferencing internal references, and merging allOf properties.
@@ -41,5 +72,5 @@ export default async function processSchema(filePath) {
   // Then merge allOf properties
   const mergedSchema = mergeSchema(dereferencedSchema);
 
-  return mergedSchema;
+  return unwrapRedundantNotAnyOf(mergedSchema);
 }

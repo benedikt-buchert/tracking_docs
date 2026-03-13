@@ -26,6 +26,19 @@ const getContainerSymbol = (containerType) => {
   return '';
 };
 
+const formatPropertyType = (value) => {
+  if (Array.isArray(value)) {
+    return value.join(', ');
+  }
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (value === undefined || value === null) {
+    return '';
+  }
+  return JSON.stringify(value);
+};
+
 const KEYWORD_HELP_TEXT = {
   additionalProperties:
     'Controls properties not listed in properties and not matched by patternProperties.',
@@ -222,7 +235,7 @@ export default function PropertyRow({
           </span>
         </td>
         <td rowSpan={rowSpan}>
-          <code>{propertyType}</code>
+          <code>{formatPropertyType(propertyType)}</code>
         </td>
 
         {/* The first constraint cell */}
