@@ -1,14 +1,43 @@
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
+import { usePrismTheme } from '@docusaurus/theme-common';
+import { Highlight } from 'prism-react-renderer';
 
-function isPlainObject(value) {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    !Array.isArray(value) &&
-    Object.getPrototypeOf(value) === Object.prototype
-  );
-}
+const SCHEMA_META_KEYS = [
+  '$schema',
+  '$id',
+  '$anchor',
+  '$dynamicAnchor',
+  '$comment',
+  '$vocabulary',
+];
+
+const SCHEMA_STRUCTURAL_KEYS = new Set([
+  '$ref',
+  '$defs',
+  'properties',
+  'required',
+  'allOf',
+  'anyOf',
+  'oneOf',
+  'if',
+  'then',
+  'else',
+  'not',
+  'items',
+  'prefixItems',
+  'contains',
+  'dependentSchemas',
+  'patternProperties',
+  'additionalProperties',
+]);
+
+const SCHEMA_NAME_MAP_KEYS = new Set([
+  'properties',
+  'patternProperties',
+  '$defs',
+  'dependentSchemas',
+]);
 
 function isExternalRef(value) {
   return typeof value === 'string' && /^https?:\/\//.test(value);
@@ -51,137 +80,189 @@ function resolveLocalRef(currentPath, refValue) {
   return normalizePathSegments(`${dirname(currentPath)}/${refValue}`);
 }
 
-function JsonIndent({ depth }) {
-  return <span>{'  '.repeat(depth)}</span>;
+function getSchemaKeywordClassName(key, parentKey) {
+  if (parentKey && SCHEMA_NAME_MAP_KEYS.has(parentKey)) {
+    return '';
+  }
+
+  if (SCHEMA_META_KEYS.includes(key)) {
+    return 'schema-json-viewer__keyword schema-json-viewer__keyword--meta';
+  }
+
+  if (SCHEMA_STRUCTURAL_KEYS.has(key)) {
+    return 'schema-json-viewer__keyword schema-json-viewer__keyword--structural';
+  }
+
+  return '';
 }
 
-function JsonPrimitive({
-  value,
-  propertyKey,
-  currentPath,
-  schemaSources,
-  onNavigate,
-}) {
-  const interactiveRefClassName = 'schema-json-viewer__link';
-  const quotedValue = `${JSON.stringify(value)}`;
+function joinClassNames(...classNames) {
+  return classNames.filter(Boolean).join(' ');
+}
 
-  if (typeof value === 'string') {
-    if (propertyKey === '$ref') {
-      if (isExternalRef(value)) {
-        return (
-          <Link
-            className={interactiveRefClassName}
-            href={value}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {quotedValue}
-          </Link>
-        );
-      }
+function createParserState() {
+  return {
+    stack: [],
+  };
+}
 
-      const resolvedRef = resolveLocalRef(currentPath, value);
-      if (resolvedRef && schemaSources?.[resolvedRef]) {
-        return (
-          <button
-            type="button"
-            className={interactiveRefClassName}
-            onClick={() => onNavigate(resolvedRef)}
-          >
-            {quotedValue}
-          </button>
-        );
-      }
+function beginNestedValue(state, tokenContent) {
+  const currentContext = state.stack[state.stack.length - 1];
+  let parentKey = null;
+
+  if (currentContext?.type === 'object' && currentContext.afterColon) {
+    parentKey = currentContext.currentKey;
+    currentContext.currentKey = null;
+    currentContext.afterColon = false;
+  }
+
+  state.stack.push({
+    type: tokenContent === '{' ? 'object' : 'array',
+    parentKey,
+    currentKey: null,
+    afterColon: false,
+  });
+}
+
+function classifyRenderedToken(state, token) {
+  const currentContext = state.stack[state.stack.length - 1];
+  const tokenTypes = new Set(token.types);
+  const content = token.content;
+  const semantic = {};
+
+  if (!content) {
+    return semantic;
+  }
+
+  if (tokenTypes.has('property')) {
+    const key = JSON.parse(content);
+    semantic.propertyKey = key;
+    semantic.parentKey = currentContext?.parentKey ?? null;
+
+    if (currentContext?.type === 'object') {
+      currentContext.currentKey = key;
+      currentContext.afterColon = false;
     }
 
-    return <span className="token string">{quotedValue}</span>;
+    return semantic;
   }
 
-  if (typeof value === 'number') {
-    return <span className="token number">{value}</span>;
+  if (content === ':') {
+    if (
+      currentContext?.type === 'object' &&
+      currentContext.currentKey !== null
+    ) {
+      currentContext.afterColon = true;
+    }
+    return semantic;
   }
 
-  if (typeof value === 'boolean') {
-    return <span className="token boolean">{String(value)}</span>;
+  if (content === '{' || content === '[') {
+    beginNestedValue(state, content);
+    return semantic;
   }
 
-  return <span className="token null keyword">null</span>;
+  if (content === '}' || content === ']') {
+    state.stack.pop();
+    return semantic;
+  }
+
+  if (content === ',') {
+    if (currentContext?.type === 'object') {
+      currentContext.currentKey = null;
+      currentContext.afterColon = false;
+    }
+    return semantic;
+  }
+
+  if (currentContext?.type === 'object' && currentContext.afterColon) {
+    if (tokenTypes.has('string') && content.trim().startsWith('"')) {
+      semantic.valueKey = currentContext.currentKey;
+      semantic.stringValue = JSON.parse(content);
+      currentContext.currentKey = null;
+      currentContext.afterColon = false;
+      return semantic;
+    }
+
+    if (
+      tokenTypes.has('number') ||
+      tokenTypes.has('boolean') ||
+      (tokenTypes.has('keyword') && content === 'null')
+    ) {
+      currentContext.currentKey = null;
+      currentContext.afterColon = false;
+    }
+  }
+
+  return semantic;
 }
 
-function JsonNode({
-  value,
-  depth,
+function renderToken({
+  token,
+  tokenIndex,
+  getTokenProps,
+  semantic,
   currentPath,
   schemaSources,
   onNavigate,
-  propertyKey = null,
 }) {
-  if (Array.isArray(value)) {
-    return (
-      <>
-        <span className="token punctuation">[</span>
-        {value.length > 0 && <br />}
-        {value.map((item, index) => (
-          <Fragment key={`${depth}-${index}`}>
-            <JsonIndent depth={depth + 1} />
-            <JsonNode
-              value={item}
-              depth={depth + 1}
-              currentPath={currentPath}
-              schemaSources={schemaSources}
-              onNavigate={onNavigate}
-            />
-            {index < value.length - 1 && (
-              <span className="token punctuation">,</span>
-            )}
-            <br />
-          </Fragment>
-        ))}
-        {value.length > 0 && <JsonIndent depth={depth} />}
-        <span className="token punctuation">]</span>
-      </>
-    );
-  }
+  const tokenProps = getTokenProps({ token, key: tokenIndex });
+  const propertyKeyClassName = semantic.propertyKey
+    ? getSchemaKeywordClassName(semantic.propertyKey, semantic.parentKey)
+    : '';
+  const className = joinClassNames(tokenProps.className, propertyKeyClassName);
 
-  if (isPlainObject(value)) {
-    const entries = Object.entries(value);
-    return (
-      <>
-        <span className="token punctuation">{'{'}</span>
-        {entries.length > 0 && <br />}
-        {entries.map(([key, child], index) => (
-          <Fragment key={`${depth}-${key}`}>
-            <JsonIndent depth={depth + 1} />
-            <span className="token property">{JSON.stringify(key)}</span>
-            <span className="token punctuation">: </span>
-            <JsonNode
-              value={child}
-              depth={depth + 1}
-              currentPath={currentPath}
-              schemaSources={schemaSources}
-              onNavigate={onNavigate}
-              propertyKey={key}
-            />
-            {index < entries.length - 1 && (
-              <span className="token punctuation">,</span>
-            )}
-            <br />
-          </Fragment>
-        ))}
-        {entries.length > 0 && <JsonIndent depth={depth} />}
-        <span className="token punctuation">{'}'}</span>
-      </>
-    );
+  if (
+    semantic.valueKey === '$ref' &&
+    typeof semantic.stringValue === 'string'
+  ) {
+    if (isExternalRef(semantic.stringValue)) {
+      return (
+        <Link
+          key={tokenIndex}
+          className={joinClassNames(
+            className,
+            'schema-json-viewer__link',
+            'schema-json-viewer__ref-link',
+          )}
+          style={tokenProps.style}
+          href={semantic.stringValue}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {token.content}
+        </Link>
+      );
+    }
+
+    const resolvedRef = resolveLocalRef(currentPath, semantic.stringValue);
+    if (resolvedRef && schemaSources?.[resolvedRef]) {
+      return (
+        <button
+          key={tokenIndex}
+          type="button"
+          className={joinClassNames(
+            className,
+            'schema-json-viewer__link',
+            'schema-json-viewer__ref-link',
+          )}
+          style={tokenProps.style}
+          onClick={() => onNavigate(resolvedRef)}
+        >
+          {token.content}
+        </button>
+      );
+    }
   }
 
   return (
-    <JsonPrimitive
-      value={value}
-      propertyKey={propertyKey}
-      currentPath={currentPath}
-      schemaSources={schemaSources}
-      onNavigate={onNavigate}
-    />
+    <span
+      key={tokenIndex}
+      className={className || tokenProps.className}
+      style={tokenProps.style}
+    >
+      {token.content}
+    </span>
   );
 }
 
@@ -190,6 +271,7 @@ export default function SchemaJsonViewer({
   sourcePath = null,
   schemaSources = null,
 }) {
+  const prismTheme = usePrismTheme();
   const resolvedSchemaSources =
     schemaSources || (sourcePath ? { [sourcePath]: schema } : {});
   const rootPath = sourcePath;
@@ -197,6 +279,7 @@ export default function SchemaJsonViewer({
 
   const currentSchema =
     (currentPath && resolvedSchemaSources?.[currentPath]) || schema;
+  const formattedSchema = JSON.stringify(currentSchema, null, 2);
 
   return (
     <details className="schema-json-viewer">
@@ -212,17 +295,37 @@ export default function SchemaJsonViewer({
           </button>
         </div>
       ) : null}
-      <pre data-language="json">
-        <code className="language-json">
-          <JsonNode
-            value={currentSchema}
-            depth={0}
-            currentPath={currentPath}
-            schemaSources={resolvedSchemaSources}
-            onNavigate={setCurrentPath}
-          />
-        </code>
-      </pre>
+      <Highlight code={formattedSchema} language="json" theme={prismTheme}>
+        {({ className, style, tokens, getLineProps, getTokenProps }) => {
+          const parserState = createParserState();
+
+          return (
+            <pre className={className} style={style} data-language="json">
+              <code className="language-json">
+                {tokens.map((line, lineIndex) => (
+                  <span
+                    key={lineIndex}
+                    {...getLineProps({ line, key: lineIndex })}
+                  >
+                    {line.map((token, tokenIndex) =>
+                      renderToken({
+                        token,
+                        tokenIndex,
+                        getTokenProps,
+                        semantic: classifyRenderedToken(parserState, token),
+                        currentPath,
+                        schemaSources: resolvedSchemaSources,
+                        onNavigate: setCurrentPath,
+                      }),
+                    )}
+                    {'\n'}
+                  </span>
+                ))}
+              </code>
+            </pre>
+          );
+        }}
+      </Highlight>
     </details>
   );
 }

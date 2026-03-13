@@ -46,6 +46,29 @@
   text-decoration: underline;
 }
 
+.schema-json-viewer__ref-link {
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 0.14em;
+}
+
+.schema-json-viewer__ref-link:hover {
+  color: var(--ifm-link-hover-color) !important;
+  text-decoration-thickness: 2px;
+}
+
+.schema-json-viewer__keyword {
+  font-weight: 600;
+}
+
+.schema-json-viewer__keyword--meta {
+  color: var(--ifm-color-info-light);
+}
+
+.schema-json-viewer__keyword--structural {
+  color: var(--ifm-color-success-light);
+}
+
 /* --- Property Name and Container Symbol Styles --- */
 
 .property-name {
