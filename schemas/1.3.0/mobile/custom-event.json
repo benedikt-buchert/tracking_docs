@@ -35,6 +35,14 @@
       "type": "boolean",
       "description": "An example boolean custom event parameter.",
       "examples": [true]
+    },
+    "country": {
+      "type": "string",
+      "description": "Country code that must not be US (demo for not + const rendering).",
+      "not": {
+        "const": "US"
+      },
+      "examples": ["DE"]
     }
   },
   "required": ["$schema", "event"],
