@@ -151,10 +151,17 @@ export function schemaToExamples(rootSchema) {
 
   if (choicePoints.length === 0 && conditionalPoints.length === 0) {
     const example = buildExampleFromSchema(rootSchema);
-    if (example && Object.keys(example).length > 0) {
-      return [
-        { property: 'default', options: [{ title: 'Example', example }] },
-      ];
+    if (typeof example !== 'undefined') {
+      const shouldIncludeObjectExample =
+        typeof example !== 'object' ||
+        example === null ||
+        Object.keys(example).length > 0;
+
+      if (shouldIncludeObjectExample) {
+        return [
+          { property: 'default', options: [{ title: 'Example', example }] },
+        ];
+      }
     }
     return [];
   }
