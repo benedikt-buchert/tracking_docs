@@ -79,7 +79,7 @@ describe('getVariablesFromSchemas', () => {
 
   const SCHEMA_PATH = '/fake/schemas';
   const mockFiles = {
-    [SCHEMA_PATH]: ['complex-event.json', 'components'],
+    [SCHEMA_PATH]: ['complex-event.json', 'mobile-event.json', 'components'],
     [path.join(SCHEMA_PATH, 'components')]: ['address.json'],
   };
   const addressSchema = {
@@ -92,6 +92,7 @@ describe('getVariablesFromSchemas', () => {
   };
   const complexEventSchema = {
     title: 'Complex Event',
+    'x-tracking-targets': ['web-datalayer-js'],
     type: 'object',
     properties: {
       $schema: { type: 'string', description: 'Should now be included.' },
@@ -110,9 +111,20 @@ describe('getVariablesFromSchemas', () => {
       timestamp: { type: 'number', description: 'Event timestamp.' },
     },
   };
+  const mobileEventSchema = {
+    title: 'Mobile Event',
+    'x-tracking-targets': ['android-firebase-kotlin-sdk'],
+    type: 'object',
+    properties: {
+      event: { type: 'string', const: 'screen_view' },
+      screen_name: { type: 'string', description: 'Screen name.' },
+    },
+  };
   const mockFileContents = {
     [path.join(SCHEMA_PATH, 'complex-event.json')]:
       JSON.stringify(complexEventSchema),
+    [path.join(SCHEMA_PATH, 'mobile-event.json')]:
+      JSON.stringify(mobileEventSchema),
     [path.join(SCHEMA_PATH, 'components', 'address.json')]:
       JSON.stringify(addressSchema),
   };
@@ -173,6 +185,40 @@ describe('getVariablesFromSchemas', () => {
 
     expect(result.map((r) => r.name)).toEqual(expect.arrayContaining(expected));
     expect(result.length).toBe(expected.length);
+  });
+
+  it('should ignore schemas that are not targeted to web-datalayer-js', async () => {
+    const bundledWebSchema = JSON.parse(JSON.stringify(complexEventSchema));
+    bundledWebSchema.properties.user_data.properties.addresses.items =
+      addressSchema;
+
+    RefParser.bundle.mockImplementation(async (filePath) => {
+      if (filePath.endsWith('complex-event.json')) {
+        return bundledWebSchema;
+      }
+      if (filePath.endsWith('mobile-event.json')) {
+        return mobileEventSchema;
+      }
+      throw new Error(`Unexpected schema file: ${filePath}`);
+    });
+
+    const result = await gtmScript.getVariablesFromSchemas(SCHEMA_PATH, {});
+
+    expect(result.map((variable) => variable.name)).toEqual(
+      expect.arrayContaining([
+        '$schema',
+        'event',
+        'user_data',
+        'user_data.user_id',
+        'user_data.addresses',
+        'user_data.addresses.0.street',
+        'user_data.addresses.0.city',
+        'timestamp',
+      ]),
+    );
+    expect(result.map((variable) => variable.name)).not.toContain(
+      'screen_name',
+    );
   });
 });
 
