@@ -46,7 +46,7 @@
         },
         "attributes": {
           "type": "object",
-          "description": "Nested generic attributes.",
+          "description": "Nested generic attributes. Declared keys are documented below; undeclared keys are allowed when they satisfy the schema constraint row for additionalProperties.",
           "properties": {
             "segment": {
               "type": "string",
@@ -71,7 +71,15 @@
               "minimum": 0,
               "examples": [12]
             }
-          }
+          },
+          "examples": [
+            {
+              "segment": "premium",
+              "score": 95,
+              "loyalty_tier": "gold",
+              "custom_ltv": 12
+            }
+          ]
         },
         "addresses": {
           "type": "array",
