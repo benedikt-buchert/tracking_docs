@@ -137,10 +137,10 @@ async function getVariablesFromSchemas(
   for (const file of jsonFiles) {
     try {
       let schema = await RefParser.bundle(file);
-      schema = mergeAllOf(schema);
       if (!shouldIncludeSchemaForGtm(schema)) {
         continue;
       }
+      schema = mergeAllOf(schema);
       const fileVariables = parseSchema(schema, { skipArraySubProperties });
       for (const variable of fileVariables) {
         if (!allVariables.has(variable.name)) {
