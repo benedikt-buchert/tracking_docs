@@ -1,44 +1,31 @@
 import buildExampleFromSchema from './buildExampleFromSchema';
 import { mergeSchema } from './mergeSchema.js';
+import traversalHelpers from './schemaTraversal.cjs';
 
-const findChoicePoints = (subSchema, path = []) => {
-  if (!subSchema) {
-    return [];
-  }
+const { visitSchemaNodes } = traversalHelpers;
 
-  const choiceType = subSchema.oneOf
-    ? 'oneOf'
-    : subSchema.anyOf
-      ? 'anyOf'
-      : null;
-  const currentChoice = choiceType ? [{ path, schema: subSchema }] : [];
+const findChoicePoints = (schema) => {
+  const choicePoints = [];
 
-  const nestedChoices = subSchema.properties
-    ? Object.entries(subSchema.properties).flatMap(([key, propSchema]) =>
-        findChoicePoints(propSchema, [...path, 'properties', key]),
-      )
-    : [];
+  visitSchemaNodes(schema, (subSchema, context) => {
+    if (subSchema.oneOf || subSchema.anyOf) {
+      choicePoints.push({ path: context.path, schema: subSchema });
+    }
+  });
 
-  return [...currentChoice, ...nestedChoices];
+  return choicePoints;
 };
 
-const findConditionalPoints = (subSchema, path = []) => {
-  if (!subSchema) {
-    return [];
-  }
+const findConditionalPoints = (schema) => {
+  const conditionalPoints = [];
 
-  const currentConditional =
-    subSchema.if && (subSchema.then || subSchema.else)
-      ? [{ path, schema: subSchema }]
-      : [];
+  visitSchemaNodes(schema, (subSchema, context) => {
+    if (subSchema.if && (subSchema.then || subSchema.else)) {
+      conditionalPoints.push({ path: context.path, schema: subSchema });
+    }
+  });
 
-  const nestedConditionals = subSchema.properties
-    ? Object.entries(subSchema.properties).flatMap(([key, propSchema]) =>
-        findConditionalPoints(propSchema, [...path, 'properties', key]),
-      )
-    : [];
-
-  return [...currentConditional, ...nestedConditionals];
+  return conditionalPoints;
 };
 
 const generateExampleForChoice = (rootSchema, path, option) => {

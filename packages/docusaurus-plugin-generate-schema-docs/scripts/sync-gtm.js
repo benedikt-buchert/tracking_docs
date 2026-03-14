@@ -3,6 +3,9 @@ const path = require('path');
 const { execSync } = require('child_process');
 const RefParser = require('@apidevtools/json-schema-ref-parser');
 const mergeAllOf = require('json-schema-merge-allof');
+const {
+  visitSchemaPropertyEntries,
+} = require('../helpers/schemaTraversal.cjs');
 
 const logger = {
   _isQuiet: false,
@@ -87,62 +90,22 @@ function findJsonFiles(dir) {
 }
 
 function parseSchema(schema, options, prefix = '') {
-  if (!schema || !schema.properties) {
-    return parseBranchSchemas(schema, options, prefix);
-  }
-
-  let variables = [];
-  for (const key in schema.properties) {
-    const property = schema.properties[key];
-    const currentPath = prefix ? `${prefix}.${key}` : key;
-    variables.push({
-      name: currentPath,
-      description: property.description,
-      type: property.type,
-    });
-    if (
-      property.type === 'array' &&
-      property.items &&
-      !options.skipArraySubProperties
-    ) {
-      if (property.items.properties) {
-        variables.push(
-          ...parseSchema(property.items, options, `${currentPath}.0`),
-        );
-      }
-    } else if (property.type === 'object' && property.properties) {
-      variables.push(...parseSchema(property, options, currentPath));
-    }
-
-    variables.push(...parseBranchSchemas(property, options, currentPath));
-  }
-
-  variables.push(...parseBranchSchemas(schema, options, prefix));
-  return variables;
-}
-
-function parseBranchSchemas(schema, options, prefix = '') {
-  if (!schema) {
-    return [];
-  }
-
   const variables = [];
-  const choiceSchemas = [
-    ...(Array.isArray(schema.oneOf) ? schema.oneOf : []),
-    ...(Array.isArray(schema.anyOf) ? schema.anyOf : []),
-  ];
 
-  choiceSchemas.forEach((choiceSchema) => {
-    variables.push(...parseSchema(choiceSchema, options, prefix));
-  });
-
-  if (schema.then) {
-    variables.push(...parseSchema(schema.then, options, prefix));
-  }
-
-  if (schema.else) {
-    variables.push(...parseSchema(schema.else, options, prefix));
-  }
+  visitSchemaPropertyEntries(
+    schema,
+    (property, context) => {
+      variables.push({
+        name: context.name,
+        description: property.description,
+        type: property.type,
+      });
+    },
+    {
+      prefix,
+      skipArraySubProperties: options.skipArraySubProperties,
+    },
+  );
 
   return variables;
 }
