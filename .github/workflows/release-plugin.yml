@@ -31,21 +31,13 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Configure Git
+      - name: Verify package version matches tag
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Update package version
-        run: |
-          npm --prefix packages/docusaurus-plugin-generate-schema-docs version ${{ github.ref_name }} --no-git-tag-version
-
-      - name: Commit and push package.json
-        run: |
-          git add packages/docusaurus-plugin-generate-schema-docs/package.json
-          git commit -m "chore(release): update plugin version to ${{ github.ref_name }} [skip ci]"
-          git pull origin main --rebase
-          git push origin HEAD:main
+          PACKAGE_VERSION=$(node -p "require('./packages/docusaurus-plugin-generate-schema-docs/package.json').version")
+          if [ "$PACKAGE_VERSION" != "${{ github.ref_name }}" ]; then
+            echo "Tag version (${{ github.ref_name }}) does not match package version ($PACKAGE_VERSION)."
+            exit 1
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
