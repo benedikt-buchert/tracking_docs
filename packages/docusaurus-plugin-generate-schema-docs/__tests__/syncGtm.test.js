@@ -168,6 +168,14 @@ describe('getVariablesFromSchemas', () => {
       screen_name: { type: 'string', description: 'Screen name.' },
     },
   };
+  const untaggedEventSchema = {
+    title: 'Untagged Event',
+    type: 'object',
+    properties: {
+      event: { type: 'string', const: 'legacy_event' },
+      legacy_field: { type: 'string', description: 'Legacy field.' },
+    },
+  };
   const mockFileContents = {
     [path.join(SCHEMA_PATH, 'complex-event.json')]:
       JSON.stringify(complexEventSchema),
@@ -254,7 +262,11 @@ describe('getVariablesFromSchemas', () => {
     );
   });
 
-  it('should ignore schemas that are not targeted to web-datalayer-js', async () => {
+  it('should only include schemas explicitly targeted to web-datalayer-js', async () => {
+    const untaggedEventPath = path.join(SCHEMA_PATH, 'legacy-event.json');
+    mockFiles[SCHEMA_PATH].push('legacy-event.json');
+    mockFileContents[untaggedEventPath] = JSON.stringify(untaggedEventSchema);
+
     const bundledWebSchema = JSON.parse(JSON.stringify(complexEventSchema));
     bundledWebSchema.properties.user_data.properties.addresses.items =
       addressSchema;
@@ -265,6 +277,12 @@ describe('getVariablesFromSchemas', () => {
       }
       if (filePath.endsWith('mobile-event.json')) {
         return mobileEventSchema;
+      }
+      if (filePath.endsWith('legacy-event.json')) {
+        return untaggedEventSchema;
+      }
+      if (filePath.endsWith('address.json')) {
+        return addressSchema;
       }
       throw new Error(`Unexpected schema file: ${filePath}`);
     });
@@ -286,6 +304,99 @@ describe('getVariablesFromSchemas', () => {
     expect(result.map((variable) => variable.name)).not.toContain(
       'screen_name',
     );
+    expect(result.map((variable) => variable.name)).not.toContain(
+      'legacy_field',
+    );
+  });
+
+  it('should include root tracking schemas based on content instead of path names', async () => {
+    const nestedSchemaDir = path.join(SCHEMA_PATH, 'event-components-demo');
+    const nestedSchemaPath = path.join(nestedSchemaDir, 'checkout-event.json');
+    const nestedSchema = {
+      title: 'Checkout Event',
+      'x-tracking-targets': ['web-datalayer-js'],
+      type: 'object',
+      properties: {
+        event: { type: 'string', const: 'checkout' },
+        order_id: { type: 'string', description: 'Order identifier.' },
+      },
+    };
+
+    mockFiles[SCHEMA_PATH].push('event-components-demo');
+    mockFiles[nestedSchemaDir] = ['checkout-event.json'];
+    mockFileContents[nestedSchemaPath] = JSON.stringify(nestedSchema);
+
+    const bundledWebSchema = JSON.parse(JSON.stringify(complexEventSchema));
+    bundledWebSchema.properties.user_data.properties.addresses.items =
+      addressSchema;
+
+    RefParser.bundle.mockImplementation(async (filePath) => {
+      if (filePath.endsWith('complex-event.json')) {
+        return bundledWebSchema;
+      }
+      if (filePath.endsWith('mobile-event.json')) {
+        return mobileEventSchema;
+      }
+      if (filePath.endsWith('address.json')) {
+        return addressSchema;
+      }
+      if (filePath.endsWith('legacy-event.json')) {
+        return untaggedEventSchema;
+      }
+      if (filePath.endsWith('checkout-event.json')) {
+        return nestedSchema;
+      }
+      throw new Error(`Unexpected schema file: ${filePath}`);
+    });
+
+    const result = await gtmScript.getVariablesFromSchemas(SCHEMA_PATH, {});
+    const variableNames = result.map((variable) => variable.name);
+
+    expect(variableNames).toContain('order_id');
+    expect(RefParser.bundle).toHaveBeenCalledWith(nestedSchemaPath);
+  });
+
+  it('should ignore component schemas even when scanning all json files', async () => {
+    const bundledWebSchema = JSON.parse(JSON.stringify(complexEventSchema));
+    bundledWebSchema.properties.user_data.properties.addresses.items =
+      addressSchema;
+    const nestedSchema = {
+      title: 'Checkout Event',
+      'x-tracking-targets': ['web-datalayer-js'],
+      type: 'object',
+      properties: {
+        event: { type: 'string', const: 'checkout' },
+        order_id: { type: 'string', description: 'Order identifier.' },
+      },
+    };
+
+    RefParser.bundle.mockImplementation(async (filePath) => {
+      if (filePath.endsWith('complex-event.json')) {
+        return bundledWebSchema;
+      }
+      if (filePath.endsWith('mobile-event.json')) {
+        return mobileEventSchema;
+      }
+      if (filePath.endsWith('address.json')) {
+        return addressSchema;
+      }
+      if (filePath.endsWith('legacy-event.json')) {
+        return untaggedEventSchema;
+      }
+      if (filePath.endsWith('checkout-event.json')) {
+        return nestedSchema;
+      }
+      throw new Error(`Unexpected schema file: ${filePath}`);
+    });
+
+    const result = await gtmScript.getVariablesFromSchemas(SCHEMA_PATH, {});
+    const variableNames = result.map((variable) => variable.name);
+
+    expect(RefParser.bundle).toHaveBeenCalledWith(
+      path.join(SCHEMA_PATH, 'components', 'address.json'),
+    );
+    expect(variableNames).not.toContain('street');
+    expect(variableNames).not.toContain('city');
   });
 });
 

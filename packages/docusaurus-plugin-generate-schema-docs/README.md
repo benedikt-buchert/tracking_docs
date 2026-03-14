@@ -90,6 +90,8 @@ docusaurus sync-gtm
 
 By default, it resolves schemas from the project root. Use `--path=<siteDir>` to target a different site directory.
 
+Only schemas tagged with `x-tracking-targets` including `web-datalayer-js` are used for GTM variable sync. Untagged schemas are ignored.
+
 ### Firebase Snippet Targets
 
 `ExampleDataLayer` supports Firebase snippet targets for:
