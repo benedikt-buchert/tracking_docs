@@ -86,6 +86,10 @@ function findJsonFiles(dir) {
   return results;
 }
 
+function isRootTrackingSchema(schema) {
+  return Boolean(schema?.properties?.event || schema?.['x-tracking-targets']);
+}
+
 function parseSchema(schema, options, prefix = '') {
   if (!schema || !schema.properties) {
     return parseBranchSchemas(schema, options, prefix);
@@ -148,11 +152,11 @@ function parseBranchSchemas(schema, options, prefix = '') {
 }
 
 function shouldIncludeSchemaForGtm(schema) {
-  const trackingTargets = schema?.['x-tracking-targets'];
-
-  if (trackingTargets == null) {
-    return true;
+  if (!isRootTrackingSchema(schema)) {
+    return false;
   }
+
+  const trackingTargets = schema?.['x-tracking-targets'];
 
   return (
     Array.isArray(trackingTargets) &&
@@ -166,9 +170,8 @@ async function getVariablesFromSchemas(
 ) {
   const allVariables = new Map();
   const jsonFiles = findJsonFiles(schemaPath);
-  const eventFiles = jsonFiles.filter((f) => !f.includes('components'));
 
-  for (const file of eventFiles) {
+  for (const file of jsonFiles) {
     try {
       let schema = await RefParser.bundle(file);
       schema = mergeAllOf(schema);

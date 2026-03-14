@@ -102,6 +102,7 @@ For local usage, authenticate with `gtm auth login` (or other supported auth met
 https://github.com/owntag/gtm-cli#authentication
 
 Important: `sync:gtm` applies real changes to the configured GTM workspace/container. Run it only against the intended account/container.
+Only schemas tagged with `x-tracking-targets` including `web-datalayer-js` are considered during GTM sync.
 
 ## Contributor Quick Start
 
