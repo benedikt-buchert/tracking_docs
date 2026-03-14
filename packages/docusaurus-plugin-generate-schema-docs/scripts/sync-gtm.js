@@ -117,6 +117,19 @@ function parseSchema(schema, options, prefix = '') {
   return variables;
 }
 
+function shouldIncludeSchemaForGtm(schema) {
+  const trackingTargets = schema?.['x-tracking-targets'];
+
+  if (trackingTargets == null) {
+    return true;
+  }
+
+  return (
+    Array.isArray(trackingTargets) &&
+    trackingTargets.includes('web-datalayer-js')
+  );
+}
+
 async function getVariablesFromSchemas(
   schemaPath,
   { skipArraySubProperties = false },
@@ -129,6 +142,9 @@ async function getVariablesFromSchemas(
     try {
       let schema = await RefParser.bundle(file);
       schema = mergeAllOf(schema);
+      if (!shouldIncludeSchemaForGtm(schema)) {
+        continue;
+      }
       const fileVariables = parseSchema(schema, { skipArraySubProperties });
       for (const variable of fileVariables) {
         if (!allVariables.has(variable.name)) {
@@ -388,6 +404,7 @@ module.exports = {
   createGtmVariables,
   deleteGtmVariables,
   parseSchema,
+  shouldIncludeSchemaForGtm,
   findJsonFiles,
   safeJsonParse,
   logger,
