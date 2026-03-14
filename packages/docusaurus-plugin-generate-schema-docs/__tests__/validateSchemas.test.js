@@ -102,4 +102,54 @@ describe('validateSchemas', () => {
     expect(consoleErrorSpy).toHaveBeenCalled();
     expect(consoleErrorSpy.mock.calls[0][0]).toContain('x-tracking-targets');
   });
+
+  it('should treat falsy scalar examples as valid examples', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+          is_enabled: {
+            type: 'boolean',
+            example: false,
+          },
+          retry_count: {
+            type: 'integer',
+            example: 0,
+          },
+          note: {
+            type: 'string',
+            example: '',
+          },
+        },
+        required: ['event', 'is_enabled', 'retry_count', 'note'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(true);
+  });
+
+  it('should allow a top-level falsy example value', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'flag.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'boolean',
+        example: false,
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(true);
+  });
 });

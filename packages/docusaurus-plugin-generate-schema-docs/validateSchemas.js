@@ -43,7 +43,7 @@ const validateSingleSchema = async (filePath, schemaPath) => {
         fileHasAnyExample = true;
         const { example, title } = option;
 
-        if (!example) {
+        if (typeof example === 'undefined') {
           errors.push(
             `x Schema ${file} (option: ${title}) does not produce a valid example.`,
           );
