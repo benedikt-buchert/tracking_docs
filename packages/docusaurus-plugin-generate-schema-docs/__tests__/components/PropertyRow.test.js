@@ -272,6 +272,10 @@ describe('PropertyRow', () => {
     expect(
       container.querySelector('.property-name--keyword'),
     ).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-keyword-badge'),
+    ).toBeInTheDocument();
+    expect(getByText('Schema constraint')).toBeInTheDocument();
     expect(keyword).not.toHaveAttribute('title');
     expect(keyword).toHaveAttribute(
       'aria-describedby',
@@ -289,6 +293,14 @@ describe('PropertyRow', () => {
       ),
     ).toBeInTheDocument();
     expect(container.querySelector('.is-last')).toBeInTheDocument();
+  });
+
+  it('defines keyword badge styles in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain('.property-keyword-badge');
+    expect(css).toContain('text-transform: uppercase');
   });
 
   it('renders patternProperties rows as schema keywords with tooltip help', () => {

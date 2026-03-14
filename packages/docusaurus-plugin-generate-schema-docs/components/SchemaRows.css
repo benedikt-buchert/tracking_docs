@@ -62,6 +62,8 @@
   position: relative;
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
 }
 
 .property-keyword-stack {
@@ -74,6 +76,21 @@
 .property-keyword {
   font-size: 0.95em;
   font-weight: 600;
+}
+
+.property-keyword-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--ifm-table-border-color);
+  background-color: var(--ifm-color-emphasis-100);
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .property-keyword-pattern {

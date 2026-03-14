@@ -46,6 +46,8 @@ const KEYWORD_HELP_TEXT = {
     'Applies the subschema to property names that match the given regular expression.',
 };
 
+const SCHEMA_KEYWORD_BADGE_TEXT = 'Schema constraint';
+
 function splitKeywordLabel(name) {
   const match = /^patternProperties (\/.+\/)$/.exec(name);
   if (!match) {
@@ -221,6 +223,9 @@ export default function PropertyRow({
                     {name}
                   </code>
                 )}
+                <span className="property-keyword-badge">
+                  {SCHEMA_KEYWORD_BADGE_TEXT}
+                </span>
                 <span
                   id={keywordHelpId}
                   className="property-keyword-tooltip"
