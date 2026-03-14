@@ -108,7 +108,55 @@ describe('getVariablesFromSchemas', () => {
           },
         },
       },
+      contact_method: {
+        type: 'object',
+        oneOf: [
+          {
+            title: 'Email Contact',
+            properties: {
+              email: {
+                type: 'string',
+                description: 'Email address.',
+              },
+            },
+          },
+          {
+            title: 'Phone Contact',
+            properties: {
+              phone_number: {
+                type: 'string',
+                description: 'Phone number.',
+              },
+            },
+          },
+        ],
+      },
+      platform: {
+        type: 'string',
+        description: 'Target platform.',
+      },
       timestamp: { type: 'number', description: 'Event timestamp.' },
+    },
+    if: {
+      properties: {
+        platform: { const: 'ios' },
+      },
+    },
+    then: {
+      properties: {
+        att_status: {
+          type: 'string',
+          description: 'App Tracking Transparency status.',
+        },
+      },
+    },
+    else: {
+      properties: {
+        ad_personalization_enabled: {
+          type: 'boolean',
+          description: 'Whether ad personalization is enabled.',
+        },
+      },
     },
   };
   const mobileEventSchema = {
@@ -160,7 +208,7 @@ describe('getVariablesFromSchemas', () => {
       expect.objectContaining({ name: 'timestamp' }),
     ]);
 
-    expect(result.length).toBe(8);
+    expect(result.length).toBe(14);
     expect(result).toEqual(expected);
   });
 
@@ -184,7 +232,26 @@ describe('getVariablesFromSchemas', () => {
     ];
 
     expect(result.map((r) => r.name)).toEqual(expect.arrayContaining(expected));
-    expect(result.length).toBe(expected.length);
+    expect(result.length).toBe(12);
+  });
+
+  it('should include variables from oneOf choices and conditional branches', async () => {
+    const bundledSchema = JSON.parse(JSON.stringify(complexEventSchema));
+    bundledSchema.properties.user_data.properties.addresses.items =
+      addressSchema;
+    RefParser.bundle.mockResolvedValue(bundledSchema);
+
+    const result = await gtmScript.getVariablesFromSchemas(SCHEMA_PATH, {});
+    const variableNames = result.map((variable) => variable.name);
+
+    expect(variableNames).toEqual(
+      expect.arrayContaining([
+        'contact_method.email',
+        'contact_method.phone_number',
+        'att_status',
+        'ad_personalization_enabled',
+      ]),
+    );
   });
 
   it('should ignore schemas that are not targeted to web-datalayer-js', async () => {

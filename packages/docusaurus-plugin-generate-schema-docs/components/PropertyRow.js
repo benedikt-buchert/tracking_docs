@@ -46,6 +46,8 @@ const KEYWORD_HELP_TEXT = {
     'Applies the subschema to property names that match the given regular expression.',
 };
 
+const SCHEMA_KEYWORD_BADGE_TEXT = 'Schema constraint';
+
 function splitKeywordLabel(name) {
   const match = /^patternProperties (\/.+\/)$/.exec(name);
   if (!match) {
@@ -56,6 +58,15 @@ function splitKeywordLabel(name) {
     keyword: 'patternProperties',
     pattern: match[1],
   };
+}
+
+function buildKeywordHelpId(name, rowPath) {
+  if (!rowPath || rowPath.length === 0) {
+    return `schema-keyword-help-${name}`;
+  }
+
+  const normalizedPath = rowPath.join('-').replace(/[^a-zA-Z0-9_-]/g, '_');
+  return `schema-keyword-help-${normalizedPath}`;
 }
 
 /**
@@ -158,7 +169,7 @@ export default function PropertyRow({
     : name;
   const keywordHelpText = KEYWORD_HELP_TEXT[keywordHelpKey];
   const keywordHelpId = keywordHelpText
-    ? `schema-keyword-help-${name}`
+    ? buildKeywordHelpId(name, row.path)
     : undefined;
   const zebraClassName =
     stripeIndex === undefined
@@ -221,6 +232,9 @@ export default function PropertyRow({
                     {name}
                   </code>
                 )}
+                <span className="property-keyword-badge">
+                  {SCHEMA_KEYWORD_BADGE_TEXT}
+                </span>
                 <span
                   id={keywordHelpId}
                   className="property-keyword-tooltip"

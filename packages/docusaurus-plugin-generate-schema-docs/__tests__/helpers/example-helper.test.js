@@ -34,6 +34,12 @@ describe('example-helper', () => {
       };
       expect(getExamples(schema)).toEqual(['example1']);
     });
+
+    it('preserves falsy "example" values', () => {
+      expect(getExamples({ example: false })).toEqual([false]);
+      expect(getExamples({ example: 0 })).toEqual([0]);
+      expect(getExamples({ example: '' })).toEqual(['']);
+    });
   });
 
   describe('getSingleExampleValue', () => {
@@ -66,6 +72,12 @@ describe('example-helper', () => {
         default: 'default-value',
       };
       expect(getSingleExampleValue(schema)).toBe('default-value');
+    });
+
+    it('returns falsy "example" values when present', () => {
+      expect(getSingleExampleValue({ example: false })).toBe(false);
+      expect(getSingleExampleValue({ example: 0 })).toBe(0);
+      expect(getSingleExampleValue({ example: '' })).toBe('');
     });
   });
 });

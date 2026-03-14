@@ -272,16 +272,22 @@ describe('PropertyRow', () => {
     expect(
       container.querySelector('.property-name--keyword'),
     ).toBeInTheDocument();
+    expect(
+      container.querySelector('.property-keyword-badge'),
+    ).toBeInTheDocument();
+    expect(getByText('Schema constraint')).toBeInTheDocument();
     expect(keyword).not.toHaveAttribute('title');
     expect(keyword).toHaveAttribute(
       'aria-describedby',
-      'schema-keyword-help-additionalProperties',
+      'schema-keyword-help-user_properties-additionalProperties',
     );
     expect(
       container.querySelector('.property-keyword-tooltip'),
     ).toBeInTheDocument();
     expect(
-      container.querySelector('#schema-keyword-help-additionalProperties'),
+      container.querySelector(
+        '#schema-keyword-help-user_properties-additionalProperties',
+      ),
     ).toBeInTheDocument();
     expect(
       getByText(
@@ -289,6 +295,14 @@ describe('PropertyRow', () => {
       ),
     ).toBeInTheDocument();
     expect(container.querySelector('.is-last')).toBeInTheDocument();
+  });
+
+  it('defines keyword badge styles in CSS', () => {
+    const cssPath = path.join(__dirname, '../../components/SchemaRows.css');
+    const css = fs.readFileSync(cssPath, 'utf8');
+
+    expect(css).toContain('.property-keyword-badge');
+    expect(css).toContain('text-transform: uppercase');
   });
 
   it('renders patternProperties rows as schema keywords with tooltip help', () => {
@@ -323,11 +337,11 @@ describe('PropertyRow', () => {
     ).toBeInTheDocument();
     expect(keyword).toHaveAttribute(
       'aria-describedby',
-      'schema-keyword-help-patternProperties /^custom_/',
+      'schema-keyword-help-attributes-patternProperties___custom__',
     );
     expect(
       container.ownerDocument.getElementById(
-        'schema-keyword-help-patternProperties /^custom_/',
+        'schema-keyword-help-attributes-patternProperties___custom__',
       ),
     ).toBeInTheDocument();
     expect(
@@ -336,6 +350,48 @@ describe('PropertyRow', () => {
       ),
     ).toBeInTheDocument();
     expect(container.querySelector('.is-last')).toBeInTheDocument();
+  });
+
+  it('uses unique tooltip ids for repeated schema keyword rows', () => {
+    const firstRow = {
+      name: 'additionalProperties',
+      level: 1,
+      required: false,
+      propertyType: 'string',
+      description: 'User property values.',
+      examples: ['beta_tester'],
+      constraints: [],
+      path: ['user_properties', 'additionalProperties'],
+      hasChildren: false,
+      containerType: null,
+      continuingLevels: [],
+      isSchemaKeywordRow: true,
+      keepConnectorOpen: false,
+    };
+    const secondRow = {
+      ...firstRow,
+      path: ['metadata', 'additionalProperties'],
+      description: 'Metadata values.',
+    };
+
+    const { container, getAllByText } = render(
+      <table>
+        <tbody>
+          <PropertyRow row={firstRow} isLastInGroup={true} />
+          <PropertyRow row={secondRow} isLastInGroup={true} />
+        </tbody>
+      </table>,
+    );
+
+    const keywords = getAllByText('additionalProperties');
+    const firstTooltipId = keywords[0].getAttribute('aria-describedby');
+    const secondTooltipId = keywords[1].getAttribute('aria-describedby');
+
+    expect(firstTooltipId).toBeTruthy();
+    expect(secondTooltipId).toBeTruthy();
+    expect(firstTooltipId).not.toBe(secondTooltipId);
+    expect(container.querySelector(`#${firstTooltipId}`)).toBeInTheDocument();
+    expect(container.querySelector(`#${secondTooltipId}`)).toBeInTheDocument();
   });
 
   describe('hierarchical lines feature', () => {
