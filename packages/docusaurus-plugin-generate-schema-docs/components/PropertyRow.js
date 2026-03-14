@@ -58,6 +58,15 @@ function splitKeywordLabel(name) {
   };
 }
 
+function buildKeywordHelpId(name, rowPath) {
+  if (!rowPath || rowPath.length === 0) {
+    return `schema-keyword-help-${name}`;
+  }
+
+  const normalizedPath = rowPath.join('-').replace(/[^a-zA-Z0-9_-]/g, '_');
+  return `schema-keyword-help-${normalizedPath}`;
+}
+
 /**
  * Renders a single property row in the schema table.
  * All data is passed in via the `row` prop, which comes from `tableData`.
@@ -158,7 +167,7 @@ export default function PropertyRow({
     : name;
   const keywordHelpText = KEYWORD_HELP_TEXT[keywordHelpKey];
   const keywordHelpId = keywordHelpText
-    ? `schema-keyword-help-${name}`
+    ? buildKeywordHelpId(name, row.path)
     : undefined;
   const zebraClassName =
     stripeIndex === undefined
