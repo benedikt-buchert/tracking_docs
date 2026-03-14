@@ -88,7 +88,7 @@ function findJsonFiles(dir) {
 
 function parseSchema(schema, options, prefix = '') {
   if (!schema || !schema.properties) {
-    return [];
+    return parseBranchSchemas(schema, options, prefix);
   }
 
   let variables = [];
@@ -113,7 +113,37 @@ function parseSchema(schema, options, prefix = '') {
     } else if (property.type === 'object' && property.properties) {
       variables.push(...parseSchema(property, options, currentPath));
     }
+
+    variables.push(...parseBranchSchemas(property, options, currentPath));
   }
+
+  variables.push(...parseBranchSchemas(schema, options, prefix));
+  return variables;
+}
+
+function parseBranchSchemas(schema, options, prefix = '') {
+  if (!schema) {
+    return [];
+  }
+
+  const variables = [];
+  const choiceSchemas = [
+    ...(Array.isArray(schema.oneOf) ? schema.oneOf : []),
+    ...(Array.isArray(schema.anyOf) ? schema.anyOf : []),
+  ];
+
+  choiceSchemas.forEach((choiceSchema) => {
+    variables.push(...parseSchema(choiceSchema, options, prefix));
+  });
+
+  if (schema.then) {
+    variables.push(...parseSchema(schema.then, options, prefix));
+  }
+
+  if (schema.else) {
+    variables.push(...parseSchema(schema.else, options, prefix));
+  }
+
   return variables;
 }
 
