@@ -168,6 +168,31 @@ describe('getVariablesFromSchemas', () => {
       screen_name: { type: 'string', description: 'Screen name.' },
     },
   };
+  const mobileConditionalSchema = {
+    title: 'Mobile Conditional Event',
+    'x-tracking-targets': ['android-firebase-kotlin-sdk'],
+    type: 'object',
+    allOf: [
+      {
+        if: {
+          properties: {
+            mobile_platform_hint: { const: 'ios' },
+          },
+          required: ['mobile_platform_hint'],
+        },
+        then: {
+          required: ['att_status'],
+        },
+        else: {
+          required: ['ad_personalization_enabled'],
+        },
+      },
+    ],
+    properties: {
+      event: { type: 'string', const: 'screen_view' },
+      mobile_platform_hint: { type: 'string' },
+    },
+  };
   const untaggedEventSchema = {
     title: 'Untagged Event',
     type: 'object',
@@ -306,6 +331,52 @@ describe('getVariablesFromSchemas', () => {
     );
     expect(result.map((variable) => variable.name)).not.toContain(
       'legacy_field',
+    );
+  });
+
+  it('should skip non-web schemas before mergeAllOf can fail on unsupported keywords', async () => {
+    const mobileConditionalPath = path.join(
+      SCHEMA_PATH,
+      'mobile-conditional-event.json',
+    );
+    mockFiles[SCHEMA_PATH].push('mobile-conditional-event.json');
+    mockFileContents[mobileConditionalPath] = JSON.stringify(
+      mobileConditionalSchema,
+    );
+
+    const bundledWebSchema = JSON.parse(JSON.stringify(complexEventSchema));
+    bundledWebSchema.properties.user_data.properties.addresses.items =
+      addressSchema;
+    const loggerErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+
+    RefParser.bundle.mockImplementation(async (filePath) => {
+      if (filePath.endsWith('complex-event.json')) {
+        return bundledWebSchema;
+      }
+      if (filePath.endsWith('mobile-event.json')) {
+        return mobileEventSchema;
+      }
+      if (filePath.endsWith('mobile-conditional-event.json')) {
+        return mobileConditionalSchema;
+      }
+      if (filePath.endsWith('address.json')) {
+        return addressSchema;
+      }
+      throw new Error(`Unexpected schema file: ${filePath}`);
+    });
+
+    const result = await gtmScript.getVariablesFromSchemas(SCHEMA_PATH, {});
+
+    expect(result.map((variable) => variable.name)).not.toContain(
+      'mobile_platform_hint',
+    );
+    expect(loggerErrorSpy).not.toHaveBeenCalledWith(
+      expect.stringContaining(
+        `Error processing schema ${mobileConditionalPath}`,
+      ),
+      expect.any(Error),
     );
   });
 
