@@ -235,6 +235,68 @@ function collectVariableReferencesFromEntity(entity, entityType, references) {
   });
 }
 
+function stripVariableReferenceFromValue(value, variableName) {
+  if (typeof value !== 'string') {
+    return value;
+  }
+
+  const escapedName = variableName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const exactReferencePattern = new RegExp(
+    `^\\{\\{\\s*${escapedName}\\s*\\}\\}$`,
+  );
+
+  if (exactReferencePattern.test(value)) {
+    return ' ';
+  }
+
+  return value.replace(
+    new RegExp(`\\{\\{\\s*${escapedName}\\s*\\}\\}`, 'g'),
+    '',
+  );
+}
+
+function stripVariableReferenceFromParameter(parameter, variableName) {
+  if (!parameter || typeof parameter !== 'object') {
+    return parameter;
+  }
+
+  const updatedParameter = { ...parameter };
+
+  if (typeof updatedParameter.value === 'string') {
+    updatedParameter.value = stripVariableReferenceFromValue(
+      updatedParameter.value,
+      variableName,
+    );
+  }
+
+  if (Array.isArray(updatedParameter.list)) {
+    updatedParameter.list = updatedParameter.list.map((nestedParameter) =>
+      stripVariableReferenceFromParameter(nestedParameter, variableName),
+    );
+  }
+
+  if (Array.isArray(updatedParameter.map)) {
+    updatedParameter.map = updatedParameter.map.map((nestedParameter) =>
+      stripVariableReferenceFromParameter(nestedParameter, variableName),
+    );
+  }
+
+  return updatedParameter;
+}
+
+function stripVariableReferenceFromEntity(entity, variableName) {
+  if (!Array.isArray(entity?.parameter)) {
+    return entity;
+  }
+
+  return {
+    ...entity,
+    parameter: entity.parameter.map((parameter) =>
+      stripVariableReferenceFromParameter(parameter, variableName),
+    ),
+  };
+}
+
 function getReferencedVariableNames(tags = [], triggers = [], variables = []) {
   return new Set(getVariableReferences(tags, triggers, variables).keys());
 }
@@ -316,9 +378,118 @@ function deleteGtmVariables(variablesToDelete) {
   );
 }
 
+function updateGtmEntity(entityType, entity) {
+  const entityTypeToCommand = {
+    tag: {
+      idFlag: '--tag-id',
+      command: 'gtm tags update',
+      id: entity.tagId,
+    },
+    trigger: {
+      idFlag: '--trigger-id',
+      command: 'gtm triggers update',
+      id: entity.triggerId,
+    },
+    variable: {
+      idFlag: '--variable-id',
+      command: 'gtm variables update',
+      id: entity.variableId,
+    },
+  };
+
+  const commandConfig = entityTypeToCommand[entityType];
+  if (!commandConfig) {
+    throw new Error(`Unsupported GTM entity type: ${entityType}`);
+  }
+
+  const args = [
+    commandConfig.command,
+    commandConfig.idFlag,
+    commandConfig.id,
+    '--name',
+    `"${entity.name}"`,
+    '--config',
+    `'${JSON.stringify({
+      type: entity.type,
+      parameter: entity.parameter,
+    })}'`,
+  ];
+
+  if (entity.fingerprint) {
+    args.push('--fingerprint', entity.fingerprint);
+  }
+
+  if (entityType === 'tag' && entity.paused !== undefined) {
+    args.push('--paused', String(entity.paused));
+  }
+
+  args.push('--quiet');
+
+  const command = args.join(' ');
+  logger.log(`Executing: ${command}`);
+  execSync(command, { stdio: 'inherit' });
+}
+
+function removeVariableReferences(
+  blockedDeletes,
+  { gtmTags = [], gtmTriggers = [], gtmVariables = [] } = {},
+) {
+  const entitiesByKey = new Map();
+  const sourceEntities = {
+    tag: gtmTags,
+    trigger: gtmTriggers,
+    variable: gtmVariables,
+  };
+  const removedReferences = [];
+
+  for (const blockedDelete of blockedDeletes) {
+    const fullVariableName = `DLV - ${blockedDelete.name}`;
+    removedReferences.push({
+      variableName: blockedDelete.name,
+      referenceCount: blockedDelete.references.length,
+      entities: blockedDelete.references,
+    });
+
+    for (const reference of blockedDelete.references) {
+      const entityKey = `${reference.type}:${reference.id}`;
+
+      if (!entitiesByKey.has(entityKey)) {
+        const sourceEntity = sourceEntities[reference.type]?.find((entity) => {
+          const entityId =
+            entity.tagId || entity.triggerId || entity.variableId;
+          return entityId === reference.id;
+        });
+
+        if (!sourceEntity) {
+          throw new Error(
+            `Could not find ${reference.type} ${reference.id} while removing references to ${fullVariableName}.`,
+          );
+        }
+
+        entitiesByKey.set(entityKey, {
+          type: reference.type,
+          entity: sourceEntity,
+        });
+      }
+
+      const updatedEntry = entitiesByKey.get(entityKey);
+      updatedEntry.entity = stripVariableReferenceFromEntity(
+        updatedEntry.entity,
+        fullVariableName,
+      );
+    }
+  }
+
+  for (const { type, entity } of entitiesByKey.values()) {
+    updateGtmEntity(type, entity);
+  }
+
+  return removedReferences;
+}
+
 async function syncGtmVariables(
   schemaVariables,
-  { skipArraySubProperties = false } = {},
+  { skipArraySubProperties = false, removeReferences = false } = {},
 ) {
   const gtmVariables = getGtmVariables();
   const gtmTags = getGtmTags();
@@ -361,15 +532,34 @@ async function syncGtmVariables(
   const inSync = schemaVariables.filter(
     (s) => !toCreate.find((c) => c.name === s.name),
   );
+  const removedReferences = removeReferences
+    ? removeVariableReferences(blockedDeletes, {
+        gtmTags,
+        gtmTriggers,
+        gtmVariables,
+      })
+    : [];
+  const deletableBlockedVariables = removeReferences
+    ? blockedDeletes.map((blockedDelete) =>
+        gtmVariables.find(
+          (variable) => variable.variableId === blockedDelete.variableId,
+        ),
+      )
+    : [];
+  const finalBlockedDeletes = removeReferences ? [] : blockedDeletes;
 
   const created = createGtmVariables(toCreate);
-  const deleted = deleteGtmVariables(toDelete);
+  const deleted = deleteGtmVariables([
+    ...toDelete,
+    ...deletableBlockedVariables,
+  ]);
 
   logger.log('GTM variable synchronization complete.');
   return {
     created,
     deleted,
-    blockedDeletes,
+    removedReferences,
+    blockedDeletes: finalBlockedDeletes,
     inSync: inSync.map((v) => v.name),
   };
 }
@@ -424,6 +614,7 @@ function parseArgs(argv) {
   return {
     isJson: args.includes('--json'),
     isQuiet: args.includes('--quiet'),
+    removeReferences: args.includes('--remove-references'),
     skipArraySubProperties: args.includes('--skip-array-sub-properties'),
     siteDir,
   };
@@ -445,7 +636,13 @@ async function main(argv, deps) {
       parseArgs: parse,
       process: proc,
     } = deps;
-    const { isJson, isQuiet, skipArraySubProperties, siteDir } = parse(argv);
+    const {
+      isJson,
+      isQuiet,
+      removeReferences,
+      skipArraySubProperties,
+      siteDir,
+    } = parse(argv);
     log.setup(isJson, isQuiet);
 
     log.log('Starting GTM variable synchronization script...');
@@ -470,7 +667,10 @@ async function main(argv, deps) {
     }
     log.log(`Found ${schemaVariables.length} variables defined in schemas.`);
 
-    const summary = await sync(schemaVariables, { skipArraySubProperties });
+    const summary = await sync(schemaVariables, {
+      skipArraySubProperties,
+      removeReferences,
+    });
 
     if (isJson) {
       console.log(
@@ -481,6 +681,17 @@ async function main(argv, deps) {
         ),
       );
     } else {
+      if (summary.removedReferences?.length > 0) {
+        log.log(
+          `Removed ${summary.removedReferences.length} referenced variable usages before deletion:`,
+        );
+        for (const removedReference of summary.removedReferences) {
+          const references = removedReference.entities
+            .map(formatReference)
+            .join(', ');
+          log.log(`- ${removedReference.variableName} from ${references}`);
+        }
+      }
       if (summary.blockedDeletes?.length > 0) {
         log.log(
           `Skipped deleting ${summary.blockedDeletes.length} GTM variables because they are still referenced:`,
@@ -533,6 +744,11 @@ module.exports = {
   getVariablesToDelete,
   getVariableReferences,
   getReferencedVariableNames,
+  stripVariableReferenceFromEntity,
+  stripVariableReferenceFromParameter,
+  stripVariableReferenceFromValue,
+  removeVariableReferences,
+  updateGtmEntity,
   getGtmTags,
   getGtmTriggers,
   getGtmVariables,
