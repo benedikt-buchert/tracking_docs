@@ -162,6 +162,20 @@ function getGtmVariables() {
   return safeJsonParse(gtmVariablesOutput) || [];
 }
 
+function getGtmTags() {
+  logger.log('Fetching existing GTM tags...');
+  const gtmTagsOutput = execSync('gtm tags list -o json --quiet').toString();
+  return safeJsonParse(gtmTagsOutput) || [];
+}
+
+function getGtmTriggers() {
+  logger.log('Fetching existing GTM triggers...');
+  const gtmTriggersOutput = execSync(
+    'gtm triggers list -o json --quiet',
+  ).toString();
+  return safeJsonParse(gtmTriggersOutput) || [];
+}
+
 function getVariablesToCreate(schemaVariables, gtmVariables) {
   const gtmVarMap = new Map();
   for (const gtmVar of gtmVariables) {
@@ -173,13 +187,88 @@ function getVariablesToCreate(schemaVariables, gtmVariables) {
   return schemaVariables.filter((sv) => !gtmVarMap.has(sv.name));
 }
 
-function getVariablesToDelete(schemaVariables, gtmVariables) {
+function collectTemplateReferencesFromParameter(parameter, references) {
+  if (!parameter || typeof parameter !== 'object') {
+    return;
+  }
+
+  if (typeof parameter.value === 'string') {
+    const matches = parameter.value.matchAll(/\{\{([^}]+)\}\}/g);
+    for (const match of matches) {
+      references.add(match[1].trim());
+    }
+  }
+
+  if (Array.isArray(parameter.list)) {
+    parameter.list.forEach((nestedParameter) => {
+      collectTemplateReferencesFromParameter(nestedParameter, references);
+    });
+  }
+
+  if (Array.isArray(parameter.map)) {
+    parameter.map.forEach((nestedParameter) => {
+      collectTemplateReferencesFromParameter(nestedParameter, references);
+    });
+  }
+}
+
+function collectVariableReferencesFromEntity(entity, entityType, references) {
+  if (!Array.isArray(entity?.parameter)) {
+    return;
+  }
+
+  const templateReferences = new Set();
+  entity.parameter.forEach((parameter) => {
+    collectTemplateReferencesFromParameter(parameter, templateReferences);
+  });
+
+  templateReferences.forEach((variableName) => {
+    if (!references.has(variableName)) {
+      references.set(variableName, []);
+    }
+
+    references.get(variableName).push({
+      type: entityType,
+      id: entity.tagId || entity.triggerId || entity.variableId,
+      name: entity.name,
+    });
+  });
+}
+
+function getReferencedVariableNames(tags = [], triggers = [], variables = []) {
+  return new Set(getVariableReferences(tags, triggers, variables).keys());
+}
+
+function getVariableReferences(tags = [], triggers = [], variables = []) {
+  const references = new Map();
+
+  tags.forEach((tag) => {
+    collectVariableReferencesFromEntity(tag, 'tag', references);
+  });
+
+  triggers.forEach((trigger) => {
+    collectVariableReferencesFromEntity(trigger, 'trigger', references);
+  });
+
+  variables.forEach((variable) => {
+    collectVariableReferencesFromEntity(variable, 'variable', references);
+  });
+
+  return references;
+}
+
+function getVariablesToDelete(
+  schemaVariables,
+  gtmVariables,
+  referencedVariableNames = new Set(),
+) {
   const schemaVarMap = new Map(schemaVariables.map((v) => [v.name, v]));
   return gtmVariables.filter((gv) => {
     const nameParam = gv.parameter?.find((p) => p.key === 'name');
     return (
       gv.type === 'v' &&
       nameParam?.value &&
+      !referencedVariableNames.has(gv.name) &&
       !schemaVarMap.has(nameParam.value) &&
       gv.name.startsWith('DLV -')
     );
@@ -229,9 +318,16 @@ function deleteGtmVariables(variablesToDelete) {
 
 async function syncGtmVariables(
   schemaVariables,
-  { skipArraySubProperties = false },
+  { skipArraySubProperties = false } = {},
 ) {
   const gtmVariables = getGtmVariables();
+  const gtmTags = getGtmTags();
+  const gtmTriggers = getGtmTriggers();
+  const variableReferences = getVariableReferences(
+    gtmTags,
+    gtmTriggers,
+    gtmVariables,
+  );
 
   let finalSchemaVariables = schemaVariables;
   if (skipArraySubProperties) {
@@ -241,7 +337,27 @@ async function syncGtmVariables(
   }
 
   const toCreate = getVariablesToCreate(finalSchemaVariables, gtmVariables);
-  const toDelete = getVariablesToDelete(finalSchemaVariables, gtmVariables);
+  const toDelete = getVariablesToDelete(
+    finalSchemaVariables,
+    gtmVariables,
+    new Set(variableReferences.keys()),
+  );
+  const blockedDeletes = gtmVariables
+    .filter((gv) => {
+      const nameParam = gv.parameter?.find((p) => p.key === 'name');
+      return (
+        gv.type === 'v' &&
+        nameParam?.value &&
+        !finalSchemaVariables.find((sv) => sv.name === nameParam.value) &&
+        gv.name.startsWith('DLV -') &&
+        variableReferences.has(gv.name)
+      );
+    })
+    .map((gv) => ({
+      name: gv.parameter.find((p) => p.key === 'name').value,
+      variableId: gv.variableId,
+      references: variableReferences.get(gv.name),
+    }));
   const inSync = schemaVariables.filter(
     (s) => !toCreate.find((c) => c.name === s.name),
   );
@@ -253,6 +369,7 @@ async function syncGtmVariables(
   return {
     created,
     deleted,
+    blockedDeletes,
     inSync: inSync.map((v) => v.name),
   };
 }
@@ -312,6 +429,10 @@ function parseArgs(argv) {
   };
 }
 
+function formatReference(reference) {
+  return `${reference.type} "${reference.name}" (${reference.id})`;
+}
+
 async function main(argv, deps) {
   try {
     const {
@@ -360,6 +481,19 @@ async function main(argv, deps) {
         ),
       );
     } else {
+      if (summary.blockedDeletes?.length > 0) {
+        log.log(
+          `Skipped deleting ${summary.blockedDeletes.length} GTM variables because they are still referenced:`,
+        );
+        for (const blockedDelete of summary.blockedDeletes) {
+          const references = (blockedDelete.references || [])
+            .map(formatReference)
+            .join(', ');
+          log.log(
+            `- ${blockedDelete.name} (ID: ${blockedDelete.variableId}) referenced by ${references}`,
+          );
+        }
+      }
       log.log('Synchronization successful!');
       log.log(
         `All changes applied in GTM workspace: "${workspaceName}" (ID: ${workspaceId})`,
@@ -397,12 +531,18 @@ module.exports = {
   main,
   getVariablesToCreate,
   getVariablesToDelete,
+  getVariableReferences,
+  getReferencedVariableNames,
+  getGtmTags,
+  getGtmTriggers,
+  getGtmVariables,
   createGtmVariables,
   deleteGtmVariables,
   parseSchema,
   shouldIncludeSchemaForGtm,
   findJsonFiles,
   safeJsonParse,
+  formatReference,
   logger,
   parseArgs,
   assertGtmCliAvailable,
