@@ -3,6 +3,7 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/web/conditional-event.json",
   "title": "Conditional Event",
   "description": "An event demonstrating if/then/else conditional properties. The postal code format depends on the selected country.",
+  "x-tracking-targets": ["web-datalayer-js"],
   "type": "object",
   "properties": {
     "$schema": {

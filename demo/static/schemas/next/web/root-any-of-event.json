@@ -3,6 +3,7 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/web/root-any-of-event.json",
   "title": "Root AnyOf Event",
   "description": "An example event that has anyOf at the root level.",
+  "x-tracking-targets": ["web-datalayer-js"],
   "type": "object",
   "properties": {
     "$schema": {
