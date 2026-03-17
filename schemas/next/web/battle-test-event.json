@@ -3,6 +3,7 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/web/battle-test-event.json",
   "title": "Battle Test Event",
   "description": "A stress-test event exercising every nesting combination: oneOf/anyOf inside if/then/else, if/then/else inside oneOf/anyOf branches, nested conditionals inside conditionals, array items with all combos, and deeply nested objects.",
+  "x-tracking-targets": ["web-datalayer-js"],
   "type": "object",
   "required": ["event", "user", "items", "payment", "fulfillment"],
   "properties": {

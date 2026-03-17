@@ -3,6 +3,7 @@
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/web/root-choice-event.json",
   "title": "Root Choice Event",
   "description": "An example event that has oneOf at the root level.",
+  "x-tracking-targets": ["web-datalayer-js"],
   "allOf": [
     {
       "type": "object",
