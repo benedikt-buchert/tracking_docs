@@ -25,10 +25,12 @@
           "properties": {
             "event": {
               "type": "string",
-              "const": "option_a"
+              "const": "option_a",
+              "description": "The event name."
             },
             "param_a": {
               "type": "string",
+              "description": "A string parameter for option A.",
               "examples": ["example_a"]
             }
           }
@@ -40,10 +42,12 @@
           "properties": {
             "event": {
               "type": "string",
-              "const": "option_b"
+              "const": "option_b",
+              "description": "The event name."
             },
             "param_b": {
               "type": "integer",
+              "description": "An integer parameter for option B.",
               "examples": [123]
             }
           }

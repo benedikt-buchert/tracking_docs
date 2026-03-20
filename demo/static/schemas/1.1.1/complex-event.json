@@ -67,14 +67,17 @@
             "properties": {
               "street": {
                 "type": "string",
+                "description": "The street address.",
                 "examples": ["123 Main St"]
               },
               "city": {
                 "type": "string",
+                "description": "The city name.",
                 "examples": ["New York"]
               },
               "zip": {
                 "type": "string",
+                "description": "The postal ZIP code.",
                 "examples": ["10001"]
               }
             }
@@ -139,10 +142,12 @@
       "properties": {
         "prop_a": {
           "type": "string",
+          "description": "First arbitrary string property.",
           "examples": ["some_value"]
         },
         "prop_b": {
           "type": "string",
+          "description": "Second arbitrary string property.",
           "examples": ["another_value"]
         }
       },
@@ -162,10 +167,12 @@
       "properties": {
         "credit_card": {
           "type": "number",
+          "description": "The credit card number.",
           "examples": [1234567890123456]
         },
         "billing_address": {
           "type": "string",
+          "description": "The billing address associated with the credit card.",
           "examples": ["123 Billing Address, Anytown, USA"]
         }
       },
