@@ -13,7 +13,8 @@
     },
     "event": {
       "type": "string",
-      "const": "any_of_event"
+      "const": "any_of_event",
+      "description": "The event name."
     }
   },
   "required": ["$schema", "event"],
@@ -24,6 +25,7 @@
       "properties": {
         "param_c": {
           "type": "string",
+          "description": "An optional string parameter for option C.",
           "examples": ["example_c"]
         }
       }
@@ -33,6 +35,7 @@
       "properties": {
         "param_d": {
           "type": "boolean",
+          "description": "An optional boolean parameter for option D.",
           "examples": [true]
         }
       }
