@@ -5,7 +5,6 @@ module.exports = {
     'plugin:react-hooks/recommended',
     'plugin:jsx-a11y/recommended',
     'plugin:jest/recommended',
-    'plugin:json-schema-validator/recommended',
     'plugin:prettier/recommended',
   ],
   parser: '@babel/eslint-parser',
@@ -15,18 +14,10 @@ module.exports = {
       presets: [require.resolve('@docusaurus/core/lib/babel/preset')],
     },
   },
-  plugins: [
-    'react',
-    'react-hooks',
-    'jsx-a11y',
-    'jest',
-    'prettier',
-    'json-schema-validator',
-  ],
+  plugins: ['react', 'react-hooks', 'jsx-a11y', 'jest', 'prettier'],
   rules: {
     'prettier/prettier': 'error',
     'react/prop-types': 'off',
-    'json-schema-validator/no-invalid': 'error',
   },
   settings: {
     react: {
