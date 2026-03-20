@@ -491,40 +491,9 @@ describe('GTM Synchronization Logic', () => {
       parameter: [{ key: 'name', value: 'old_variable' }],
     },
   ];
-  const gtmTags = [
-    {
-      tagId: '42',
-      name: 'GA4 Event',
-      parameter: [
-        {
-          type: 'template',
-          key: 'eventAction',
-          value: '{{DLV - old_variable}}',
-        },
-      ],
-    },
-  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  describe('getReferencedVariableNames', () => {
-    it('should extract referenced variable names from GTM entity parameters', () => {
-      const referencedNames = gtmScript.getReferencedVariableNames(gtmTags, []);
-
-      expect(referencedNames).toEqual(new Set(['DLV - old_variable']));
-    });
-  });
-
-  describe('getVariableReferences', () => {
-    it('should capture reference details by variable name', () => {
-      const references = gtmScript.getVariableReferences(gtmTags, []);
-
-      expect(references.get('DLV - old_variable')).toEqual([
-        { type: 'tag', id: '42', name: 'GA4 Event' },
-      ]);
-    });
   });
 
   describe('getVariablesToCreate', () => {
@@ -554,18 +523,6 @@ describe('GTM Synchronization Logic', () => {
           parameter: [{ key: 'name', value: 'old_variable' }],
         },
       ]);
-    });
-
-    it('should skip stale variables that are still referenced', () => {
-      const referencedNames = new Set(['DLV - old_variable']);
-
-      const toDelete = gtmScript.getVariablesToDelete(
-        schemaVariables,
-        gtmVariables,
-        referencedNames,
-      );
-
-      expect(toDelete).toEqual([]);
     });
   });
 
@@ -608,23 +565,41 @@ describe('GTM Synchronization Logic', () => {
   });
 
   describe('deleteGtmVariables', () => {
-    it('should call execSync to delete variables and return their names', () => {
+    it('should delete variables and return their names', () => {
       const toDelete = gtmScript.getVariablesToDelete(
         schemaVariables,
         gtmVariables,
       );
-      const deleted = gtmScript.deleteGtmVariables(toDelete);
+      const { deleted, failedDeletes } = gtmScript.deleteGtmVariables(toDelete);
       expect(execSync).toHaveBeenCalledTimes(1);
       expect(execSync).toHaveBeenCalledWith(
         'gtm variables delete --variable-id 123 --force --quiet',
         { stdio: 'inherit' },
       );
       expect(deleted).toEqual(['old_variable']);
+      expect(failedDeletes).toEqual([]);
+    });
+
+    it('should capture failed deletes when GTM rejects the deletion', () => {
+      execSync.mockImplementation(() => {
+        throw new Error('Returned an error response for your request.');
+      });
+
+      const toDelete = gtmScript.getVariablesToDelete(
+        schemaVariables,
+        gtmVariables,
+      );
+      const { deleted, failedDeletes } = gtmScript.deleteGtmVariables(toDelete);
+
+      expect(deleted).toEqual([]);
+      expect(failedDeletes).toEqual([
+        { name: 'old_variable', variableId: '123' },
+      ]);
     });
   });
 
   describe('syncGtmVariables', () => {
-    it('should report blocked deletions for referenced stale variables', async () => {
+    it('should report failed deletes when GTM rejects a deletion', async () => {
       const syncedSchemaVariables = [
         { name: 'event', description: 'The event name.' },
       ];
@@ -633,11 +608,8 @@ describe('GTM Synchronization Logic', () => {
         if (command === 'gtm variables list -o json --quiet') {
           return Buffer.from(JSON.stringify(gtmVariables));
         }
-        if (command === 'gtm tags list -o json --quiet') {
-          return Buffer.from(JSON.stringify(gtmTags));
-        }
-        if (command === 'gtm triggers list -o json --quiet') {
-          return Buffer.from('[]');
+        if (command.startsWith('gtm variables delete')) {
+          throw new Error('Returned an error response for your request.');
         }
         throw new Error(`Unexpected command: ${command}`);
       });
@@ -645,12 +617,8 @@ describe('GTM Synchronization Logic', () => {
       const summary = await gtmScript.syncGtmVariables(syncedSchemaVariables);
 
       expect(summary.deleted).toEqual([]);
-      expect(summary.blockedDeletes).toEqual([
-        {
-          name: 'old_variable',
-          variableId: '123',
-          references: [{ type: 'tag', id: '42', name: 'GA4 Event' }],
-        },
+      expect(summary.failedDeletes).toEqual([
+        { name: 'old_variable', variableId: '123' },
       ]);
     });
   });
@@ -671,11 +639,10 @@ describe('main function', () => {
       syncGtmVariables: jest.fn().mockResolvedValue({
         created: ['var1'],
         deleted: ['var2'],
-        blockedDeletes: [
+        failedDeletes: [
           {
             name: 'legacy_field',
             variableId: '88',
-            references: [{ type: 'tag', id: '42', name: 'GA4 Event' }],
           },
         ],
         inSync: ['var3'],
@@ -711,11 +678,10 @@ describe('main function', () => {
       workspace: { workspaceName: 'test-workspace', workspaceId: '123' },
       created: ['var1'],
       deleted: ['var2'],
-      blockedDeletes: [
+      failedDeletes: [
         {
           name: 'legacy_field',
           variableId: '88',
-          references: [{ type: 'tag', id: '42', name: 'GA4 Event' }],
         },
       ],
       inSync: ['var3'],
@@ -728,15 +694,13 @@ describe('main function', () => {
     expect(mockDeps.getLatestSchemaPath).toHaveBeenCalledWith('./my-demo');
   });
 
-  it('should report blocked deletions in human-readable output', async () => {
+  it('should report failed deletions in human-readable output', async () => {
     const argv = ['node', 'script.js'];
     await gtmScript.main(argv, mockDeps);
 
     expect(logSpy).toHaveBeenCalledWith(
-      'Skipped deleting 1 GTM variables because they are still referenced:',
+      'Skipped deleting 1 GTM variables (GTM rejected the delete, they may still be referenced):',
     );
-    expect(logSpy).toHaveBeenCalledWith(
-      '- legacy_field (ID: 88) referenced by tag "GA4 Event" (42)',
-    );
+    expect(logSpy).toHaveBeenCalledWith('- legacy_field (ID: 88)');
   });
 });
