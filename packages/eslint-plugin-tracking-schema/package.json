@@ -1,0 +1,26 @@
+{
+  "name": "eslint-plugin-tracking-schema",
+  "version": "1.0.0",
+  "description": "ESLint plugin to enforce annotation quality (description, type, examples) on JSON schema property definitions.",
+  "main": "index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benedikt-buchert/tracking_docs.git"
+  },
+  "keywords": [
+    "eslint",
+    "eslint-plugin",
+    "json-schema",
+    "tracking",
+    "linting"
+  ],
+  "peerDependencies": {
+    "eslint": ">=8",
+    "jsonc-eslint-parser": ">=2"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
+}

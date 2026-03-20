@@ -6,6 +6,7 @@ This repository contains a Docusaurus v3 plugin for generating documentation fro
 
 - [Main README (this file)](./README.md): Monorepo usage, demo workflows, release process, and contributor quick start.
 - [Plugin README](./packages/docusaurus-plugin-generate-schema-docs/README.md): Plugin API, options, schema layout, and CLI command behavior.
+- [ESLint Plugin README](./packages/eslint-plugin-tracking-schema/README.md): Linting rules to enforce annotation quality on JSON schema files.
 
 ## Prerequisites
 
@@ -222,6 +223,13 @@ demo/
     `git tag 1.2.0`
     `git push origin 1.2.0`
 2.  **CI Magic**: A GitHub Action will automatically run, update the plugin's version, publish it to npm, and create a GitHub Release.
+
+### ESLint Plugin Release
+
+1.  **Tag the `main` branch**: Use the `eslint-plugin/` prefix to avoid collision with the main plugin tags.
+    `git tag eslint-plugin/1.0.0`
+    `git push origin eslint-plugin/1.0.0`
+2.  **CI Magic**: A GitHub Action will verify the tag matches the `package.json` version, publish to npm, and create a GitHub Release.
 
 ### Other Versioning Commands
 

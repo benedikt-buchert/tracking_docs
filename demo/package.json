@@ -31,7 +31,8 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.9.2",
-    "@docusaurus/types": "3.9.2"
+    "@docusaurus/types": "3.9.2",
+    "eslint-plugin-tracking-schema": "file:../packages/eslint-plugin-tracking-schema"
   },
   "browserslist": {
     "production": [

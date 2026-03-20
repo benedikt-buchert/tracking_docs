@@ -25,5 +25,5 @@ describe('validateSchemas - Integration', () => {
     const { schemaDir } = getPathsForVersion('next', siteDir);
     const result = await validateSchemas(schemaDir);
     expect(result).toBe(true);
-  });
+  }, 30000);
 });

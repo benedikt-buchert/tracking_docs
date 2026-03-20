@@ -203,6 +203,16 @@ If you have `event-reference/add-to-cart-event` and `mobile-reference/add-to-car
 - `docs/partials/event-reference/_add-to-cart-event.mdx`
 - `docs/partials/event-reference/_add-to-cart-event_bottom.mdx`
 
+## Related packages
+
+### [`eslint-plugin-tracking-schema`](https://www.npmjs.com/package/eslint-plugin-tracking-schema)
+
+An ESLint plugin that enforces annotation quality on the JSON Schema files you feed into this plugin. It ensures every property has a `description`, a `type`, and `examples` — catching incomplete schemas at author time before they produce misleading documentation.
+
+```bash
+npm install --save-dev eslint-plugin-tracking-schema jsonc-eslint-parser
+```
+
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request if you have any ideas or improvements.
