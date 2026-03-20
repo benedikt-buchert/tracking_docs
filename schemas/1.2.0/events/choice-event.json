@@ -12,7 +12,8 @@
     },
     "event": {
       "type": "string",
-      "const": "one_of_event"
+      "const": "one_of_event",
+      "description": "The event name."
     },
     "user_id": {
       "description": "The user's ID.",
@@ -41,15 +42,18 @@
           "properties": {
             "payment_type": {
               "type": "string",
+              "description": "The type of payment.",
               "enum": ["credit_card", "debit_card"],
               "examples": ["credit_card"]
             },
             "card_number": {
               "type": "string",
+              "description": "The card number.",
               "examples": ["1234-5678-9012-3456"]
             },
             "expiry_date": {
               "type": "string",
+              "description": "The card expiry date.",
               "examples": ["12/26"]
             }
           },
@@ -61,11 +65,13 @@
           "properties": {
             "payment_type": {
               "type": "string",
-              "const": "paypal"
+              "const": "paypal",
+              "description": "The type of payment."
             },
             "email": {
               "type": "string",
               "format": "email",
+              "description": "The PayPal account email address.",
               "examples": ["test@example.com"]
             }
           },

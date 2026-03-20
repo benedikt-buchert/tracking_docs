@@ -74,7 +74,8 @@
                 "properties": {
                   "channel": {
                     "type": "string",
-                    "const": "email"
+                    "const": "email",
+                    "description": "The contact channel identifier."
                   },
                   "email_address": {
                     "type": "string",
@@ -92,7 +93,8 @@
                 "properties": {
                   "channel": {
                     "type": "string",
-                    "const": "sms"
+                    "const": "sms",
+                    "description": "The contact channel identifier."
                   },
                   "phone_number": {
                     "type": "string",
@@ -251,7 +253,8 @@
                   "properties": {
                     "class": {
                       "type": "string",
-                      "const": "standard_parcel"
+                      "const": "standard_parcel",
+                      "description": "The shipping class identifier."
                     },
                     "estimated_days": {
                       "type": "integer",
@@ -269,7 +272,8 @@
                   "properties": {
                     "class": {
                       "type": "string",
-                      "const": "freight"
+                      "const": "freight",
+                      "description": "The shipping class identifier."
                     },
                     "requires_signature": {
                       "type": "boolean",
@@ -327,7 +331,8 @@
           "properties": {
             "method": {
               "type": "string",
-              "const": "credit_card"
+              "const": "credit_card",
+              "description": "The payment method identifier."
             },
             "card_brand": {
               "type": "string",
@@ -381,7 +386,8 @@
           "properties": {
             "method": {
               "type": "string",
-              "const": "digital_wallet"
+              "const": "digital_wallet",
+              "description": "The payment method identifier."
             },
             "wallet_provider": {
               "description": "The wallet provider, either a known name or a custom string.",
@@ -416,7 +422,8 @@
           "properties": {
             "method": {
               "type": "string",
-              "const": "bank_transfer"
+              "const": "bank_transfer",
+              "description": "The payment method identifier."
             },
             "bank_name": {
               "type": "string",
@@ -452,7 +459,8 @@
           "properties": {
             "fulfillment_method": {
               "type": "string",
-              "const": "home_delivery"
+              "const": "home_delivery",
+              "description": "The fulfillment method identifier."
             },
             "address": {
               "type": "object",
@@ -534,7 +542,8 @@
           "properties": {
             "fulfillment_method": {
               "type": "string",
-              "const": "store_pickup"
+              "const": "store_pickup",
+              "description": "The fulfillment method identifier."
             },
             "store_id": {
               "type": "string",
@@ -551,7 +560,8 @@
                   "properties": {
                     "slot_type": {
                       "type": "string",
-                      "const": "scheduled"
+                      "const": "scheduled",
+                      "description": "The pickup slot type identifier."
                     },
                     "datetime": {
                       "type": "string",
@@ -569,7 +579,8 @@
                   "properties": {
                     "slot_type": {
                       "type": "string",
-                      "const": "asap"
+                      "const": "asap",
+                      "description": "The pickup slot type identifier."
                     },
                     "estimated_ready_minutes": {
                       "type": "integer",
@@ -591,7 +602,8 @@
           "properties": {
             "fulfillment_method": {
               "type": "string",
-              "const": "digital"
+              "const": "digital",
+              "description": "The fulfillment method identifier."
             },
             "delivery_email": {
               "type": "string",
@@ -614,7 +626,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "const": "percentage"
+              "const": "percentage",
+              "description": "The discount type identifier."
             },
             "value": {
               "type": "number",
@@ -633,7 +646,8 @@
           "properties": {
             "type": {
               "type": "string",
-              "const": "fixed"
+              "const": "fixed",
+              "description": "The discount type identifier."
             },
             "amount": {
               "type": "number",
@@ -667,7 +681,8 @@
               "properties": {
                 "platform": {
                   "type": "string",
-                  "const": "web"
+                  "const": "web",
+                  "description": "The source platform identifier."
                 },
                 "device_type": {
                   "type": "string",
@@ -728,7 +743,8 @@
               "properties": {
                 "platform": {
                   "type": "string",
-                  "const": "app"
+                  "const": "app",
+                  "description": "The source platform identifier."
                 },
                 "app_version": {
                   "type": "string",
@@ -754,7 +770,8 @@
       "payment": {
         "properties": {
           "currency": {
-            "const": "USD"
+            "const": "USD",
+            "description": "ISO 4217 currency code."
           }
         }
       }
@@ -795,7 +812,8 @@
         "tax": {
           "properties": {
             "jurisdiction": {
-              "const": "CA"
+              "const": "CA",
+              "description": "Tax jurisdiction (state)."
             }
           }
         }
