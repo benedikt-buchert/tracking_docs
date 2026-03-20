@@ -9,14 +9,29 @@ import { promises as fs } from 'fs';
 import { URL } from 'url';
 import { resolveConstraintSchemaPath } from './constraintSchemaPaths.js';
 
+const schemaFileCache = new Map();
+
+export function clearSchemaFileCache() {
+  schemaFileCache.clear();
+}
+
+function readSchemaFile(filePath) {
+  if (!schemaFileCache.has(filePath)) {
+    schemaFileCache.set(
+      filePath,
+      fs.readFile(filePath, 'utf-8').then(JSON.parse),
+    );
+  }
+  return schemaFileCache.get(filePath);
+}
+
 function createAjvInstance(schemas, mainSchema, schemaPath) {
   const schemaVersion = mainSchema?.$schema;
 
   const loadSchema = async (uri) => {
     const constraintPath = resolveConstraintSchemaPath(uri);
     if (constraintPath) {
-      const schemaContent = await fs.readFile(constraintPath, 'utf-8');
-      return JSON.parse(schemaContent);
+      return readSchemaFile(constraintPath);
     }
 
     let localPath;
@@ -29,8 +44,7 @@ function createAjvInstance(schemas, mainSchema, schemaPath) {
     } else {
       localPath = path.resolve(schemaPath, uri);
     }
-    const schemaContent = await fs.readFile(localPath, 'utf-8');
-    return JSON.parse(schemaContent);
+    return readSchemaFile(localPath);
   };
 
   const options = {

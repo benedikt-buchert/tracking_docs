@@ -1,4 +1,5 @@
-import { createValidator } from '../../helpers/validator';
+import { createValidator, clearSchemaFileCache } from '../../helpers/validator';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 
 describe('createValidator', () => {
@@ -112,6 +113,44 @@ describe('createValidator', () => {
 
     expect(result.valid).toBe(true);
     expect(result.errors).toEqual([]);
+  });
+
+  describe('schema file caching', () => {
+    beforeEach(() => {
+      clearSchemaFileCache();
+    });
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('reads each referenced schema file only once across concurrent validators', async () => {
+      const componentSchema = JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { id: { type: 'string' } },
+      });
+
+      const readFileSpy = jest
+        .spyOn(fsPromises, 'readFile')
+        .mockResolvedValue(componentSchema);
+
+      const schemaWithRef = {
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { item: { $ref: 'components/products.json' } },
+      };
+
+      await Promise.all([
+        createValidator([], { ...schemaWithRef }, '/schemas'),
+        createValidator([], { ...schemaWithRef }, '/schemas'),
+      ]);
+
+      const componentReads = readFileSpy.mock.calls.filter(([p]) =>
+        p.includes('products.json'),
+      );
+      expect(componentReads).toHaveLength(1);
+    });
   });
 
   it('resolves published /constraints refs to local constraint schemas', async () => {
