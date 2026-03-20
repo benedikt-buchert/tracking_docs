@@ -565,18 +565,61 @@ describe('GTM Synchronization Logic', () => {
   });
 
   describe('deleteGtmVariables', () => {
-    it('should call execSync to delete variables and return their names', () => {
+    it('should delete variables and return their names', () => {
       const toDelete = gtmScript.getVariablesToDelete(
         schemaVariables,
         gtmVariables,
       );
-      const deleted = gtmScript.deleteGtmVariables(toDelete);
+      const { deleted, failedDeletes } = gtmScript.deleteGtmVariables(toDelete);
       expect(execSync).toHaveBeenCalledTimes(1);
       expect(execSync).toHaveBeenCalledWith(
         'gtm variables delete --variable-id 123 --force --quiet',
         { stdio: 'inherit' },
       );
       expect(deleted).toEqual(['old_variable']);
+      expect(failedDeletes).toEqual([]);
+    });
+
+    it('should capture failed deletes when GTM rejects the deletion', () => {
+      execSync.mockImplementation(() => {
+        throw new Error('Returned an error response for your request.');
+      });
+
+      const toDelete = gtmScript.getVariablesToDelete(
+        schemaVariables,
+        gtmVariables,
+      );
+      const { deleted, failedDeletes } = gtmScript.deleteGtmVariables(toDelete);
+
+      expect(deleted).toEqual([]);
+      expect(failedDeletes).toEqual([
+        { name: 'old_variable', variableId: '123' },
+      ]);
+    });
+  });
+
+  describe('syncGtmVariables', () => {
+    it('should report failed deletes when GTM rejects a deletion', async () => {
+      const syncedSchemaVariables = [
+        { name: 'event', description: 'The event name.' },
+      ];
+
+      execSync.mockImplementation((command) => {
+        if (command === 'gtm variables list -o json --quiet') {
+          return Buffer.from(JSON.stringify(gtmVariables));
+        }
+        if (command.startsWith('gtm variables delete')) {
+          throw new Error('Returned an error response for your request.');
+        }
+        throw new Error(`Unexpected command: ${command}`);
+      });
+
+      const summary = await gtmScript.syncGtmVariables(syncedSchemaVariables);
+
+      expect(summary.deleted).toEqual([]);
+      expect(summary.failedDeletes).toEqual([
+        { name: 'old_variable', variableId: '123' },
+      ]);
     });
   });
 });
@@ -596,6 +639,12 @@ describe('main function', () => {
       syncGtmVariables: jest.fn().mockResolvedValue({
         created: ['var1'],
         deleted: ['var2'],
+        failedDeletes: [
+          {
+            name: 'legacy_field',
+            variableId: '88',
+          },
+        ],
         inSync: ['var3'],
       }),
       getVariablesFromSchemas: jest
@@ -629,6 +678,12 @@ describe('main function', () => {
       workspace: { workspaceName: 'test-workspace', workspaceId: '123' },
       created: ['var1'],
       deleted: ['var2'],
+      failedDeletes: [
+        {
+          name: 'legacy_field',
+          variableId: '88',
+        },
+      ],
       inSync: ['var3'],
     });
   });
@@ -637,5 +692,15 @@ describe('main function', () => {
     const argv = ['node', 'script.js', '--path=./my-demo'];
     await gtmScript.main(argv, mockDeps);
     expect(mockDeps.getLatestSchemaPath).toHaveBeenCalledWith('./my-demo');
+  });
+
+  it('should report failed deletions in human-readable output', async () => {
+    const argv = ['node', 'script.js'];
+    await gtmScript.main(argv, mockDeps);
+
+    expect(logSpy).toHaveBeenCalledWith(
+      'Skipped deleting 1 GTM variables (GTM rejected the delete, they may still be referenced):',
+    );
+    expect(logSpy).toHaveBeenCalledWith('- legacy_field (ID: 88)');
   });
 });

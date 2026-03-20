@@ -217,19 +217,27 @@ function createGtmVariables(variablesToCreate) {
 
 function deleteGtmVariables(variablesToDelete) {
   logger.log(`Found ${variablesToDelete.length} variables to delete.`);
+  const deleted = [];
+  const failedDeletes = [];
   for (const v of variablesToDelete) {
     const command = `gtm variables delete --variable-id ${v.variableId} --force --quiet`;
     logger.log(`Executing: ${command}`);
-    execSync(command, { stdio: 'inherit' });
+    try {
+      execSync(command, { stdio: 'inherit' });
+      deleted.push(v.parameter.find((p) => p.key === 'name').value);
+    } catch {
+      failedDeletes.push({
+        name: v.parameter.find((p) => p.key === 'name').value,
+        variableId: v.variableId,
+      });
+    }
   }
-  return variablesToDelete.map(
-    (v) => v.parameter.find((p) => p.key === 'name').value,
-  );
+  return { deleted, failedDeletes };
 }
 
 async function syncGtmVariables(
   schemaVariables,
-  { skipArraySubProperties = false },
+  { skipArraySubProperties = false } = {},
 ) {
   const gtmVariables = getGtmVariables();
 
@@ -247,12 +255,13 @@ async function syncGtmVariables(
   );
 
   const created = createGtmVariables(toCreate);
-  const deleted = deleteGtmVariables(toDelete);
+  const { deleted, failedDeletes } = deleteGtmVariables(toDelete);
 
   logger.log('GTM variable synchronization complete.');
   return {
     created,
     deleted,
+    failedDeletes,
     inSync: inSync.map((v) => v.name),
   };
 }
@@ -360,6 +369,14 @@ async function main(argv, deps) {
         ),
       );
     } else {
+      if (summary.failedDeletes?.length > 0) {
+        log.log(
+          `Skipped deleting ${summary.failedDeletes.length} GTM variables (GTM rejected the delete, they may still be referenced):`,
+        );
+        for (const failed of summary.failedDeletes) {
+          log.log(`- ${failed.name} (ID: ${failed.variableId})`);
+        }
+      }
       log.log('Synchronization successful!');
       log.log(
         `All changes applied in GTM workspace: "${workspaceName}" (ID: ${workspaceId})`,
@@ -397,6 +414,7 @@ module.exports = {
   main,
   getVariablesToCreate,
   getVariablesToDelete,
+  getGtmVariables,
   createGtmVariables,
   deleteGtmVariables,
   parseSchema,
