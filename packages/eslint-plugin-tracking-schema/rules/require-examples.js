@@ -36,6 +36,9 @@ module.exports = {
         // const and enum already constrain the value — no example needed
         if (keys.has('const') || keys.has('enum')) return;
 
+        // oneOf/anyOf/allOf carry examples inside their branches
+        if (keys.has('oneOf') || keys.has('anyOf') || keys.has('allOf')) return;
+
         // object and array types rely on sub-properties / items for examples
         const typeProp = definitionNode.properties.find(
           (p) => (p.key.value ?? p.key.name) === 'type',

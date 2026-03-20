@@ -75,6 +75,31 @@ ruleTester.run('require-examples', rule, {
         properties: { items: { $ref: '../components/items.json' } },
       }),
     },
+    // oneOf — examples live inside branches
+    {
+      code: JSON.stringify({
+        properties: {
+          discount: {
+            description: 'Discount — percentage or fixed.',
+            oneOf: [
+              { type: 'number', description: 'Fixed amount.', examples: [5] },
+              { type: 'string', description: 'Percentage.', examples: ['10%'] },
+            ],
+          },
+        },
+      }),
+    },
+    // anyOf — examples live inside branches
+    {
+      code: JSON.stringify({
+        properties: {
+          value: {
+            description: 'A value.',
+            anyOf: [{ type: 'string' }, { type: 'number' }],
+          },
+        },
+      }),
+    },
     // if block — condition schema, not a documented property
     {
       code: JSON.stringify({
