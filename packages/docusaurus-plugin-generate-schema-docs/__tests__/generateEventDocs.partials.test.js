@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment @stryker-mutator/jest-runner/jest-env/node
  *
  * Tests that top and bottom partials are correctly injected into generated MDX
  * when matching partial files exist in the partials directory, and that the

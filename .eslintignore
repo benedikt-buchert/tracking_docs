@@ -4,3 +4,5 @@ node_modules/
 .docusaurus/
 demo/.docusaurus/
 packages/tracking-target-constraints/dist/
+coverage/
+reports/

@@ -9,6 +9,8 @@ yarn-debug.log*
 yarn-error.log*
 demo/docs/events/
 coverage/
+.stryker-tmp/
+reports/mutation/stryker-incremental.json
 native-tests/**/.build/
 native-tests/**/target/
 native-tests/**/.swiftpm/

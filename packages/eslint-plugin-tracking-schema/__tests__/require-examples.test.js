@@ -1,6 +1,12 @@
 const { RuleTester } = require('eslint');
 const rule = require('../rules/require-examples');
 
+describe('require-examples meta', () => {
+  it('has a non-empty description', () => {
+    expect(rule.meta.docs.description.length).toBeGreaterThan(0);
+  });
+});
+
 const ruleTester = new RuleTester({
   parser: require.resolve('jsonc-eslint-parser'),
 });
@@ -116,6 +122,34 @@ ruleTester.run('require-examples', rule, {
     {
       code: JSON.stringify({
         then: { properties: { page_title: { maxLength: 300 } } },
+      }),
+    },
+    // non-object property value — string literal
+    {
+      code: JSON.stringify({
+        properties: { event: 'string' },
+      }),
+    },
+    // allOf — examples live inside branches
+    {
+      code: JSON.stringify({
+        properties: {
+          value: {
+            description: 'Combined.',
+            allOf: [{ type: 'string' }],
+          },
+        },
+      }),
+    },
+    // property with no type prop — typeProp is undefined
+    {
+      code: JSON.stringify({
+        properties: {
+          event: {
+            description: 'Event.',
+            examples: ['click'],
+          },
+        },
       }),
     },
   ],

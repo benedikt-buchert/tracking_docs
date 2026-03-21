@@ -1,5 +1,5 @@
 /**
- * @jest-environment node
+ * @jest-environment @stryker-mutator/jest-runner/jest-env/node
  */
 
 import path from 'path';
@@ -25,5 +25,5 @@ describe('validateSchemas - Integration', () => {
     const { schemaDir } = getPathsForVersion('next', siteDir);
     const result = await validateSchemas(schemaDir);
     expect(result).toBe(true);
-  }, 30000);
+  }, 60000);
 });
