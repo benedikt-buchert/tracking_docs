@@ -662,6 +662,401 @@ describe('schemaToExamples', () => {
     });
   });
 
+  // ── Mutant killers: targeted tests for surviving Stryker mutants ──
+
+  describe('L34: root-level choice path.length === 0 must not be mutated to false', () => {
+    it('root-level oneOf deletes oneOf key and merges — result differs from nested path handling', () => {
+      const schema = {
+        type: 'object',
+        properties: { base: { type: 'string', examples: ['val'] } },
+        oneOf: [
+          {
+            title: 'WithExtra',
+            properties: { extra: { type: 'string', examples: ['e'] } },
+          },
+        ],
+      };
+      const groups = schemaToExamples(schema);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].property).toBe('root');
+      // The merged example must contain BOTH base and extra
+      expect(groups[0].options[0].example).toHaveProperty('base', 'val');
+      expect(groups[0].options[0].example).toHaveProperty('extra', 'e');
+    });
+  });
+
+  describe('L60: branchesOnlyAdjustRequired — && vs || and optional chaining', () => {
+    it('does NOT prune when only inactiveBranchSchema has properties (one has, one does not)', () => {
+      // activeBranch has NO properties, inactiveBranch HAS properties
+      // branchesOnlyAdjustRequired = !undefined && !{...} = true && false = false
+      // With && -> false => skip pruning (correct)
+      // With || -> true || false = true => would incorrectly prune
+      const schema = {
+        type: 'object',
+        properties: {
+          event: { type: 'string', examples: ['test'] },
+          removable: { type: 'string', examples: ['keep_me'] },
+        },
+        required: ['event'],
+        if: { properties: { event: { const: 'test' } } },
+        then: { required: ['event'] },
+        else: {
+          properties: {
+            other: { type: 'string', examples: ['other_val'] },
+          },
+          required: ['removable'],
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // Since else has properties, branchesOnlyAdjustRequired is false,
+      // so pruning is skipped and removable should remain
+      expect(thenOpt.example).toHaveProperty('removable', 'keep_me');
+    });
+
+    it('does NOT prune when only activeBranchSchema has properties', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          event: { type: 'string', examples: ['test'] },
+          removable: { type: 'string', examples: ['keep_me'] },
+        },
+        required: ['event'],
+        if: { properties: { event: { const: 'test' } } },
+        then: {
+          properties: {
+            added: { type: 'string', examples: ['new_val'] },
+          },
+          required: ['event'],
+        },
+        else: { required: ['removable'] },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // Since then has properties, branchesOnlyAdjustRequired is false,
+      // so pruning is skipped and removable should remain
+      expect(thenOpt.example).toHaveProperty('removable', 'keep_me');
+    });
+  });
+
+  describe('L79-83: mergedSchema.required array filtering', () => {
+    it('actually removes pruned property from mergedSchema.required array', () => {
+      // Need a scenario where:
+      // 1. mergedSchema has a required array containing the pruned property name
+      // 2. After pruning, that name should be gone from required
+      // We test this indirectly through the final example output
+      const schema = {
+        type: 'object',
+        properties: {
+          event: { type: 'string', examples: ['action'] },
+          temp_field: { type: 'string', examples: ['temp'] },
+          keep_field: { type: 'string', examples: ['keep'] },
+        },
+        required: ['event', 'keep_field'],
+        if: { properties: { event: { const: 'action' } } },
+        then: { required: ['event', 'keep_field'] },
+        else: { required: ['temp_field'] },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // temp_field should be pruned (not in active required, not in base required)
+      expect(thenOpt.example).not.toHaveProperty('temp_field');
+      // keep_field is in base required — must stay
+      expect(thenOpt.example).toHaveProperty('keep_field', 'keep');
+      // event is in both — must stay
+      expect(thenOpt.example).toHaveProperty('event', 'action');
+    });
+
+    it('filter correctly excludes only the matching name from required (L81 !== vs ===)', () => {
+      // If the EqualityOperator is flipped (=== instead of !==), the filter would
+      // KEEP only the pruned name instead of removing it
+      const schema = {
+        type: 'object',
+        properties: {
+          event: { type: 'string', examples: ['go'] },
+          alpha: { type: 'string', examples: ['a'] },
+          beta: { type: 'string', examples: ['b'] },
+        },
+        required: ['event', 'alpha'],
+        if: { properties: { event: { const: 'go' } } },
+        then: { required: ['event'] },
+        else: { required: ['alpha', 'beta'] },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // alpha is in base required — protected, must stay
+      expect(thenOpt.example).toHaveProperty('alpha', 'a');
+      // beta is NOT in active or base required — must be pruned
+      expect(thenOpt.example).not.toHaveProperty('beta');
+      // event is in active required — must stay
+      expect(thenOpt.example).toHaveProperty('event', 'go');
+    });
+  });
+
+  describe('L93: root conditional path.length === 0 block must execute', () => {
+    it('root conditional correctly deletes if/then/else and merges branch at root level', () => {
+      // If L93 block is emptied (BlockStatement -> {}), the root conditional
+      // would fall through to the nested path handling which would fail
+      const schema = {
+        type: 'object',
+        properties: {
+          color: { type: 'string', examples: ['red'] },
+        },
+        required: ['color'],
+        if: { properties: { color: { const: 'red' } } },
+        then: {
+          properties: { shade: { type: 'string', examples: ['crimson'] } },
+        },
+        else: {
+          properties: { shade: { type: 'string', examples: ['navy'] } },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const conditional = groups.find((g) => g.property === 'conditional');
+      expect(conditional).toBeDefined();
+
+      const thenOpt = conditional.options.find(
+        (o) => o.title === 'When condition is met',
+      );
+      expect(thenOpt).toBeDefined();
+      expect(thenOpt.example).toHaveProperty('color', 'red');
+      expect(thenOpt.example).toHaveProperty('shade', 'crimson');
+
+      const elseOpt = conditional.options.find(
+        (o) => o.title === 'When condition is not met',
+      );
+      expect(elseOpt).toBeDefined();
+      expect(elseOpt.example).toHaveProperty('color', 'red');
+      expect(elseOpt.example).toHaveProperty('shade', 'navy');
+    });
+  });
+
+  describe('L96: baseRequired fallback to [] when schema has no required (root conditional)', () => {
+    it('uses empty array as baseRequired fallback, allowing pruning of inactive-only properties', () => {
+      // If [] is mutated to ["Stryker was here"], then "Stryker was here" would
+      // be in protectedRequired and if any inactive required matches it wouldn't prune
+      // With the correct [] fallback, nothing is protected by baseRequired
+      const schema = {
+        type: 'object',
+        properties: {
+          event: { type: 'string', examples: ['click'] },
+          removable: { type: 'string', examples: ['bye'] },
+        },
+        // NO required array on schema root
+        if: { properties: { event: { const: 'click' } } },
+        then: {},
+        else: { required: ['removable'] },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // removable should be pruned since it's only in else required and nothing protects it
+      expect(thenOpt.example).not.toHaveProperty('removable');
+    });
+  });
+
+  describe('L100: branchSchema truthiness check at root level', () => {
+    it('when branch is then and schema has then, produces merged example (not bare schema)', () => {
+      // If L100 is mutated to `true`, even a falsy branchSchema would enter the merge path
+      // and crash. We verify the correct path by checking the result is properly merged.
+      const schema = {
+        type: 'object',
+        properties: {
+          status: { type: 'string', examples: ['active'] },
+        },
+        if: { properties: { status: { const: 'active' } } },
+        then: {
+          properties: { detail: { type: 'string', examples: ['info'] } },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const conditional = groups.find((g) => g.property === 'conditional');
+      expect(conditional).toBeDefined();
+      // Only then branch, no else
+      expect(conditional.options).toHaveLength(1);
+      expect(conditional.options[0].example).toHaveProperty('detail', 'info');
+      expect(conditional.options[0].example).toHaveProperty('status', 'active');
+    });
+  });
+
+  describe('L118: nested conditional target.required fallback and branchSchema check', () => {
+    it('nested conditional with target.required present uses it as baseRequired', () => {
+      // If target.required || [] is mutated to target.required && [],
+      // when target.required exists, && would return [] instead of the actual array
+      const schema = {
+        type: 'object',
+        properties: {
+          wrapper: {
+            type: 'object',
+            properties: {
+              mode: { type: 'string', examples: ['fast'] },
+              protected_prop: { type: 'string', examples: ['safe'] },
+              removable_prop: { type: 'string', examples: ['gone'] },
+            },
+            required: ['mode', 'protected_prop'],
+            if: { properties: { mode: { const: 'fast' } } },
+            then: { required: ['mode'] },
+            else: { required: ['protected_prop', 'removable_prop'] },
+          },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const thenOpt = groups
+        .find((g) => g.property === 'conditional')
+        ?.options.find((o) => o.title === 'When condition is met');
+      expect(thenOpt).toBeDefined();
+      // protected_prop is in baseRequired (['mode', 'protected_prop']) — must NOT be pruned
+      expect(thenOpt.example.wrapper).toHaveProperty('protected_prop', 'safe');
+      // removable_prop is NOT in active required or base required — must be pruned
+      expect(thenOpt.example.wrapper).not.toHaveProperty('removable_prop');
+    });
+
+    it('nested conditional without branchSchema skips merge and returns base example', () => {
+      // If L122 is mutated to `true`, it would try to merge undefined branchSchema
+      const schema = {
+        type: 'object',
+        properties: {
+          wrapper: {
+            type: 'object',
+            properties: {
+              mode: { type: 'string', examples: ['slow'] },
+            },
+            if: { properties: { mode: { const: 'slow' } } },
+            else: {
+              properties: {
+                speed: { type: 'string', examples: ['fast'] },
+              },
+            },
+          },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const conditional = groups.find((g) => g.property === 'conditional');
+      expect(conditional).toBeDefined();
+      // Only else branch exists, so only one option
+      expect(conditional.options).toHaveLength(1);
+      expect(conditional.options[0].title).toBe('When condition is not met');
+    });
+  });
+
+  describe('L129: Object.keys(target).forEach deletion must execute', () => {
+    it('replaces all target keys with merged result in nested conditional', () => {
+      // If the arrow function is mutated to () => undefined, target keys won't be deleted
+      // and the result would have stale properties from the original target
+      const schema = {
+        type: 'object',
+        properties: {
+          nested: {
+            type: 'object',
+            properties: {
+              action: { type: 'string', examples: ['run'] },
+            },
+            required: ['action'],
+            if: { properties: { action: { const: 'run' } } },
+            then: {
+              properties: {
+                speed: { type: 'number', examples: [100] },
+              },
+            },
+            else: {
+              properties: {
+                reason: { type: 'string', examples: ['tired'] },
+              },
+            },
+          },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      const conditional = groups.find((g) => g.property === 'conditional');
+      const thenOpt = conditional?.options.find(
+        (o) => o.title === 'When condition is met',
+      );
+      expect(thenOpt).toBeDefined();
+      expect(thenOpt.example.nested).toHaveProperty('action', 'run');
+      expect(thenOpt.example.nested).toHaveProperty('speed', 100);
+      // The nested object should be the merged result
+      expect(typeof thenOpt.example.nested).toBe('object');
+      expect(thenOpt.example.nested).not.toBeNull();
+    });
+  });
+
+  describe('L143-145: shouldIncludeObjectExample edge cases', () => {
+    it('excludes empty object example (Object.keys(example).length > 0 must be strict)', () => {
+      // If > 0 is mutated to >= 0, empty objects would pass through
+      const schema = { type: 'object' };
+      const groups = schemaToExamples(schema);
+      // Empty object should be excluded
+      expect(groups).toEqual([]);
+      expect(groups).toHaveLength(0);
+    });
+
+    it('includes object with exactly one property (boundary for > 0)', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          solo: { type: 'string', examples: ['only'] },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].options[0].example).toEqual({ solo: 'only' });
+    });
+
+    it('typeof check distinguishes object from string correctly (L143)', () => {
+      // If "object" is mutated to "", typeof example !== "" would be true for
+      // everything, and the short-circuit would skip the Object.keys check
+      const schema = { type: 'string', examples: ['test_string'] };
+      const groups = schemaToExamples(schema);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].options[0].example).toBe('test_string');
+    });
+
+    it('number example is included (typeof !== object is true)', () => {
+      const schema = { type: 'number', examples: [0] };
+      const groups = schemaToExamples(schema);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].options[0].example).toBe(0);
+    });
+
+    it('boolean false example is included (typeof !== object is true)', () => {
+      const schema = { type: 'boolean', examples: [false] };
+      const groups = schemaToExamples(schema);
+      expect(groups).toHaveLength(1);
+      expect(groups[0].options[0].example).toBe(false);
+    });
+
+    it('shouldIncludeObjectExample returns true when condition is met, wraps in expected structure (L147)', () => {
+      const schema = {
+        type: 'object',
+        properties: {
+          x: { type: 'integer', examples: [42] },
+        },
+      };
+      const groups = schemaToExamples(schema);
+      // Must be wrapped in exactly this structure
+      expect(groups).toEqual([
+        {
+          property: 'default',
+          options: [{ title: 'Example', example: { x: 42 } }],
+        },
+      ]);
+    });
+  });
+
   describe('if/then/else conditional examples', () => {
     it('generates two examples for schema with if/then/else', () => {
       const groups = schemaToExamples(conditionalEventSchema);

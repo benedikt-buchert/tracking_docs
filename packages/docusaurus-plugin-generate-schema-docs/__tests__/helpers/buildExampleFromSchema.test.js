@@ -359,4 +359,119 @@ describe('buildExampleFromSchema', () => {
     const schema = { type: ['integer', 'null'] };
     expect(buildExampleFromSchema(schema)).toBe(0);
   });
+
+  // --- Mutant-killing tests ---
+
+  it('should return undefined for null/undefined schema (L19 guard)', () => {
+    expect(buildExampleFromSchema(null)).toBeUndefined();
+    expect(buildExampleFromSchema(undefined)).toBeUndefined();
+    expect(buildExampleFromSchema(0)).toBeUndefined();
+    expect(buildExampleFromSchema(false)).toBeUndefined();
+  });
+
+  it('should fall through to primitive placeholder when type is not object/array (L13 default)', () => {
+    // Ensures the default branch in getPrimitivePlaceholder returns undefined
+    // for unrecognized types, killing the ConditionalExpression mutant on L13-14
+    const schema = { type: 'null' };
+    expect(buildExampleFromSchema(schema)).toBeUndefined();
+  });
+
+  it('should skip oneOf branch when oneOf is an empty array (L25 length > 0)', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', examples: ['Alice'] },
+      },
+      oneOf: [],
+    };
+    const example = buildExampleFromSchema(schema);
+    expect(example).toEqual({ name: 'Alice' });
+  });
+
+  it('should skip anyOf branch when anyOf is an empty array (L25 length > 0)', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', examples: ['Bob'] },
+      },
+      anyOf: [],
+    };
+    const example = buildExampleFromSchema(schema);
+    expect(example).toEqual({ name: 'Bob' });
+  });
+
+  it('should not infer object type when type is explicitly set to a non-object type (L52 && vs ||)', () => {
+    // type is 'string' and properties exist — should NOT be treated as object
+    // Kills the LogicalOperator mutant that changes && to || on L52
+    const schema = {
+      type: 'string',
+      properties: {
+        name: { type: 'string', examples: ['ignored'] },
+      },
+    };
+    const example = buildExampleFromSchema(schema);
+    expect(example).toBe('');
+  });
+
+  it('should not enter object branch when inferredType is not object (L55 ConditionalExpression true)', () => {
+    // type is 'string' with properties — should return string placeholder, not object
+    const schema = {
+      type: 'string',
+      properties: {
+        foo: { type: 'integer', examples: [99] },
+      },
+    };
+    expect(buildExampleFromSchema(schema)).toBe('');
+  });
+
+  it('should not enter array branch when type is not array but items exists (L69 && vs ||)', () => {
+    // type is 'string' with items — should return string placeholder, not array
+    const schema = {
+      type: 'string',
+      items: { type: 'string', examples: ['ignored'] },
+    };
+    expect(buildExampleFromSchema(schema)).toBe('');
+  });
+
+  it('should not enter array branch when type is array but items is missing (L69 ConditionalExpression true)', () => {
+    // Already tested above but with strict assertion
+    const schema = { type: 'array' };
+    const result = buildExampleFromSchema(schema);
+    // Should fall through to getPrimitivePlaceholder which returns undefined for 'array'
+    expect(result).toBeUndefined();
+  });
+
+  it('should return undefined for array items that resolve to undefined (L71)', () => {
+    // Array with items that produce undefined — the whole array should be undefined
+    const schema = {
+      type: 'array',
+      items: { type: 'object' }, // object with no properties returns undefined
+    };
+    expect(buildExampleFromSchema(schema)).toBeUndefined();
+  });
+
+  it('should wrap array items value in array, not return empty string (L71 StringLiteral)', () => {
+    // Kills the StringLiteral mutant that replaces [itemValue] with ""
+    const schema = {
+      type: 'array',
+      items: { type: 'integer' },
+    };
+    const result = buildExampleFromSchema(schema);
+    expect(result).toEqual([0]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).not.toBe('');
+  });
+
+  it('should handle oneOf with null/undefined choiceType length gracefully (L25 OptionalChaining)', () => {
+    // oneOf is present but not an array — optional chaining should prevent crash
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string', examples: ['test'] },
+      },
+      oneOf: null,
+    };
+    const example = buildExampleFromSchema(schema);
+    expect(example).toEqual({ name: 'test' });
+  });
 });
