@@ -213,6 +213,55 @@ describe('getBracketLinesStyle', () => {
     // capOffset = (10 - 1) / 2 = 4.5
     expect(result.backgroundPosition).toContain('calc(0.5rem - 4.5px)');
   });
+
+  it('ending cap also uses the correct cap offset formula: (CAP_WIDTH - 1) / 2 = 4.5px', () => {
+    const bracket = { level: 0, bracketIndex: 0 };
+    const result = getBracketLinesStyle([bracket], { ending: [bracket] });
+    // capOffset = (10 - 1) / 2 = 4.5, not (10 - 1) * 2 = 18, not (10 + 1) / 2 = 5.5
+    expect(result.backgroundPosition).toContain('calc(0.5rem - 4.5px)');
+    expect(result.backgroundPosition).not.toContain('calc(0.5rem - 18px)');
+    expect(result.backgroundPosition).not.toContain('calc(0.5rem - 5.5px)');
+  });
+
+  it('ending cap size is 10px 1px (not empty)', () => {
+    const bracket = { level: 0, bracketIndex: 0 };
+    const result = getBracketLinesStyle([bracket], { ending: [bracket] });
+    expect(result.backgroundSize).toContain('10px 1px');
+  });
+
+  it('joins gradients with ", " separator (not empty string)', () => {
+    const brackets = [
+      { level: 0, bracketIndex: 0 },
+      { level: 1, bracketIndex: 1 },
+    ];
+    const result = getBracketLinesStyle(brackets);
+    // With 2 brackets there should be a comma-space separator between gradients
+    expect(result.backgroundImage).toContain('), linear-gradient(');
+    expect(result.backgroundSize).toContain(', ');
+    expect(result.backgroundPosition).toContain(', ');
+  });
+
+  it('initializes internal arrays as empty (not pre-populated)', () => {
+    // A single bracket with no caps should produce exactly 1 gradient entry
+    const bracket = { level: 0, bracketIndex: 0 };
+    const result = getBracketLinesStyle([bracket]);
+    // If arrays were initialized with ["Stryker was here"], we'd see extra content
+    expect(result.backgroundImage).toBe(
+      'linear-gradient(var(--ifm-color-info), var(--ifm-color-info))',
+    );
+    expect(result.backgroundSize).toBe('1px calc(100% - 0px)');
+    expect(result.backgroundPosition).toBe('right 0.5rem top 0px');
+  });
+
+  it('starting/ending key sets start empty (caps only match explicitly listed brackets)', () => {
+    // Providing no caps at all — the bracket should have no caps applied
+    const bracket = { level: 0, bracketIndex: 0 };
+    const result = getBracketLinesStyle([bracket], {});
+    // If startingKeys/endingKeys were pre-filled, the bracket might match a cap
+    expect(result.backgroundSize).toBe('1px calc(100% - 0px)');
+    // Only 1 gradient (no cap gradients)
+    expect(result.backgroundImage.split('linear-gradient').length - 1).toBe(1);
+  });
 });
 
 describe('mergeBackgroundStyles', () => {
@@ -405,5 +454,39 @@ describe('getContinuingLinesStyle', () => {
     // level 1: parent line added
     const atOne = getContinuingLinesStyle([], 1);
     expect(atOne).toHaveProperty('backgroundImage');
+  });
+
+  it('internal gradient arrays start empty (single level produces exactly one entry)', () => {
+    const result = getContinuingLinesStyle([0], 0);
+    // If arrays were initialized with ["Stryker was here"], we'd see extra/wrong content
+    expect(result.backgroundImage).toBe(
+      'linear-gradient(var(--ifm-table-border-color), var(--ifm-table-border-color))',
+    );
+    expect(result.backgroundSize).toBe('1px 100%');
+  });
+
+  it('continuing level size is exactly "1px 100%" (not empty string)', () => {
+    const result = getContinuingLinesStyle([0], 0);
+    expect(result.backgroundSize).toBe('1px 100%');
+  });
+
+  it('parent line size is exactly "1px 100%" (not empty string)', () => {
+    // level=2, empty continuingLevels → only parent line at level 1
+    const result = getContinuingLinesStyle([], 2);
+    expect(result.backgroundSize).toBe('1px 100%');
+  });
+
+  it('joins multiple entries with ", " separator in getContinuingLinesStyle', () => {
+    const result = getContinuingLinesStyle([0, 1], 3);
+    // 3 gradients: levels 0, 1, and parent at level 2
+    expect(result.backgroundImage).toContain('), linear-gradient(');
+    expect(result.backgroundSize).toContain(', ');
+    expect(result.backgroundPosition).toContain(', ');
+  });
+
+  it('allSizes array starts empty (not pre-populated)', () => {
+    const result = getContinuingLinesStyle([0], 0);
+    // Only one size entry for one continuing level
+    expect(result.backgroundSize.split(', ').length).toBe(1);
   });
 });
