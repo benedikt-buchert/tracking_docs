@@ -235,4 +235,129 @@ describe('processSchema', () => {
       anyOf: [{ const: 'US' }, { const: 'CA' }],
     });
   });
+
+  // Kills mutant 685: && → || on line 20 (normalized.not && typeof ... === 'object')
+  // When not is false (falsy non-object), the && guard must prevent entering the block.
+  // With ||, the code would try to access .anyOf on false and corrupt the value.
+  it('preserves not: false without entering the unwrap block', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'schema-with-not-edge-cases.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    expect(mergedSchema.properties.falsy_not.not).toBe(false);
+  });
+
+  // Kills mutant 686: typeof normalized.not === 'object' → true on line 20
+  // The not: true test already exists but we need a strict assertion that the value
+  // is exactly true (not transformed into something else by entering the block)
+  it('does not enter unwrap block when not is a non-object truthy value', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'schema-with-not-non-object.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    // Strict check: not must remain boolean true, not be replaced by undefined or an object
+    expect(mergedSchema.properties.flag.not).toBe(true);
+    expect(typeof mergedSchema.properties.flag.not).toBe('boolean');
+  });
+
+  // Kills mutants 694-698: while loop condition mutations on lines 23-25
+  // When not is an array, !Array.isArray(candidate) should prevent entering the loop.
+  it('does not unwrap when not value is an array', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'schema-with-not-edge-cases.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    // not: [{ const: 'A' }, { const: 'B' }] should be kept as-is (array, not unwrapped)
+    expect(Array.isArray(mergedSchema.properties.not_is_array.not)).toBe(true);
+    expect(mergedSchema.properties.not_is_array.not).toEqual([
+      { const: 'A' },
+      { const: 'B' },
+    ]);
+  });
+
+  // Kills mutants on while loop: candidate being null after first unwrap iteration
+  // not: { anyOf: [null] } — the single anyOf element is null, so after unwrapping
+  // the while loop must stop because candidate is null (falsy)
+  it('stops unwrapping when anyOf single element is null', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'schema-with-not-edge-cases.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    // not: { anyOf: [null] } should unwrap to not: null
+    expect(mergedSchema.properties.not_with_null_candidate.not).toBeNull();
+  });
+
+  // Kills mutant on while loop: anyOf contains an array element
+  // not: { anyOf: [[1, 2, 3]] } — the single anyOf element is an array,
+  // so on the next iteration !Array.isArray(candidate) stops the loop
+  it('stops unwrapping when anyOf single element is itself an array', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'schema-with-not-edge-cases.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    // not: { anyOf: [[1, 2, 3]] } should unwrap to not: [1, 2, 3]
+    expect(mergedSchema.properties.not_anyof_contains_array.not).toEqual([
+      1, 2, 3,
+    ]);
+  });
+
+  // Kills mutants 706-710, 712-714, 717: options/resolve block mutations
+  // The constraint resolver must actually resolve the ref and produce correct content.
+  // If the options object is {}, resolve is {}, canRead returns undefined, read fails,
+  // or encoding is wrong, the schema won't have the expected constraint properties.
+  it('constraint resolver produces correct schema content with proper encoding', async () => {
+    const filePath = path.join(
+      __dirname,
+      '..',
+      '__fixtures__',
+      'validateSchemas',
+      'main-schema-with-constraints-ref.json',
+    );
+    const mergedSchema = await processSchema(filePath);
+
+    // Verify the constraint schema was resolved, read with utf8, and merged correctly
+    // These specific values come from the flat-event-params.json constraint schema
+    expect(mergedSchema.additionalProperties.type).toEqual([
+      'string',
+      'number',
+      'integer',
+      'boolean',
+      'null',
+    ]);
+    expect(mergedSchema.properties.items.type).toBe('array');
+    expect(mergedSchema.properties.items.items.type).toBe('object');
+    expect(
+      mergedSchema.properties.items.items.additionalProperties.type,
+    ).toEqual(['string', 'number', 'integer', 'boolean', 'null']);
+    // Verify event property is merged from both constraint and original schema
+    expect(mergedSchema.properties.event.type).toBe('string');
+    expect(mergedSchema.properties.event.const).toBe('screen_view');
+    // Verify screen_name from original schema is preserved
+    expect(mergedSchema.properties.screen_name.type).toBe('string');
+  });
 });

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schema-with-not-edge-cases.json",
+  "title": "Schema With Not Edge Cases",
+  "type": "object",
+  "properties": {
+    "falsy_not": {
+      "type": "string",
+      "not": false
+    },
+    "not_is_array": {
+      "type": "string",
+      "not": [{ "const": "A" }, { "const": "B" }]
+    },
+    "not_anyof_contains_array": {
+      "type": "string",
+      "not": { "anyOf": [[1, 2, 3]] }
+    },
+    "not_with_null_candidate": {
+      "type": "string",
+      "not": { "anyOf": [null] }
+    }
+  }
+}
