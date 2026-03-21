@@ -132,4 +132,106 @@ describe('buildExampleModel', () => {
       'android-firebase-kotlin-sdk',
     ]);
   });
+
+  it('falls back to default target when x-tracking-targets is null (optional chain)', () => {
+    const schema = {
+      'x-tracking-targets': null,
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    const targets = resolveExampleTargets(schema);
+    expect(targets.map((t) => t.id)).toEqual([DEFAULT_SNIPPET_TARGET_ID]);
+  });
+
+  it('falls back to default target when x-tracking-targets is an empty array', () => {
+    const schema = {
+      'x-tracking-targets': [],
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    const targets = resolveExampleTargets(schema);
+    expect(targets.map((t) => t.id)).toEqual([DEFAULT_SNIPPET_TARGET_ID]);
+    expect(targets).toHaveLength(1);
+  });
+
+  it('filters out null targets and falls back to default when all target IDs are invalid', () => {
+    const schema = {
+      'x-tracking-targets': ['nonexistent-target-id'],
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    // All invalid IDs should be caught, filtered out, then fall back to default
+    const targets = resolveExampleTargets(schema);
+    expect(targets.map((t) => t.id)).toEqual([DEFAULT_SNIPPET_TARGET_ID]);
+  });
+
+  it('filters out null when one target ID is invalid but keeps valid ones', () => {
+    const schema = {
+      'x-tracking-targets': [
+        'web-datalayer-js',
+        'nonexistent-target-id',
+        'android-firebase-kotlin-sdk',
+      ],
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+      },
+    };
+
+    const targets = resolveExampleTargets(schema);
+    expect(targets.map((t) => t.id)).toEqual([
+      'web-datalayer-js',
+      'android-firebase-kotlin-sdk',
+    ]);
+  });
+
+  it('returns empty variantGroups and isSimpleDefault false when schema produces no examples', () => {
+    // A schema with type object but no properties and no examples yields no example groups
+    const schema = {
+      type: 'object',
+    };
+
+    const model = buildExampleModel(schema);
+    expect(model.variantGroups).toEqual([]);
+    expect(model.isSimpleDefault).toBe(false);
+    expect(model.targets).toHaveLength(1);
+    expect(model.targets[0].id).toBe(DEFAULT_SNIPPET_TARGET_ID);
+  });
+
+  it('sets isSimpleDefault to false when there are multiple variantGroups', () => {
+    const model = buildExampleModel(choiceEventSchema);
+    expect(model.isSimpleDefault).toBe(false);
+    expect(model.variantGroups.length).toBeGreaterThan(1);
+  });
+
+  it('sets isSimpleDefault to false when single variantGroup property is not "default"', () => {
+    // A schema with exactly one oneOf choice point produces a single variantGroup
+    // whose property is the field name (not 'default')
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['test_event'] },
+        category: {
+          oneOf: [
+            { title: 'Standard', const: 'standard' },
+            { title: 'Premium', const: 'premium' },
+          ],
+        },
+      },
+    };
+
+    const model = buildExampleModel(schema);
+    expect(model.variantGroups).toHaveLength(1);
+    expect(model.variantGroups[0].property).not.toBe('default');
+    expect(model.isSimpleDefault).toBe(false);
+  });
 });

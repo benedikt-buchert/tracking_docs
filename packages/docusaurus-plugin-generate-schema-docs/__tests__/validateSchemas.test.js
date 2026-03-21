@@ -152,4 +152,145 @@ describe('validateSchemas', () => {
     const result = await validateSchemas(schemaDir);
     expect(result).toBe(true);
   });
+
+  it('should return false and log errors when a schema produces no examples', async () => {
+    const fixturePath = path.resolve(
+      __dirname,
+      '__fixtures__',
+      'validateSchemas',
+      'no-example-schema.json',
+    );
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.copyFileSync(
+      fixturePath,
+      path.join(schemaDir, 'no-example-schema.json'),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('does not produce any examples');
+  });
+
+  it('should return false and log error when processing a schema throws', async () => {
+    const fixturePath = path.resolve(
+      __dirname,
+      '__fixtures__',
+      'validateSchemas',
+      'main-schema-with-missing-ref.json',
+    );
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.copyFileSync(
+      fixturePath,
+      path.join(schemaDir, 'main-schema-with-missing-ref.json'),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('Error processing');
+  });
+
+  it('should report errors for all failing schemas when multiple schemas exist', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+
+    // First schema: valid
+    fs.writeFileSync(
+      path.join(schemaDir, 'valid.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { event: { type: 'string', const: 'ok' } },
+        required: ['event'],
+      }),
+    );
+
+    // Second schema: no examples produced
+    fs.writeFileSync(
+      path.join(schemaDir, 'no-examples.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: { untyped: { description: 'no type or example' } },
+        required: ['untyped'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+  });
+
+  it('should return false when a oneOf option produces an undefined example', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+
+    // Schema with a oneOf where one option has no resolvable example
+    fs.writeFileSync(
+      path.join(schemaDir, 'undef-option.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        oneOf: [
+          {
+            title: 'ValidOption',
+            properties: { event: { type: 'string', const: 'test' } },
+            required: ['event'],
+          },
+          {
+            title: 'UndefinedOption',
+            properties: { mystery: { description: 'no type, no example' } },
+            required: ['mystery'],
+          },
+        ],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('does not produce a valid example');
+  });
+
+  it('should report all examples invalid when every example fails validation', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+
+    // Schema where every oneOf option produces an example that fails schema validation
+    fs.writeFileSync(
+      path.join(schemaDir, 'all-invalid.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        properties: {
+          count: {
+            type: 'integer',
+            minimum: 100,
+            example: 1,
+          },
+        },
+        required: ['count'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('example data failed validation');
+  });
 });

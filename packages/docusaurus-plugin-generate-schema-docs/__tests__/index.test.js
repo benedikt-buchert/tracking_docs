@@ -14,6 +14,7 @@ jest.mock('url', () => ({
 jest.mock('../generateEventDocs.js', () => jest.fn().mockResolvedValue());
 jest.mock('../validateSchemas.js', () => jest.fn().mockResolvedValue(true));
 jest.mock('../helpers/update-schema-ids.js', () => jest.fn());
+jest.mock('child_process', () => ({ execSync: jest.fn() }));
 jest.mock('../helpers/path-helpers.js', () => ({
   getPathsForVersion: jest
     .fn()
@@ -28,7 +29,9 @@ jest.mock('fs', () => ({
 
 import generateEventDocs from '../generateEventDocs.js';
 import validateSchemas from '../validateSchemas.js';
+import updateSchemaIds from '../helpers/update-schema-ids.js';
 import fs from 'fs';
+import { execSync } from 'child_process';
 
 const makeContext = (overrides = {}) => ({
   siteDir: '/site',
@@ -224,5 +227,191 @@ describe('extendCli - generate-schema-docs', () => {
     expect(generateEventDocs).toHaveBeenCalledWith(
       expect.objectContaining({ version: 'current' }),
     );
+  });
+});
+
+describe('extendCli - update-schema-ids', () => {
+  const getAction = async () => {
+    let captured = null;
+    const cli = {
+      command: jest.fn((name) => {
+        const cmd = {
+          description: jest.fn().mockReturnThis(),
+          option: jest.fn().mockReturnThis(),
+          action: jest.fn((fn) => {
+            if (name === 'update-schema-ids [version]') captured = fn;
+            return cmd;
+          }),
+        };
+        return cmd;
+      }),
+    };
+    const plugin = await createPlugin(makeContext(), makeOptions());
+    plugin.extendCli(cli);
+    return captured;
+  };
+
+  it('calls updateSchemaIds with siteDir, url, and version', async () => {
+    const action = await getAction();
+    action('1.0.0');
+    expect(updateSchemaIds).toHaveBeenCalledWith(
+      '/site',
+      'https://example.com',
+      '1.0.0',
+    );
+  });
+});
+
+describe('extendCli - sync-gtm', () => {
+  const getAction = async () => {
+    let captured = null;
+    const cli = {
+      command: jest.fn((name) => {
+        const cmd = {
+          description: jest.fn().mockReturnThis(),
+          option: jest.fn().mockReturnThis(),
+          action: jest.fn((fn) => {
+            if (name === 'sync-gtm') captured = fn;
+            return cmd;
+          }),
+        };
+        return cmd;
+      }),
+    };
+    const plugin = await createPlugin(makeContext(), makeOptions());
+    plugin.extendCli(cli);
+    return captured;
+  };
+
+  it('runs the sync-gtm script with the default path', async () => {
+    const action = await getAction();
+    action({ path: '/site' });
+    expect(execSync).toHaveBeenCalledWith(
+      expect.stringContaining('--path=/site'),
+      expect.objectContaining({ cwd: '/site', stdio: 'inherit' }),
+    );
+  });
+
+  it('appends --json flag when json option is set', async () => {
+    const action = await getAction();
+    action({ path: '/site', json: true });
+    expect(execSync).toHaveBeenCalledWith(
+      expect.stringContaining('--json'),
+      expect.any(Object),
+    );
+  });
+
+  it('appends --quiet flag when quiet option is set', async () => {
+    const action = await getAction();
+    action({ path: '/site', quiet: true });
+    expect(execSync).toHaveBeenCalledWith(
+      expect.stringContaining('--quiet'),
+      expect.any(Object),
+    );
+  });
+
+  it('appends --skip-array-sub-properties flag when option is set', async () => {
+    const action = await getAction();
+    action({ path: '/site', skipArraySubProperties: true });
+    expect(execSync).toHaveBeenCalledWith(
+      expect.stringContaining('--skip-array-sub-properties'),
+      expect.any(Object),
+    );
+  });
+
+  it('does not append optional flags when options are falsy', async () => {
+    const action = await getAction();
+    action({ path: '/site' });
+    const cmd = execSync.mock.calls[0][0];
+    expect(cmd).not.toContain('--json');
+    expect(cmd).not.toContain('--quiet');
+    expect(cmd).not.toContain('--skip-array-sub-properties');
+  });
+});
+
+describe('extendCli - version-with-schemas', () => {
+  const getAction = async () => {
+    let captured = null;
+    const cli = {
+      command: jest.fn((name) => {
+        const cmd = {
+          description: jest.fn().mockReturnThis(),
+          option: jest.fn().mockReturnThis(),
+          action: jest.fn((fn) => {
+            if (name === 'version-with-schemas <version>') captured = fn;
+            return cmd;
+          }),
+        };
+        return cmd;
+      }),
+    };
+    const plugin = await createPlugin(makeContext(), makeOptions());
+    plugin.extendCli(cli);
+    return captured;
+  };
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    // versions.json absent (not versioned); nextSchemasDir present
+    fs.existsSync.mockImplementation((p) => !p.includes('versions.json'));
+  });
+
+  it('creates version, copies schemas, updates IDs and generates docs on success', async () => {
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(execSync).toHaveBeenCalledWith(
+      expect.stringContaining('docs:version 1.2.0'),
+      expect.any(Object),
+    );
+    expect(fs.cpSync).toHaveBeenCalled();
+    expect(updateSchemaIds).toHaveBeenCalledWith(
+      '/site',
+      'https://example.com',
+      '1.2.0',
+    );
+    expect(generateEventDocs).toHaveBeenCalledWith(
+      expect.objectContaining({ version: '1.2.0' }),
+    );
+  });
+
+  it('exits with code 1 when docusaurus docs:version fails', async () => {
+    execSync.mockImplementation(() => {
+      throw new Error('cmd failed');
+    });
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    exitSpy.mockRestore();
+  });
+
+  it('exits with code 1 when next schemas directory does not exist', async () => {
+    execSync.mockImplementation(() => {});
+    fs.existsSync.mockReturnValue(false); // nextSchemasDir also missing
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    exitSpy.mockRestore();
+  });
+
+  it('exits with code 1 when schema copy fails', async () => {
+    execSync.mockImplementation(() => {});
+    fs.cpSync.mockImplementation(() => {
+      throw new Error('copy failed');
+    });
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    exitSpy.mockRestore();
   });
 });
