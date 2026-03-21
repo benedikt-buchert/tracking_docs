@@ -30,6 +30,7 @@ jest.mock('fs', () => ({
 import generateEventDocs from '../generateEventDocs.js';
 import validateSchemas from '../validateSchemas.js';
 import updateSchemaIds from '../helpers/update-schema-ids.js';
+import { getPathsForVersion } from '../helpers/path-helpers.js';
 import fs from 'fs';
 import { execSync } from 'child_process';
 
@@ -68,6 +69,7 @@ describe('loadContent', () => {
     const plugin = await createPlugin(makeContext(), makeOptions());
     await plugin.loadContent();
 
+    expect(fs.readFileSync).toHaveBeenCalledWith('/site/versions.json', 'utf8');
     expect(generateEventDocs).toHaveBeenCalledTimes(3);
     expect(generateEventDocs).toHaveBeenCalledWith(
       expect.objectContaining({ version: '1.0' }),
@@ -118,6 +120,7 @@ describe('extendCli - validate-schemas', () => {
     plugin.extendCli(cli);
 
     await action.fn(undefined);
+    expect(getPathsForVersion).toHaveBeenCalledWith('next', '/site');
     expect(validateSchemas).toHaveBeenCalledWith('/site/static/schemas/next');
   });
 
@@ -220,6 +223,7 @@ describe('extendCli - generate-schema-docs', () => {
     const action = await getActionForCommand('generate-schema-docs');
     await action();
 
+    expect(fs.readFileSync).toHaveBeenCalledWith('/site/versions.json', 'utf8');
     expect(generateEventDocs).toHaveBeenCalledTimes(2);
     expect(generateEventDocs).toHaveBeenCalledWith(
       expect.objectContaining({ version: '1.0' }),
@@ -286,10 +290,20 @@ describe('extendCli - sync-gtm', () => {
   it('runs the sync-gtm script with the default path', async () => {
     const action = await getAction();
     action({ path: '/site' });
-    expect(execSync).toHaveBeenCalledWith(
-      expect.stringContaining('--path=/site'),
-      expect.objectContaining({ cwd: '/site', stdio: 'inherit' }),
-    );
+    const cmd = execSync.mock.calls[0][0];
+    expect(cmd).toContain('scripts/sync-gtm.js');
+    expect(cmd).toContain('--path=/site');
+    expect(execSync).toHaveBeenCalledWith(cmd, {
+      cwd: '/site',
+      stdio: 'inherit',
+    });
+  });
+
+  it('joins multiple args with spaces', async () => {
+    const action = await getAction();
+    action({ path: '/site', json: true, quiet: true });
+    const cmd = execSync.mock.calls[0][0];
+    expect(cmd).toContain('--path=/site --json --quiet');
   });
 
   it('appends --json flag when json option is set', async () => {
@@ -363,9 +377,13 @@ describe('extendCli - version-with-schemas', () => {
 
     expect(execSync).toHaveBeenCalledWith(
       expect.stringContaining('docs:version 1.2.0'),
-      expect.any(Object),
+      { cwd: '/site', stdio: 'inherit' },
     );
-    expect(fs.cpSync).toHaveBeenCalled();
+    expect(fs.cpSync).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      '/site/static/schemas/1.2.0',
+      { recursive: true },
+    );
     expect(updateSchemaIds).toHaveBeenCalledWith(
       '/site',
       'https://example.com',
