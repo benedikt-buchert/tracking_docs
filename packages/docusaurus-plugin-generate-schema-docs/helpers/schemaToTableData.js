@@ -221,143 +221,148 @@ function processOptions(
   });
 }
 
-export function schemaToTableData(
-  schema,
-  level = 0,
-  path = [],
-  parentContinuingLevels = [],
-  isLastOption = true,
-  parentGroupBrackets = [],
-) {
-  const flatRows = [];
+// --- Row building (module-level, each function returns its rows) ---
 
-  function buildConditionalRow(
-    subSchema,
+function buildConditionalRow(
+  subSchema,
+  currentLevel,
+  currentPath,
+  continuingLevels,
+  currentGroupBrackets = [],
+  ownContinuingLevels,
+  conditionalIsLastInGroup = true,
+) {
+  const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
+  const innerGroupBrackets = [...currentGroupBrackets, ownBracket];
+
+  const conditionRows = schemaToTableData(
+    subSchema.if,
     currentLevel,
     currentPath,
     continuingLevels,
-    currentGroupBrackets = [],
-    ownContinuingLevels,
-    conditionalIsLastInGroup = true,
-  ) {
-    const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
-    const innerGroupBrackets = [...currentGroupBrackets, ownBracket];
+    false, // branches always follow condition rows, so they are never "last"
+    innerGroupBrackets,
+  ).map((row) => ({ ...row, isCondition: true }));
 
-    const conditionRows = schemaToTableData(
-      subSchema.if,
-      currentLevel,
-      currentPath,
-      continuingLevels,
-      false, // branches always follow condition rows, so they are never "last"
-      innerGroupBrackets,
-    ).map((row) => ({ ...row, isCondition: true }));
+  const hasElse = !!subSchema.else;
+  const branches = [];
 
-    const hasElse = !!subSchema.else;
-    const branches = [];
-
-    if (subSchema.then) {
-      branches.push({
-        title: 'Then',
-        description: subSchema.then.description,
-        rows: schemaToTableData(
-          materializeConditionalBranchSchema(subSchema.then, subSchema),
-          currentLevel,
-          currentPath,
-          continuingLevels,
-          !hasElse && conditionalIsLastInGroup,
-          innerGroupBrackets,
-        ),
-      });
-    }
-
-    if (hasElse) {
-      branches.push({
-        title: 'Else',
-        description: subSchema.else.description,
-        rows: schemaToTableData(
-          materializeConditionalBranchSchema(subSchema.else, subSchema),
-          currentLevel,
-          currentPath,
-          continuingLevels,
-          conditionalIsLastInGroup,
-          innerGroupBrackets,
-        ),
-      });
-    }
-
-    // ownContinuingLevels (when provided) includes currentLevel for the row's
-    // header/toggle rendering, since sibling properties' tree lines must continue.
-    const rowContinuingLevels = ownContinuingLevels
-      ? [...new Set([...continuingLevels, ...ownContinuingLevels])]
-      : continuingLevels;
-
-    flatRows.push(
-      makeConditionalRow({
-        path: [...currentPath, 'if/then/else'],
-        level: currentLevel,
-        isLastInGroup: conditionalIsLastInGroup,
-        continuingLevels: [...rowContinuingLevels],
-        groupBrackets: [...currentGroupBrackets],
-        condition: {
-          title: 'If',
-          description: subSchema.if.description,
-          rows: conditionRows,
-        },
-        branches,
-      }),
-    );
+  if (subSchema.then) {
+    branches.push({
+      title: 'Then',
+      description: subSchema.then.description,
+      rows: schemaToTableData(
+        materializeConditionalBranchSchema(subSchema.then, subSchema),
+        currentLevel,
+        currentPath,
+        continuingLevels,
+        !hasElse && conditionalIsLastInGroup,
+        innerGroupBrackets,
+      ),
+    });
   }
 
-  // Dispatches child row building after a property row has been pushed.
-  function buildPropertyChildren(
-    propSchema,
-    currentLevel,
-    newPath,
-    childContinuingLevels,
-    currentGroupBrackets,
-    isLast,
-    {
-      isChoiceWrapper,
-      isConditionalWrapper,
-      hasArrayItems,
-      hasAdditionalProperties,
-    },
-  ) {
-    if (propSchema.properties) {
-      buildRows(
+  if (hasElse) {
+    branches.push({
+      title: 'Else',
+      description: subSchema.else.description,
+      rows: schemaToTableData(
+        materializeConditionalBranchSchema(subSchema.else, subSchema),
+        currentLevel,
+        currentPath,
+        continuingLevels,
+        conditionalIsLastInGroup,
+        innerGroupBrackets,
+      ),
+    });
+  }
+
+  // ownContinuingLevels (when provided) includes currentLevel for the row's
+  // header/toggle rendering, since sibling properties' tree lines must continue.
+  const rowContinuingLevels = ownContinuingLevels
+    ? [...new Set([...continuingLevels, ...ownContinuingLevels])]
+    : continuingLevels;
+
+  return [
+    makeConditionalRow({
+      path: [...currentPath, 'if/then/else'],
+      level: currentLevel,
+      isLastInGroup: conditionalIsLastInGroup,
+      continuingLevels: [...rowContinuingLevels],
+      groupBrackets: [...currentGroupBrackets],
+      condition: {
+        title: 'If',
+        description: subSchema.if.description,
+        rows: conditionRows,
+      },
+      branches,
+    }),
+  ];
+}
+
+// Dispatches child row building after a property row has been pushed.
+function buildPropertyChildren(
+  ctx,
+  propSchema,
+  currentLevel,
+  newPath,
+  childContinuingLevels,
+  currentGroupBrackets,
+  isLast,
+  {
+    isChoiceWrapper,
+    isConditionalWrapper,
+    hasArrayItems,
+    hasAdditionalProperties,
+  },
+) {
+  const rows = [];
+
+  if (propSchema.properties) {
+    rows.push(
+      ...buildRows(
+        ctx,
         propSchema,
         currentLevel + 1,
         newPath,
         propSchema.required,
         childContinuingLevels,
         currentGroupBrackets,
-      );
-    } else if (propSchema.type === 'object' && hasAdditionalProperties) {
-      buildRows(
+      ),
+    );
+  } else if (propSchema.type === 'object' && hasAdditionalProperties) {
+    rows.push(
+      ...buildRows(
+        ctx,
         propSchema,
         currentLevel + 1,
         newPath,
         [],
         childContinuingLevels,
         currentGroupBrackets,
-      );
-    } else if (hasArrayItems) {
-      const itemPath = [...newPath, '[n]'];
-      if (propSchema.items.properties) {
-        buildRows(
+      ),
+    );
+  } else if (hasArrayItems) {
+    const itemPath = [...newPath, '[n]'];
+    if (propSchema.items.properties) {
+      rows.push(
+        ...buildRows(
+          ctx,
           propSchema.items,
           currentLevel + 1,
           itemPath,
           propSchema.items.required,
           childContinuingLevels,
           currentGroupBrackets,
-        );
-      }
-      if (
-        propSchema.items.if &&
-        (propSchema.items.then || propSchema.items.else)
-      ) {
-        buildConditionalRow(
+        ),
+      );
+    }
+    if (
+      propSchema.items.if &&
+      (propSchema.items.then || propSchema.items.else)
+    ) {
+      rows.push(
+        ...buildConditionalRow(
           propSchema.items,
           currentLevel + 1,
           itemPath,
@@ -365,45 +370,47 @@ export function schemaToTableData(
           currentGroupBrackets,
           undefined,
           isLast,
-        );
-      }
-    } else if (isChoiceWrapper) {
-      // Complex choice property (e.g. payment_method): property row already pushed,
-      // now add the nested choice row.
-      const choiceType = propSchema.oneOf ? 'oneOf' : 'anyOf';
-      const ownBracket = computeOwnBracket(
-        currentLevel + 1,
-        currentGroupBrackets,
-      );
-      const innerBrackets = [...currentGroupBrackets, ownBracket];
-      flatRows.push(
-        makeChoiceRow({
-          choiceType,
-          path: [...newPath, choiceType],
-          level: currentLevel + 1,
-          title: propSchema.title,
-          description: null,
-          isLastInGroup: true,
-          continuingLevels: childContinuingLevels,
-          groupBrackets: [...currentGroupBrackets],
-          options: processOptions(
-            propSchema[choiceType],
-            currentLevel + 1,
-            newPath,
-            true,
-            propSchema.required,
-            childContinuingLevels,
-            innerBrackets,
-          ),
-        }),
+        ),
       );
     }
+  } else if (isChoiceWrapper) {
+    // Complex choice property (e.g. payment_method): property row already pushed,
+    // now add the nested choice row.
+    const choiceType = propSchema.oneOf ? 'oneOf' : 'anyOf';
+    const ownBracket = computeOwnBracket(
+      currentLevel + 1,
+      currentGroupBrackets,
+    );
+    const innerBrackets = [...currentGroupBrackets, ownBracket];
+    rows.push(
+      makeChoiceRow({
+        choiceType,
+        path: [...newPath, choiceType],
+        level: currentLevel + 1,
+        title: propSchema.title,
+        description: null,
+        isLastInGroup: true,
+        continuingLevels: childContinuingLevels,
+        groupBrackets: [...currentGroupBrackets],
+        options: processOptions(
+          propSchema[choiceType],
+          currentLevel + 1,
+          newPath,
+          true,
+          propSchema.required,
+          childContinuingLevels,
+          innerBrackets,
+        ),
+      }),
+    );
+  }
 
-    // Handle if/then/else nested inside a property without its own properties.
-    // When propSchema HAS properties, the recursive buildRows call above
-    // already handles if/then/else via the root-level check at the end of buildRows.
-    if (isConditionalWrapper && !propSchema.properties) {
-      buildConditionalRow(
+  // Handle if/then/else nested inside a property without its own properties.
+  // When propSchema HAS properties, the recursive buildRows call above
+  // already handles if/then/else via the root-level check at the end of buildRows.
+  if (isConditionalWrapper && !propSchema.properties) {
+    rows.push(
+      ...buildConditionalRow(
         propSchema,
         currentLevel + 1,
         newPath,
@@ -411,103 +418,108 @@ export function schemaToTableData(
         currentGroupBrackets,
         undefined,
         isLast,
-      );
-    }
+      ),
+    );
   }
 
-  // --- Step 3: extracted property iteration ---
-  function buildPropertyRows(
-    subSchema,
-    currentLevel,
-    currentPath,
-    requiredFromParent,
-    continuingLevels,
-    currentGroupBrackets,
-    visiblePropEntries,
-    hasSiblingChoices,
-  ) {
-    visiblePropEntries.forEach(([name, propSchema], index) => {
-      const newPath = [...currentPath, name];
-      const isLastProp =
-        index === visiblePropEntries.length - 1 && !hasSiblingChoices;
-      const isLast = isLastProp && (currentLevel !== level || isLastOption);
+  return rows;
+}
 
-      // If this is not the last item, add currentLevel to continuing levels for children
-      // so ancestor tree lines keep flowing through all descendants.
-      const childContinuingLevels = isLast
-        ? [...continuingLevels]
-        : [...continuingLevels, currentLevel];
+function buildPropertyRows(
+  ctx,
+  subSchema,
+  currentLevel,
+  currentPath,
+  requiredFromParent,
+  continuingLevels,
+  currentGroupBrackets,
+  visiblePropEntries,
+  hasSiblingChoices,
+) {
+  const rows = [];
 
-      const {
-        hasChildren,
-        containerType,
-        isChoiceWrapper,
-        isConditionalWrapper,
-        hasArrayItems,
-        hasAdditionalProperties,
-      } = getContainerInfo(propSchema);
+  visiblePropEntries.forEach(([name, propSchema], index) => {
+    const newPath = [...currentPath, name];
+    const isLastProp =
+      index === visiblePropEntries.length - 1 && !hasSiblingChoices;
+    const isLast =
+      isLastProp && (currentLevel !== ctx.topLevel || ctx.isLastOption);
 
-      // A "simple" choice has scalar options (no nested properties) and renders inline.
-      // A "complex" choice has object options and needs its own property row first.
-      const isSimpleChoice = isChoiceWrapper && containerType === null;
+    // If this is not the last item, add currentLevel to continuing levels for children
+    // so ancestor tree lines keep flowing through all descendants.
+    const childContinuingLevels = isLast
+      ? [...continuingLevels]
+      : [...continuingLevels, currentLevel];
 
-      if (isSimpleChoice) {
-        const choiceType = propSchema.oneOf ? 'oneOf' : 'anyOf';
-        const ownBracket = computeOwnBracket(
-          currentLevel,
-          currentGroupBrackets,
-        );
-        flatRows.push(
-          makeChoiceRow({
-            choiceType,
-            name,
-            path: newPath,
-            level: currentLevel,
-            title: propSchema.title,
-            description: propSchema.description,
-            isLastInGroup: isLast,
-            continuingLevels: [...continuingLevels],
-            groupBrackets: [...currentGroupBrackets],
-            options: processOptions(
-              propSchema[choiceType],
-              currentLevel,
-              newPath,
-              false,
-              subSchema.required || requiredFromParent,
-              childContinuingLevels,
-              [...currentGroupBrackets, ownBracket],
-              isLast,
-            ),
-          }),
-        );
-      } else {
-        const isRequired =
-          (subSchema.required || requiredFromParent)?.includes(name) || false;
-        const constraints = getConstraints(propSchema);
-        if (isRequired) constraints.unshift('required');
+    const {
+      hasChildren,
+      containerType,
+      isChoiceWrapper,
+      isConditionalWrapper,
+      hasArrayItems,
+      hasAdditionalProperties,
+    } = getContainerInfo(propSchema);
 
-        flatRows.push(
-          makePropertyRow({
-            name,
-            path: newPath,
-            level: currentLevel,
-            required: isRequired,
-            propertyType:
-              propSchema.type || (propSchema.enum ? 'enum' : 'object'),
-            description: propSchema.description,
-            examples: getExamples(propSchema),
-            constraints,
-            isLastInGroup: isLast,
-            hasChildren,
-            containerType,
-            continuingLevels: [...continuingLevels],
-            groupBrackets: [...currentGroupBrackets],
-            isSchemaKeywordRow: propSchema['x-schema-keyword-row'] === true,
-            keepConnectorOpen: propSchema['x-keep-connector-open'] === true,
-          }),
-        );
+    // A "simple" choice has scalar options (no nested properties) and renders inline.
+    // A "complex" choice has object options and needs its own property row first.
+    const isSimpleChoice = isChoiceWrapper && containerType === null;
 
-        buildPropertyChildren(
+    if (isSimpleChoice) {
+      const choiceType = propSchema.oneOf ? 'oneOf' : 'anyOf';
+      const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
+      rows.push(
+        makeChoiceRow({
+          choiceType,
+          name,
+          path: newPath,
+          level: currentLevel,
+          title: propSchema.title,
+          description: propSchema.description,
+          isLastInGroup: isLast,
+          continuingLevels: [...continuingLevels],
+          groupBrackets: [...currentGroupBrackets],
+          options: processOptions(
+            propSchema[choiceType],
+            currentLevel,
+            newPath,
+            false,
+            subSchema.required || requiredFromParent,
+            childContinuingLevels,
+            [...currentGroupBrackets, ownBracket],
+            isLast,
+          ),
+        }),
+      );
+    } else {
+      const isRequired =
+        (subSchema.required || requiredFromParent)?.includes(name) || false;
+      const constraints = getConstraints(propSchema);
+      if (isRequired) constraints.unshift('required');
+
+      rows.push(
+        makePropertyRow({
+          name,
+          path: newPath,
+          level: currentLevel,
+          required: isRequired,
+          propertyType:
+            propSchema.type || (propSchema.enum ? 'enum' : 'object'),
+          description: propSchema.description,
+          examples: getExamples(propSchema),
+          constraints,
+          isLastInGroup: isLast,
+          hasChildren,
+          containerType,
+          continuingLevels: [...continuingLevels],
+          groupBrackets: [...currentGroupBrackets],
+          isSchemaKeywordRow: propSchema['x-schema-keyword-row'] === true,
+          keepConnectorOpen: propSchema['x-keep-connector-open'] === true,
+        }),
+      );
+
+      rows.push(
+        ...buildPropertyChildren(
+          ctx,
           propSchema,
           currentLevel,
           newPath,
@@ -520,42 +532,47 @@ export function schemaToTableData(
             hasArrayItems,
             hasAdditionalProperties,
           },
-        );
-      }
-    });
-  }
-
-  function buildRows(
-    subSchema,
-    currentLevel,
-    currentPath,
-    requiredFromParent = [],
-    continuingLevels = [],
-    currentGroupBrackets = [],
-  ) {
-    if (!subSchema) return;
-
-    const patternPropertyEntries = getRenderablePatternProperties(subSchema);
-    const hasAnyProperties =
-      subSchema.properties ||
-      hasRenderableAdditionalProperties(subSchema) ||
-      patternPropertyEntries.length > 0;
-
-    if (hasAnyProperties) {
-      const propEntries = buildPropEntries(subSchema, patternPropertyEntries);
-      const hasSiblingChoices = !!(
-        subSchema.oneOf ||
-        subSchema.anyOf ||
-        subSchema.if
+        ),
       );
-      const visiblePropEntries = propEntries.filter(
-        ([, propSchema]) =>
-          !(
-            propSchema['x-gtm-clear'] === true && isEffectivelyEmpty(propSchema)
-          ),
-      );
+    }
+  });
 
-      buildPropertyRows(
+  return rows;
+}
+
+function buildRows(
+  ctx,
+  subSchema,
+  currentLevel,
+  currentPath,
+  requiredFromParent = [],
+  continuingLevels = [],
+  currentGroupBrackets = [],
+) {
+  if (!subSchema) return [];
+
+  const rows = [];
+  const patternPropertyEntries = getRenderablePatternProperties(subSchema);
+  const hasAnyProperties =
+    subSchema.properties ||
+    hasRenderableAdditionalProperties(subSchema) ||
+    patternPropertyEntries.length > 0;
+
+  if (hasAnyProperties) {
+    const propEntries = buildPropEntries(subSchema, patternPropertyEntries);
+    const hasSiblingChoices = !!(
+      subSchema.oneOf ||
+      subSchema.anyOf ||
+      subSchema.if
+    );
+    const visiblePropEntries = propEntries.filter(
+      ([, propSchema]) =>
+        !(propSchema['x-gtm-clear'] === true && isEffectivelyEmpty(propSchema)),
+    );
+
+    rows.push(
+      ...buildPropertyRows(
+        ctx,
         subSchema,
         currentLevel,
         currentPath,
@@ -564,83 +581,98 @@ export function schemaToTableData(
         currentGroupBrackets,
         visiblePropEntries,
         hasSiblingChoices,
-      );
-    }
+      ),
+    );
+  }
 
-    // When properties coexist with root-level choices or conditionals,
-    // the header/toggle rows need the tree line at currentLevel to continue.
-    // Only used for the row's own continuingLevels — NOT propagated to inner rows.
-    const hasProperties =
-      subSchema.properties && Object.keys(subSchema.properties).length > 0;
-    const ownContinuingLevels =
-      hasProperties && !continuingLevels.includes(currentLevel)
-        ? [...continuingLevels, currentLevel]
-        : [...continuingLevels];
+  // When properties coexist with root-level choices or conditionals,
+  // the header/toggle rows need the tree line at currentLevel to continue.
+  // Only used for the row's own continuingLevels — NOT propagated to inner rows.
+  const hasProperties =
+    subSchema.properties && Object.keys(subSchema.properties).length > 0;
+  const ownContinuingLevels =
+    hasProperties && !continuingLevels.includes(currentLevel)
+      ? [...continuingLevels, currentLevel]
+      : [...continuingLevels];
 
-    const choiceType = subSchema.oneOf
-      ? 'oneOf'
-      : subSchema.anyOf
-        ? 'anyOf'
-        : null;
-    if (choiceType) {
-      const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
-      const choiceIsLastInGroup =
-        isLastOption && !(subSchema.if && (subSchema.then || subSchema.else));
-      flatRows.push(
-        makeChoiceRow({
-          choiceType,
-          path: currentPath,
-          level: currentLevel,
-          title: subSchema.title,
-          description: subSchema.description,
-          isLastInGroup: choiceIsLastInGroup,
-          continuingLevels: [...ownContinuingLevels],
-          groupBrackets: [...currentGroupBrackets],
-          options: processOptions(
-            subSchema[choiceType],
-            currentLevel,
-            currentPath,
-            false,
-            subSchema.required || requiredFromParent,
-            continuingLevels,
-            [...currentGroupBrackets, ownBracket],
-            choiceIsLastInGroup,
-          ),
-        }),
-      );
-    } else if (!subSchema.properties && subSchema.type) {
-      // Root-level primitive schema
-      flatRows.push(
-        makePropertyRow({
-          name: subSchema.title || '<value>',
-          path: currentPath,
-          level: currentLevel,
-          required: false,
-          propertyType: subSchema.type,
-          description: subSchema.description,
-          examples: getExamples(subSchema),
-          constraints: getConstraints(subSchema),
-          isLastInGroup: true,
-          continuingLevels: [...continuingLevels],
-          groupBrackets: [...currentGroupBrackets],
-        }),
-      );
-    }
+  const choiceType = subSchema.oneOf
+    ? 'oneOf'
+    : subSchema.anyOf
+      ? 'anyOf'
+      : null;
+  if (choiceType) {
+    const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
+    const choiceIsLastInGroup =
+      ctx.isLastOption && !(subSchema.if && (subSchema.then || subSchema.else));
+    rows.push(
+      makeChoiceRow({
+        choiceType,
+        path: currentPath,
+        level: currentLevel,
+        title: subSchema.title,
+        description: subSchema.description,
+        isLastInGroup: choiceIsLastInGroup,
+        continuingLevels: [...ownContinuingLevels],
+        groupBrackets: [...currentGroupBrackets],
+        options: processOptions(
+          subSchema[choiceType],
+          currentLevel,
+          currentPath,
+          false,
+          subSchema.required || requiredFromParent,
+          continuingLevels,
+          [...currentGroupBrackets, ownBracket],
+          choiceIsLastInGroup,
+        ),
+      }),
+    );
+  } else if (!subSchema.properties && subSchema.type) {
+    // Root-level primitive schema
+    rows.push(
+      makePropertyRow({
+        name: subSchema.title || '<value>',
+        path: currentPath,
+        level: currentLevel,
+        required: false,
+        propertyType: subSchema.type,
+        description: subSchema.description,
+        examples: getExamples(subSchema),
+        constraints: getConstraints(subSchema),
+        isLastInGroup: true,
+        continuingLevels: [...continuingLevels],
+        groupBrackets: [...currentGroupBrackets],
+      }),
+    );
+  }
 
-    if (subSchema.if && (subSchema.then || subSchema.else)) {
-      buildConditionalRow(
+  if (subSchema.if && (subSchema.then || subSchema.else)) {
+    rows.push(
+      ...buildConditionalRow(
         subSchema,
         currentLevel,
         currentPath,
         continuingLevels,
         currentGroupBrackets,
         hasProperties ? [...ownContinuingLevels] : undefined,
-        isLastOption,
-      );
-    }
+        ctx.isLastOption,
+      ),
+    );
   }
 
-  buildRows(
+  return rows;
+}
+
+export function schemaToTableData(
+  schema,
+  level = 0,
+  path = [],
+  parentContinuingLevels = [],
+  isLastOption = true,
+  parentGroupBrackets = [],
+) {
+  const ctx = { topLevel: level, isLastOption };
+  return buildRows(
+    ctx,
     schema,
     level,
     path,
@@ -648,5 +680,4 @@ export function schemaToTableData(
     parentContinuingLevels,
     parentGroupBrackets,
   );
-  return flatRows;
 }
