@@ -124,6 +124,12 @@ ruleTester.run('require-type', rule, {
       }),
       errors: [{ message: 'Property "value" is missing "type".' }],
     },
+    // L42: node.key.name fallback — JSON5 unquoted key triggers ?? branch
+    {
+      code: '{"properties": {value: {"description": "A value.", "examples": [1]}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
+      errors: [{ message: 'Property "value" is missing "type".' }],
+    },
     // missing type in then block
     {
       code: JSON.stringify({

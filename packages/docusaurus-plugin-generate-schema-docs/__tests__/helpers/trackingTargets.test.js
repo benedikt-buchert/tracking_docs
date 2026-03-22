@@ -187,4 +187,25 @@ describe('trackingTargets', () => {
     expect(result.errors).toEqual([]);
     expect(result.warning).toBeNull();
   });
+
+  // L15: default-arg — omit second argument entirely to trigger = {} default
+  it('uses default options when second argument is omitted', () => {
+    const result = resolveTrackingTargets({});
+
+    expect(result.targets).toEqual([DEFAULT_TRACKING_TARGET]);
+    expect(result.errors).toEqual([]);
+    // schemaFile defaults to 'schema', isQuiet defaults to false
+    expect(result.warning).toContain('schema');
+    expect(result.warning).toContain(DEFAULT_TRACKING_TARGET);
+  });
+
+  // L15: default-arg — provide options object without schemaFile or isQuiet
+  it('uses default schemaFile and isQuiet when keys are omitted from options', () => {
+    const result = resolveTrackingTargets({}, {});
+
+    expect(result.targets).toEqual([DEFAULT_TRACKING_TARGET]);
+    expect(result.errors).toEqual([]);
+    // schemaFile defaults to 'schema'
+    expect(result.warning).toContain('schema');
+  });
 });

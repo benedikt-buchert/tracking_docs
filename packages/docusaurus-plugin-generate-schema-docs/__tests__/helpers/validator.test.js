@@ -427,6 +427,71 @@ describe('createValidator', () => {
     });
   });
 
+  describe('fallback branch when compileAsync is absent (L97-L100)', () => {
+    it('uses ajv.getSchema when compileAsync is missing and mainSchema has $id (L98-L99)', async () => {
+      const Ajv = (await import('ajv')).default;
+      const origCompileAsync = Ajv.prototype.compileAsync;
+      delete Ajv.prototype.compileAsync;
+
+      try {
+        const schema = {
+          $id: 'http://example.com/schemas/test-no-compile-async.json',
+          $schema: 'http://json-schema.org/draft-07/schema#',
+          type: 'object',
+          properties: { name: { type: 'string' } },
+          required: ['name'],
+        };
+
+        const validator = await createValidator([schema], schema);
+        expect(validator({ name: 'Alice' }).valid).toBe(true);
+        expect(validator({ name: 123 }).valid).toBe(false);
+      } finally {
+        Ajv.prototype.compileAsync = origCompileAsync;
+      }
+    });
+
+    it('uses ajv.compile when compileAsync is missing and mainSchema has no $id (L98, L100)', async () => {
+      const Ajv = (await import('ajv')).default;
+      const origCompileAsync = Ajv.prototype.compileAsync;
+      delete Ajv.prototype.compileAsync;
+
+      try {
+        const schema = {
+          $schema: 'http://json-schema.org/draft-07/schema#',
+          type: 'object',
+          properties: { name: { type: 'string' } },
+          required: ['name'],
+        };
+
+        const validator = await createValidator([], schema);
+        expect(validator({ name: 'Bob' }).valid).toBe(true);
+        expect(validator({ name: 42 }).valid).toBe(false);
+      } finally {
+        Ajv.prototype.compileAsync = origCompileAsync;
+      }
+    });
+  });
+
+  describe('addKeyword guard (L71)', () => {
+    it('covers the addKeyword branch by verifying custom keywords are registered', async () => {
+      // The L71 guard checks if ajv.addKeyword exists before calling it.
+      // All standard Ajv instances have addKeyword, so L71 is always true.
+      // We verify the keywords ARE added (covering L72-L73) by validating
+      // a schema that uses x-gtm-clear — if addKeyword hadn't been called, Ajv strict mode would fail.
+      const schema = {
+        $schema: 'http://json-schema.org/draft-07/schema#',
+        type: 'object',
+        properties: {
+          name: { type: 'string', 'x-gtm-clear': true },
+          targets: { type: 'array', 'x-tracking-targets': ['ga4'] },
+        },
+      };
+
+      const validator = await createValidator([], schema);
+      expect(validator({ name: 'test', targets: ['ga4'] }).valid).toBe(true);
+    });
+  });
+
   describe('error thrown when validate cannot be found (L103-L106)', () => {
     it('throws an error mentioning $id when schema has $id and cannot be found (L105-L106)', async () => {
       // Use draft-04 with a $id that is NOT pre-loaded in schemas, so getSchema returns undefined

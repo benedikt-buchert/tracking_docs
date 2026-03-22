@@ -1039,6 +1039,12 @@ describe('schemaToExamples', () => {
       expect(groups[0].options[0].example).toBe(false);
     });
 
+    it('excludes empty object example provided via examples array (L147 falsy)', () => {
+      const schema = { type: 'object', examples: [{}] };
+      const groups = schemaToExamples(schema);
+      expect(groups).toEqual([]);
+    });
+
     it('shouldIncludeObjectExample returns true when condition is met, wraps in expected structure (L147)', () => {
       const schema = {
         type: 'object',

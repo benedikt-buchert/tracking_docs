@@ -182,9 +182,10 @@ describe('plugin structure', () => {
     expect(paths).not.toContain('/site/static/schemas/next');
   });
 
-  it('has a getThemePath method', async () => {
+  it('has a getThemePath method that returns ./components', async () => {
     const plugin = await createPlugin(makeContext(), makeOptions());
     expect(typeof plugin.getThemePath).toBe('function');
+    expect(plugin.getThemePath()).toBe('./components');
   });
 });
 

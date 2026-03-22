@@ -79,6 +79,12 @@ ruleTester.run('require-description', rule, {
       }),
       errors: [{ message: 'Property "event" is missing "description".' }],
     },
+    // L40: node.key.name fallback — JSON5 unquoted key triggers ?? branch
+    {
+      code: '{"properties": {event: {"type": "string", "examples": ["click"]}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
+      errors: [{ message: 'Property "event" is missing "description".' }],
+    },
     // missing description in then block
     {
       code: JSON.stringify({

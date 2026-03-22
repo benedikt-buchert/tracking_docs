@@ -164,6 +164,18 @@ ruleTester.run('require-examples', rule, {
       }),
       errors: [{ message: 'Property "currency" is missing "examples".' }],
     },
+    // L44: p.key.name fallback — JSON5 unquoted "type" key triggers ?? branch
+    {
+      code: '{"properties": {"currency": {type: "string", "description": "Currency code."}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
+      errors: [{ message: 'Property "currency" is missing "examples".' }],
+    },
+    // L53: node.key.name fallback — JSON5 unquoted property name triggers ?? branch
+    {
+      code: '{"properties": {currency: {"type": "string", "description": "Currency code."}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
+      errors: [{ message: 'Property "currency" is missing "examples".' }],
+    },
     // missing examples on a leaf number property
     {
       code: JSON.stringify({

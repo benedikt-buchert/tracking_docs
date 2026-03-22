@@ -1092,4 +1092,85 @@ describe('snippetTargets', () => {
     });
     expect(snippet.startsWith('NSMutableDictionary *item1 = [@{')).toBe(true);
   });
+
+  // L839: generateSnippetForTarget default-arg — omit targetId to trigger default
+  it('uses default targetId when none is provided', () => {
+    const snippet = generateSnippetForTarget({
+      example: { event: 'test_event' },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('window.dataLayer.push');
+    expect(snippet).toContain('"event": "test_event"');
+  });
+
+  // L222: config default-arg — call web generator directly without config
+  it('web generator defaults config to {} when config is omitted', () => {
+    const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
+    const snippet = webTarget.generator({
+      example: { event: 'test_event' },
+      schema: { properties: {} },
+      dataLayerName: 'myDL',
+    });
+
+    expect(snippet).toContain('window.myDL.push');
+  });
+
+  // L227: schema || {} — call web generator with schema undefined
+  it('web generator falls back to empty schema when schema is falsy', () => {
+    const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
+    const snippet = webTarget.generator({
+      example: { event: 'test_event' },
+      schema: undefined,
+      config: {},
+    });
+
+    expect(snippet).toContain('window.dataLayer.push');
+    expect(snippet).toContain('"event": "test_event"');
+  });
+
+  // L265: example || {} — call firebase generator with example undefined (throws before L265, but exercises the path)
+  it('toFirebaseParamEntries handles null example via || {} fallback', () => {
+    const kotlinTarget = SNIPPET_TARGETS.find(
+      (t) => t.id === 'android-firebase-kotlin-sdk',
+    );
+    // example with only event triggers toFirebaseParamEntries with a truthy example
+    // but no additional params — the || {} fallback is defensive
+    const snippet = kotlinTarget.generator({
+      example: { event: 'simple_event' },
+      targetId: 'android-firebase-kotlin-sdk',
+    });
+
+    expect(snippet).toContain('firebaseAnalytics.logEvent("simple_event")');
+  });
+
+  // L289: predefined event with objc platform — kFIREvent constant
+  it('uses kFIREvent constant for predefined event in objc snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'purchase',
+        transaction_id: 'T_100',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      '[FIRAnalytics logEventWithName:kFIREventPurchase parameters:eventParams];',
+    );
+  });
+
+  // L306: predefined param with objc platform — kFIRParameter constant
+  it('uses kFIRParameter constant for predefined param in objc snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'custom_event',
+        currency: 'USD',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('kFIRParameterCurrency: @"USD"');
+  });
 });

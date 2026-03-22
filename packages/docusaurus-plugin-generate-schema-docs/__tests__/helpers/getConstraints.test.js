@@ -116,4 +116,31 @@ describe('getConstraints', () => {
     };
     expect(getConstraints(prop, false)).toEqual(['not: { type: "string" }']);
   });
+
+  it('should not include uniqueItems constraint when value is false', () => {
+    const prop = { uniqueItems: false };
+    expect(getConstraints(prop, false)).toEqual([]);
+  });
+
+  it('should not include additionalProperties constraint when value is true', () => {
+    const prop = { additionalProperties: true };
+    expect(getConstraints(prop, false)).toEqual([]);
+  });
+
+  it('should render "not" constraint with nested array values', () => {
+    const prop = {
+      not: { enum: ['a', 'b'] },
+    };
+    expect(getConstraints(prop, false)).toEqual(['not: { enum: ["a", "b"] }']);
+  });
+
+  it('should render "not" constraint with deeply nested array of objects', () => {
+    const prop = {
+      not: { items: [{ type: 'string' }, { type: 'number' }] },
+    };
+    const result = getConstraints(prop, false);
+    expect(result).toEqual([
+      'not: { items: [{ type: "string" }, { type: "number" }] }',
+    ]);
+  });
 });
