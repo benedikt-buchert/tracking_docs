@@ -1,6 +1,12 @@
 const { RuleTester } = require('eslint');
 const rule = require('../rules/require-description');
 
+describe('require-description meta', () => {
+  it('has a non-empty description', () => {
+    expect(rule.meta.docs.description.length).toBeGreaterThan(0);
+  });
+});
+
 const ruleTester = new RuleTester({
   parser: require.resolve('jsonc-eslint-parser'),
 });
@@ -57,6 +63,12 @@ ruleTester.run('require-description', rule, {
         then: { properties: { page_title: { maxLength: 300 } } },
       }),
     },
+    // non-object property value — string literal, no JSONObjectExpression
+    {
+      code: JSON.stringify({
+        properties: { event: 'string' },
+      }),
+    },
   ],
 
   invalid: [
@@ -65,6 +77,12 @@ ruleTester.run('require-description', rule, {
       code: JSON.stringify({
         properties: { event: { type: 'string', examples: ['click'] } },
       }),
+      errors: [{ message: 'Property "event" is missing "description".' }],
+    },
+    // L40: node.key.name fallback — JSON5 unquoted key triggers ?? branch
+    {
+      code: '{"properties": {event: {"type": "string", "examples": ["click"]}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
       errors: [{ message: 'Property "event" is missing "description".' }],
     },
     // missing description in then block

@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schema-with-not-non-object.json",
+  "title": "Schema With Not Non Object",
+  "type": "object",
+  "properties": {
+    "flag": {
+      "not": true
+    },
+    "name": {
+      "type": "string",
+      "not": { "const": "forbidden" }
+    }
+  }
+}

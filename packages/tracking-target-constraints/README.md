@@ -39,5 +39,6 @@ This repository deploys constraints to the same GitHub Pages site as the demo do
 - `https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json`
 
 The `.github/workflows/gh-pages.yml` workflow assembles:
+
 - `demo/build` at the site root
 - `packages/tracking-target-constraints/dist` under `/constraints`

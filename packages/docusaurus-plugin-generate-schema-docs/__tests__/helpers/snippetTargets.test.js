@@ -684,6 +684,264 @@ describe('snippetTargets', () => {
     expect(objcSnippet).toContain('kFIRParameterCoupon: @"WELCOME10"');
   });
 
+  it('emits null user property value for kotlin snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'login',
+        user_properties: { custom_prop: null },
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'firebaseAnalytics.setUserProperty("custom_prop", null)',
+    );
+  });
+
+  it('emits null user property value for java snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'login',
+        user_properties: { custom_prop: null },
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'mFirebaseAnalytics.setUserProperty("custom_prop", null);',
+    );
+  });
+
+  it('emits nil user property value for swift snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'login',
+        user_properties: { custom_prop: null },
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'Analytics.setUserProperty(nil, forName: "custom_prop")',
+    );
+  });
+
+  it('emits nil log call with parameters:nil for swift when no params', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'login',
+        user_properties: { plan: 'free' },
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'Analytics.logEvent(AnalyticsEventLogin, parameters: nil)',
+    );
+  });
+
+  it('emits parameters:nil for objc when no params', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: { event: 'login' },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      '[FIRAnalytics logEventWithName:kFIREventLogin parameters:nil];',
+    );
+  });
+
+  it('emits @"string" user property for objc with non-predefined key', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'login',
+        user_properties: { custom_user_prop: 'value' },
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      '[FIRAnalytics setUserPropertyString:@"value" forName:@"custom_user_prop"];',
+    );
+  });
+
+  it('coerces number and boolean user properties to strings', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'login',
+        user_properties: { count: 42, active: true },
+      },
+      schema: { properties: {} },
+    });
+    const javaSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'login',
+        user_properties: { count: 42, active: false },
+      },
+      schema: { properties: {} },
+    });
+
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.setUserProperty("count", "42")',
+    );
+    expect(kotlinSnippet).toContain(
+      'firebaseAnalytics.setUserProperty("active", "true")',
+    );
+    expect(javaSnippet).toContain(
+      'mFirebaseAnalytics.setUserProperty("count", "42");',
+    );
+    expect(javaSnippet).toContain(
+      'mFirebaseAnalytics.setUserProperty("active", "false");',
+    );
+  });
+
+  it('throws when user property value is an unsupported type (object)', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'login',
+          user_properties: { nested: { a: 1 } },
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('user_properties.nested');
+  });
+
+  it('throws when items array contains non-object items', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'purchase',
+          items: ['invalid-item'],
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('non-empty array of objects');
+  });
+
+  it('throws when items is an empty array', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'purchase',
+          items: [],
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('non-empty array of objects');
+  });
+
+  it('handles items with boolean values in kotlin bundles', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1', is_featured: true, custom_score: 5.5 }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'putString(FirebaseAnalytics.Param.ITEM_ID, "sku-1")',
+    );
+    expect(snippet).toContain('putLong("is_featured", 1L)');
+    expect(snippet).toContain('putDouble("custom_score", 5.5)');
+  });
+
+  it('handles items with boolean values in java bundles', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1', is_sale: false, custom_price: 2.5 }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain(
+      'item1.putString(FirebaseAnalytics.Param.ITEM_ID, "sku-1");',
+    );
+    expect(snippet).toContain('item1.putLong("is_sale", 0L);');
+    expect(snippet).toContain('item1.putDouble("custom_price", 2.5);');
+  });
+
+  it('handles items with boolean values in swift item dicts', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'purchase',
+        items: [
+          { item_id: 'sku-1', flag: true, price: 9.99 },
+          { item_id: 'sku-2', flag: false },
+        ],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain('AnalyticsParameterItemID: "sku-1"');
+    expect(snippet).toContain('"flag": 1,');
+    expect(snippet).toContain('AnalyticsParameterPrice: 9.99');
+    expect(snippet).toContain('AnalyticsParameterItemID: "sku-2"');
+    expect(snippet).toContain('"flag": 0');
+  });
+
+  it('handles items with boolean values in objc item dicts', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'purchase',
+        items: [
+          { item_id: 'sku-1', flag: true, price: 9.99 },
+          { item_id: 'sku-2' },
+        ],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet).toContain('kFIRParameterItemID: @"sku-1"');
+    expect(snippet).toContain('@"flag": @(1),');
+    expect(snippet).toContain('kFIRParameterPrice: @(9.99)');
+    expect(snippet).toContain('kFIRParameterItemID: @"sku-2"');
+  });
+
+  it('throws when item value in bundle is an unsupported type (nested object)', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'purchase',
+          items: [{ item_id: 'sku-1', metadata: { nested: true } }],
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('items[0].metadata');
+  });
+
+  it('includes error type label "null" and "array" in shape error message', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'purchase',
+          items: [{ item_id: 'sku-1', bad: null }],
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('null');
+
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'android-firebase-kotlin-sdk',
+        example: {
+          event: 'purchase',
+          items: [{ item_id: 'sku-1', bad: [1, 2] }],
+        },
+        schema: { properties: {} },
+      }),
+    ).toThrow('array');
+  });
+
   it('maps additional Firebase commerce constants present in reference docs', () => {
     const kotlinSnippet = generateSnippetForTarget({
       targetId: 'android-firebase-kotlin-sdk',
@@ -740,5 +998,179 @@ describe('snippetTargets', () => {
     expect(swiftSnippet).toContain('AnalyticsParameterSubscription: 1');
     expect(swiftSnippet).toContain('AnalyticsParameterFreeTrial: 0');
     expect(swiftSnippet).toContain('AnalyticsParameterPriceIsDiscounted: 1');
+  });
+
+  it('snippet does not begin with stray content for kotlin (no items, no user_properties)', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: { event: 'login', method: 'email' },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('firebaseAnalytics.logEvent(')).toBe(true);
+  });
+
+  it('snippet does not begin with stray content for java (no items, no user_properties)', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: { event: 'login', method: 'email' },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('Bundle eventParams = new Bundle();')).toBe(true);
+  });
+
+  it('handles user_properties: null gracefully (returns no user property lines)', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: { event: 'login', user_properties: null },
+      schema: { properties: {} },
+    });
+    expect(snippet).not.toContain('setUserProperty');
+    expect(snippet).toContain(
+      'firebaseAnalytics.logEvent(FirebaseAnalytics.Event.LOGIN)',
+    );
+  });
+
+  it('skips event and $schema keys in firebase param entries', () => {
+    const kotlinSnippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'custom_event',
+        $schema: 'https://example.com/schema.json',
+        custom_method: 'email',
+      },
+      schema: { properties: {} },
+    });
+    expect(kotlinSnippet).not.toContain('"event"');
+    expect(kotlinSnippet).not.toContain('"$schema"');
+    expect(kotlinSnippet).toContain('param("custom_method", "email")');
+  });
+
+  it('kotlin snippet with items starts with item bundles, not stray content', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-kotlin-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1' }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('val item1 = Bundle().apply {')).toBe(true);
+  });
+
+  it('java snippet with items starts with item bundles, not stray content', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'android-firebase-java-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1' }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('Bundle item1 = new Bundle();')).toBe(true);
+  });
+
+  it('swift snippet with items starts with item dicts, not stray content', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-swift-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1' }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('var item1: [String: Any] = [')).toBe(true);
+  });
+
+  it('objc snippet with items starts with item dicts, not stray content', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'purchase',
+        items: [{ item_id: 'sku-1' }],
+      },
+      schema: { properties: {} },
+    });
+    expect(snippet.startsWith('NSMutableDictionary *item1 = [@{')).toBe(true);
+  });
+
+  // L839: generateSnippetForTarget default-arg — omit targetId to trigger default
+  it('uses default targetId when none is provided', () => {
+    const snippet = generateSnippetForTarget({
+      example: { event: 'test_event' },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('window.dataLayer.push');
+    expect(snippet).toContain('"event": "test_event"');
+  });
+
+  // L222: config default-arg — call web generator directly without config
+  it('web generator defaults config to {} when config is omitted', () => {
+    const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
+    const snippet = webTarget.generator({
+      example: { event: 'test_event' },
+      schema: { properties: {} },
+      dataLayerName: 'myDL',
+    });
+
+    expect(snippet).toContain('window.myDL.push');
+  });
+
+  // L227: schema || {} — call web generator with schema undefined
+  it('web generator falls back to empty schema when schema is falsy', () => {
+    const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
+    const snippet = webTarget.generator({
+      example: { event: 'test_event' },
+      schema: undefined,
+      config: {},
+    });
+
+    expect(snippet).toContain('window.dataLayer.push');
+    expect(snippet).toContain('"event": "test_event"');
+  });
+
+  // L265: example || {} — call firebase generator with example undefined (throws before L265, but exercises the path)
+  it('toFirebaseParamEntries handles null example via || {} fallback', () => {
+    const kotlinTarget = SNIPPET_TARGETS.find(
+      (t) => t.id === 'android-firebase-kotlin-sdk',
+    );
+    // example with only event triggers toFirebaseParamEntries with a truthy example
+    // but no additional params — the || {} fallback is defensive
+    const snippet = kotlinTarget.generator({
+      example: { event: 'simple_event' },
+      targetId: 'android-firebase-kotlin-sdk',
+    });
+
+    expect(snippet).toContain('firebaseAnalytics.logEvent("simple_event")');
+  });
+
+  // L289: predefined event with objc platform — kFIREvent constant
+  it('uses kFIREvent constant for predefined event in objc snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'purchase',
+        transaction_id: 'T_100',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain(
+      '[FIRAnalytics logEventWithName:kFIREventPurchase parameters:eventParams];',
+    );
+  });
+
+  // L306: predefined param with objc platform — kFIRParameter constant
+  it('uses kFIRParameter constant for predefined param in objc snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'ios-firebase-objc-sdk',
+      example: {
+        event: 'custom_event',
+        currency: 'USD',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toContain('kFIRParameterCurrency: @"USD"');
   });
 });

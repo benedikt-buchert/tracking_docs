@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schema-with-not-anyof-multi.json",
+  "title": "Schema With Not AnyOf Multi",
+  "type": "object",
+  "properties": {
+    "country": {
+      "type": "string",
+      "not": { "anyOf": [{ "const": "US" }, { "const": "CA" }] }
+    }
+  }
+}

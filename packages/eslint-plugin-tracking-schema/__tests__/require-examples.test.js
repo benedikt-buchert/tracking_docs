@@ -1,6 +1,12 @@
 const { RuleTester } = require('eslint');
 const rule = require('../rules/require-examples');
 
+describe('require-examples meta', () => {
+  it('has a non-empty description', () => {
+    expect(rule.meta.docs.description.length).toBeGreaterThan(0);
+  });
+});
+
 const ruleTester = new RuleTester({
   parser: require.resolve('jsonc-eslint-parser'),
 });
@@ -118,6 +124,34 @@ ruleTester.run('require-examples', rule, {
         then: { properties: { page_title: { maxLength: 300 } } },
       }),
     },
+    // non-object property value — string literal
+    {
+      code: JSON.stringify({
+        properties: { event: 'string' },
+      }),
+    },
+    // allOf — examples live inside branches
+    {
+      code: JSON.stringify({
+        properties: {
+          value: {
+            description: 'Combined.',
+            allOf: [{ type: 'string' }],
+          },
+        },
+      }),
+    },
+    // property with no type prop — typeProp is undefined
+    {
+      code: JSON.stringify({
+        properties: {
+          event: {
+            description: 'Event.',
+            examples: ['click'],
+          },
+        },
+      }),
+    },
   ],
 
   invalid: [
@@ -128,6 +162,18 @@ ruleTester.run('require-examples', rule, {
           currency: { type: 'string', description: 'Currency code.' },
         },
       }),
+      errors: [{ message: 'Property "currency" is missing "examples".' }],
+    },
+    // L44: p.key.name fallback — JSON5 unquoted "type" key triggers ?? branch
+    {
+      code: '{"properties": {"currency": {type: "string", "description": "Currency code."}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
+      errors: [{ message: 'Property "currency" is missing "examples".' }],
+    },
+    // L53: node.key.name fallback — JSON5 unquoted property name triggers ?? branch
+    {
+      code: '{"properties": {currency: {"type": "string", "description": "Currency code."}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
       errors: [{ message: 'Property "currency" is missing "examples".' }],
     },
     // missing examples on a leaf number property

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schema-with-not-anyof.json",
+  "title": "Schema With Not AnyOf",
+  "type": "object",
+  "properties": {
+    "country": {
+      "type": "string",
+      "not": { "anyOf": [{ "const": "US" }] }
+    },
+    "nested": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "not": { "anyOf": [{ "anyOf": [{ "const": "XX" }] }] }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string",
+          "not": { "anyOf": [{ "const": "forbidden" }] }
+        }
+      ]
+    }
+  }
+}

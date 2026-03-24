@@ -1,12 +1,46 @@
 /**
- * @jest-environment node
+ * @jest-environment @stryker-mutator/jest-runner/jest-env/node
  */
 
-import { processOneOfSchema } from '../../helpers/schema-processing';
+import { processOneOfSchema, slugify } from '../../helpers/schema-processing';
 import path from 'path';
 import fs from 'fs';
 
 describe('schema-processing', () => {
+  describe('slugify', () => {
+    it('returns "option" for falsy input', () => {
+      expect(slugify('')).toBe('option');
+      expect(slugify(null)).toBe('option');
+      expect(slugify(undefined)).toBe('option');
+    });
+
+    it('replaces multiple spaces with a single hyphen', () => {
+      expect(slugify('hello   world')).toBe('hello-world');
+    });
+
+    it('removes non-word characters', () => {
+      expect(slugify('hello!@#world')).toBe('helloworld');
+    });
+
+    it('replaces multiple consecutive hyphens with a single hyphen', () => {
+      expect(slugify('hello---world')).toBe('hello-world');
+    });
+
+    it('trims leading hyphens', () => {
+      expect(slugify('-hello')).toBe('hello');
+      expect(slugify('--hello')).toBe('hello');
+    });
+
+    it('trims trailing hyphens', () => {
+      expect(slugify('hello-')).toBe('hello');
+      expect(slugify('hello--')).toBe('hello');
+    });
+
+    it('converts to lowercase', () => {
+      expect(slugify('Hello World')).toBe('hello-world');
+    });
+  });
+
   describe('processOneOfSchema', () => {
     it('should merge oneOf options with the root schema', async () => {
       const rootSchema = {
@@ -117,6 +151,92 @@ describe('schema-processing', () => {
 
       expect(mergedEcommerce['x-gtm-clear']).toBe(true);
       expect(mergedEcommerce.properties.transaction_id.type).toBe('string');
+    });
+
+    it('returns an empty array when schema has no oneOf', async () => {
+      const schema = {
+        $id: 'root.json',
+        title: 'Root',
+        properties: { foo: { type: 'string' } },
+      };
+      const result = await processOneOfSchema(schema, '/path/to/schema.json');
+      expect(result).toEqual([]);
+    });
+
+    it('uses $anchor as slug when option has $anchor but no $id ending in .json', async () => {
+      const rootSchema = {
+        $id: 'root.json',
+        title: 'Root',
+        oneOf: [
+          {
+            $anchor: 'my-anchor',
+            title: 'Anchored Option',
+          },
+        ],
+      };
+      const result = await processOneOfSchema(
+        rootSchema,
+        '/path/to/schema.json',
+      );
+      expect(result[0].slug).toBe('my-anchor');
+      expect(result[0].schema.$id).toBe('root.json#my-anchor');
+    });
+
+    it('uses basename of $id ending in .json as slug and preserves original $id', async () => {
+      const rootSchema = {
+        $id: 'root.json',
+        title: 'Root',
+        oneOf: [
+          {
+            $id: 'sub/my-option.json',
+            title: 'Option With Id',
+          },
+        ],
+      };
+      const result = await processOneOfSchema(
+        rootSchema,
+        '/path/to/schema.json',
+      );
+      expect(result[0].slug).toBe('my-option');
+      expect(result[0].schema.$id).toBe('sub/my-option.json');
+    });
+
+    it('does not treat $id not ending in .json as hadId', async () => {
+      const rootSchema = {
+        $id: 'root.json',
+        title: 'Root',
+        oneOf: [
+          {
+            $id: 'not-a-json-file',
+            title: 'No Json Extension',
+          },
+        ],
+      };
+      const result = await processOneOfSchema(
+        rootSchema,
+        '/path/to/schema.json',
+      );
+      expect(result[0].slug).toBe('no-json-extension');
+      expect(result[0].schema.$id).toBe('root.json#no-json-extension');
+    });
+
+    it('does not resolve $ref that starts with #', async () => {
+      const rootSchema = {
+        $id: 'root.json',
+        title: 'Root',
+        oneOf: [
+          {
+            $ref: '#/definitions/internal',
+            title: 'Internal Ref',
+          },
+        ],
+      };
+      const result = await processOneOfSchema(
+        rootSchema,
+        '/path/to/schema.json',
+      );
+      expect(result[0].schema.$ref).toBe('#/definitions/internal');
+      expect(result[0].sourceFilePath).toBeNull();
     });
 
     it('preserves parent allOf metadata when root oneOf options are file refs', async () => {

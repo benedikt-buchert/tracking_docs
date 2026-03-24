@@ -1,6 +1,21 @@
 const { RuleTester } = require('eslint');
 const rule = require('../rules/require-type');
 
+describe('require-type meta', () => {
+  it('has a non-empty description', () => {
+    expect(rule.meta.docs.description.length).toBeGreaterThan(0);
+  });
+
+  it('has a docs object with a url', () => {
+    expect(rule.meta.docs).toBeDefined();
+    expect(rule.meta.docs.url.length).toBeGreaterThan(0);
+  });
+
+  it('has a schema array', () => {
+    expect(Array.isArray(rule.meta.schema)).toBe(true);
+  });
+});
+
 const ruleTester = new RuleTester({
   parser: require.resolve('jsonc-eslint-parser'),
 });
@@ -93,6 +108,12 @@ ruleTester.run('require-type', rule, {
         then: { properties: { page_title: { maxLength: 300 } } },
       }),
     },
+    // non-object property value — string literal
+    {
+      code: JSON.stringify({
+        properties: { event: 'string' },
+      }),
+    },
   ],
 
   invalid: [
@@ -101,6 +122,12 @@ ruleTester.run('require-type', rule, {
       code: JSON.stringify({
         properties: { value: { description: 'A value.', examples: [1] } },
       }),
+      errors: [{ message: 'Property "value" is missing "type".' }],
+    },
+    // L42: node.key.name fallback — JSON5 unquoted key triggers ?? branch
+    {
+      code: '{"properties": {value: {"description": "A value.", "examples": [1]}}}',
+      parserOptions: { jsonSyntax: 'JSON5' },
       errors: [{ message: 'Property "value" is missing "type".' }],
     },
     // missing type in then block

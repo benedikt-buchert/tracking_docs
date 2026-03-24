@@ -123,6 +123,7 @@ Canonical emitted-payload contracts live in:
 `packages/docusaurus-plugin-generate-schema-docs/test-data/payloadContracts.js`
 
 Representative event classes covered:
+
 - predefined event (`screen_view`)
 - ecommerce event with `items` (`add_to_cart`)
 - custom event (`my_custom_event`)
@@ -142,6 +143,7 @@ npm run test:realsdk:ios
 ```
 
 Native fixture sources are auto-generated from `generateSnippetForTarget`:
+
 - iOS: `native-tests/ios/Sources/NativePayloadFixtures/GeneratedSnippets.swift`
 - iOS Obj-C: `native-tests/ios/Sources/NativePayloadFixturesObjC/GeneratedObjCSnippets.m`
 - Android: `native-tests/android/src/test/java/com/trackingdocs/nativepayload/GeneratedAndroidSnippets.java`
@@ -150,18 +152,22 @@ Native fixture sources are auto-generated from `generateSnippetForTarget`:
 Use `npm run check:native-fixtures` to regenerate and fail if committed files are stale.
 
 Real SDK compile checks:
+
 - Android: `scripts/test-android-realsdk.mjs` downloads the real `firebase-analytics` + measurement artifacts and validates both Java and Kotlin call shapes against `FirebaseAnalytics`.
 - iOS: `native-tests/ios-sdk` validates Swift API usage (`Analytics`) and Obj-C symbols (`FIRAnalytics` constants/selectors) against the real Firebase iOS SDK (`FirebaseAnalytics`).
 
 Version overrides:
+
 - Android real SDK check reads `FIREBASE_ANDROID_ANALYTICS_VERSION` (default: `22.5.0`).
 - iOS real SDK check reads `FIREBASE_IOS_SDK_VERSION` (default: `11.15.0`).
 
 CI runs real SDK checks in matrix mode:
+
 - Android analytics versions: `22.4.0`, `22.5.0`
 - iOS SDK versions: `11.14.0`, `11.15.0`
 
 CI lanes:
+
 - `validate-linux` (ubuntu-latest): lint, full Jest suite except iOS runtime payload lane, Android native payload tests (`mvn test`), docs generation, build, schema validation
 - `validate-ios-payload` (macos-latest): iOS runtime payload contract tests (`npm run test:payload:ios`) and iOS native payload tests (`swift test`)
 

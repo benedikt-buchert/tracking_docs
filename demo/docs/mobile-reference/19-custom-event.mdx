@@ -5,28 +5,551 @@ sidebar_label: Custom Event
 custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/mobile/custom-event.json
 ---
 
-import SchemaViewer from '@theme/SchemaViewer';
-import SchemaJsonViewer from '@theme/SchemaJsonViewer';
-
-
+import SchemaViewer from "@theme/SchemaViewer";
+import SchemaJsonViewer from "@theme/SchemaJsonViewer";
 
 # Custom Event
 
 A custom Firebase event example for mobile apps.
 
-
-
 <SchemaViewer
-  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","type":"object","x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"required":["$schema","event"],"$defs":{"firebaseScalar":{"type":["string","number","integer","boolean","null"]},"firebaseItem":{"type":"object","additionalProperties":{"type":["string","number","integer","boolean","null"]}}},"additionalProperties":{"type":["string","number","integer","boolean","null"]},"properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]},"country":{"type":"string","description":"Country code that must not be US (demo for not + const rendering).","not":{"const":"US"},"examples":["DE"]},"status_code":{"type":"string","description":"Complex not example: disallow success-like codes via nested anyOf.","not":{"anyOf":[{"const":"200"},{"pattern":"^2[0-9]{2}$"},{"enum":["ok","success"]}]},"examples":["500"]},"region_bucket":{"type":"string","description":"Complex not example: disallow restricted prefixes and exact values.","not":{"anyOf":[{"pattern":"^internal-"},{"enum":["private","secret"]},{"allOf":[{"minLength":2},{"maxLength":2},{"pattern":"^[A-Z]{2}$"}]}]},"examples":["public-west"]},"sku":{"type":"string","description":"Complex not example: disallow short numeric-only IDs and known placeholders.","not":{"anyOf":[{"pattern":"^[0-9]{1,4}$"},{"enum":["unknown","tbd","na"]},{"allOf":[{"pattern":"^[A-Z0-9_-]+$"},{"maxLength":3}]}]},"examples":["SKU-12345"]},"items":{"type":"array","items":{"type":"object","additionalProperties":{"type":["string","number","integer","boolean","null"]}}}}}}
-  sourceSchema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"type":"object","properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]},"country":{"type":"string","description":"Country code that must not be US (demo for not + const rendering).","not":{"const":"US"},"examples":["DE"]},"status_code":{"type":"string","description":"Complex not example: disallow success-like codes via nested anyOf.","not":{"anyOf":[{"const":"200"},{"pattern":"^2[0-9]{2}$"},{"enum":["ok","success"]}]},"examples":["500"]},"region_bucket":{"type":"string","description":"Complex not example: disallow restricted prefixes and exact values.","not":{"anyOf":[{"pattern":"^internal-"},{"enum":["private","secret"]},{"allOf":[{"minLength":2},{"maxLength":2},{"pattern":"^[A-Z]{2}$"}]}]},"examples":["public-west"]},"sku":{"type":"string","description":"Complex not example: disallow short numeric-only IDs and known placeholders.","not":{"anyOf":[{"pattern":"^[0-9]{1,4}$"},{"enum":["unknown","tbd","na"]},{"allOf":[{"pattern":"^[A-Z0-9_-]+$"},{"maxLength":3}]}]},"examples":["SKU-12345"]}},"required":["$schema","event"],"allOf":[{"$ref":"https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"}]}}
+  schema={{
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+    title: "Custom Event",
+    description: "A custom Firebase event example for mobile apps.",
+    type: "object",
+    "x-tracking-targets": [
+      "android-firebase-kotlin-sdk",
+      "android-firebase-java-sdk",
+      "ios-firebase-swift-sdk",
+      "ios-firebase-objc-sdk",
+    ],
+    required: ["$schema", "event"],
+    $defs: {
+      firebaseScalar: {
+        type: ["string", "number", "integer", "boolean", "null"],
+      },
+      firebaseItem: {
+        type: "object",
+        additionalProperties: {
+          type: ["string", "number", "integer", "boolean", "null"],
+        },
+      },
+    },
+    additionalProperties: {
+      type: ["string", "number", "integer", "boolean", "null"],
+    },
+    properties: {
+      $schema: {
+        type: "string",
+        description: "Defines the structure of the event.",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+      },
+      event: {
+        type: "string",
+        description: "Custom event name.",
+        examples: ["my_custom_event"],
+      },
+      custom_prop: {
+        type: "string",
+        description: "An example custom event parameter.",
+        examples: ["gold_user"],
+      },
+      custom_value: {
+        type: "number",
+        description: "An example numeric custom event parameter.",
+        examples: [42.5],
+      },
+      custom_flag: {
+        type: "boolean",
+        description: "An example boolean custom event parameter.",
+        examples: [true],
+      },
+      country: {
+        type: "string",
+        description:
+          "Country code that must not be US (demo for not + const rendering).",
+        not: { const: "US" },
+        examples: ["DE"],
+      },
+      status_code: {
+        type: "string",
+        description:
+          "Complex not example: disallow success-like codes via nested anyOf.",
+        not: {
+          anyOf: [
+            { const: "200" },
+            { pattern: "^2[0-9]{2}$" },
+            { enum: ["ok", "success"] },
+          ],
+        },
+        examples: ["500"],
+      },
+      region_bucket: {
+        type: "string",
+        description:
+          "Complex not example: disallow restricted prefixes and exact values.",
+        not: {
+          anyOf: [
+            { pattern: "^internal-" },
+            { enum: ["private", "secret"] },
+            {
+              allOf: [
+                { minLength: 2 },
+                { maxLength: 2 },
+                { pattern: "^[A-Z]{2}$" },
+              ],
+            },
+          ],
+        },
+        examples: ["public-west"],
+      },
+      sku: {
+        type: "string",
+        description:
+          "Complex not example: disallow short numeric-only IDs and known placeholders.",
+        not: {
+          anyOf: [
+            { pattern: "^[0-9]{1,4}$" },
+            { enum: ["unknown", "tbd", "na"] },
+            { allOf: [{ pattern: "^[A-Z0-9_-]+$" }, { maxLength: 3 }] },
+          ],
+        },
+        examples: ["SKU-12345"],
+      },
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: {
+            type: ["string", "number", "integer", "boolean", "null"],
+          },
+        },
+      },
+    },
+  }}
+  sourceSchema={{
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+    title: "Custom Event",
+    description: "A custom Firebase event example for mobile apps.",
+    "x-tracking-targets": [
+      "android-firebase-kotlin-sdk",
+      "android-firebase-java-sdk",
+      "ios-firebase-swift-sdk",
+      "ios-firebase-objc-sdk",
+    ],
+    type: "object",
+    properties: {
+      $schema: {
+        type: "string",
+        description: "Defines the structure of the event.",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+      },
+      event: {
+        type: "string",
+        description: "Custom event name.",
+        examples: ["my_custom_event"],
+      },
+      custom_prop: {
+        type: "string",
+        description: "An example custom event parameter.",
+        examples: ["gold_user"],
+      },
+      custom_value: {
+        type: "number",
+        description: "An example numeric custom event parameter.",
+        examples: [42.5],
+      },
+      custom_flag: {
+        type: "boolean",
+        description: "An example boolean custom event parameter.",
+        examples: [true],
+      },
+      country: {
+        type: "string",
+        description:
+          "Country code that must not be US (demo for not + const rendering).",
+        not: { const: "US" },
+        examples: ["DE"],
+      },
+      status_code: {
+        type: "string",
+        description:
+          "Complex not example: disallow success-like codes via nested anyOf.",
+        not: {
+          anyOf: [
+            { const: "200" },
+            { pattern: "^2[0-9]{2}$" },
+            { enum: ["ok", "success"] },
+          ],
+        },
+        examples: ["500"],
+      },
+      region_bucket: {
+        type: "string",
+        description:
+          "Complex not example: disallow restricted prefixes and exact values.",
+        not: {
+          anyOf: [
+            { pattern: "^internal-" },
+            { enum: ["private", "secret"] },
+            {
+              allOf: [
+                { minLength: 2 },
+                { maxLength: 2 },
+                { pattern: "^[A-Z]{2}$" },
+              ],
+            },
+          ],
+        },
+        examples: ["public-west"],
+      },
+      sku: {
+        type: "string",
+        description:
+          "Complex not example: disallow short numeric-only IDs and known placeholders.",
+        not: {
+          anyOf: [
+            { pattern: "^[0-9]{1,4}$" },
+            { enum: ["unknown", "tbd", "na"] },
+            { allOf: [{ pattern: "^[A-Z0-9_-]+$" }, { maxLength: 3 }] },
+          ],
+        },
+        examples: ["SKU-12345"],
+      },
+    },
+    required: ["$schema", "event"],
+    allOf: [
+      {
+        $ref: "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json",
+      },
+    ],
+  }}
   sourcePath={"mobile/custom-event.json"}
-  schemaSources={{"mobile/custom-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"type":"object","properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]},"country":{"type":"string","description":"Country code that must not be US (demo for not + const rendering).","not":{"const":"US"},"examples":["DE"]},"status_code":{"type":"string","description":"Complex not example: disallow success-like codes via nested anyOf.","not":{"anyOf":[{"const":"200"},{"pattern":"^2[0-9]{2}$"},{"enum":["ok","success"]}]},"examples":["500"]},"region_bucket":{"type":"string","description":"Complex not example: disallow restricted prefixes and exact values.","not":{"anyOf":[{"pattern":"^internal-"},{"enum":["private","secret"]},{"allOf":[{"minLength":2},{"maxLength":2},{"pattern":"^[A-Z]{2}$"}]}]},"examples":["public-west"]},"sku":{"type":"string","description":"Complex not example: disallow short numeric-only IDs and known placeholders.","not":{"anyOf":[{"pattern":"^[0-9]{1,4}$"},{"enum":["unknown","tbd","na"]},{"allOf":[{"pattern":"^[A-Z0-9_-]+$"},{"maxLength":3}]}]},"examples":["SKU-12345"]}},"required":["$schema","event"],"allOf":[{"$ref":"https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"}]}}}
-  
+  schemaSources={{
+    "mobile/custom-event.json": {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $id: "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+      title: "Custom Event",
+      description: "A custom Firebase event example for mobile apps.",
+      "x-tracking-targets": [
+        "android-firebase-kotlin-sdk",
+        "android-firebase-java-sdk",
+        "ios-firebase-swift-sdk",
+        "ios-firebase-objc-sdk",
+      ],
+      type: "object",
+      properties: {
+        $schema: {
+          type: "string",
+          description: "Defines the structure of the event.",
+          const:
+            "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+        },
+        event: {
+          type: "string",
+          description: "Custom event name.",
+          examples: ["my_custom_event"],
+        },
+        custom_prop: {
+          type: "string",
+          description: "An example custom event parameter.",
+          examples: ["gold_user"],
+        },
+        custom_value: {
+          type: "number",
+          description: "An example numeric custom event parameter.",
+          examples: [42.5],
+        },
+        custom_flag: {
+          type: "boolean",
+          description: "An example boolean custom event parameter.",
+          examples: [true],
+        },
+        country: {
+          type: "string",
+          description:
+            "Country code that must not be US (demo for not + const rendering).",
+          not: { const: "US" },
+          examples: ["DE"],
+        },
+        status_code: {
+          type: "string",
+          description:
+            "Complex not example: disallow success-like codes via nested anyOf.",
+          not: {
+            anyOf: [
+              { const: "200" },
+              { pattern: "^2[0-9]{2}$" },
+              { enum: ["ok", "success"] },
+            ],
+          },
+          examples: ["500"],
+        },
+        region_bucket: {
+          type: "string",
+          description:
+            "Complex not example: disallow restricted prefixes and exact values.",
+          not: {
+            anyOf: [
+              { pattern: "^internal-" },
+              { enum: ["private", "secret"] },
+              {
+                allOf: [
+                  { minLength: 2 },
+                  { maxLength: 2 },
+                  { pattern: "^[A-Z]{2}$" },
+                ],
+              },
+            ],
+          },
+          examples: ["public-west"],
+        },
+        sku: {
+          type: "string",
+          description:
+            "Complex not example: disallow short numeric-only IDs and known placeholders.",
+          not: {
+            anyOf: [
+              { pattern: "^[0-9]{1,4}$" },
+              { enum: ["unknown", "tbd", "na"] },
+              { allOf: [{ pattern: "^[A-Z0-9_-]+$" }, { maxLength: 3 }] },
+            ],
+          },
+          examples: ["SKU-12345"],
+        },
+      },
+      required: ["$schema", "event"],
+      allOf: [
+        {
+          $ref: "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json",
+        },
+      ],
+    },
+  }}
 />
 <SchemaJsonViewer
-  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","type":"object","x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"required":["$schema","event"],"$defs":{"firebaseScalar":{"type":["string","number","integer","boolean","null"]},"firebaseItem":{"type":"object","additionalProperties":{"type":["string","number","integer","boolean","null"]}}},"additionalProperties":{"type":["string","number","integer","boolean","null"]},"properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]},"country":{"type":"string","description":"Country code that must not be US (demo for not + const rendering).","not":{"const":"US"},"examples":["DE"]},"status_code":{"type":"string","description":"Complex not example: disallow success-like codes via nested anyOf.","not":{"anyOf":[{"const":"200"},{"pattern":"^2[0-9]{2}$"},{"enum":["ok","success"]}]},"examples":["500"]},"region_bucket":{"type":"string","description":"Complex not example: disallow restricted prefixes and exact values.","not":{"anyOf":[{"pattern":"^internal-"},{"enum":["private","secret"]},{"allOf":[{"minLength":2},{"maxLength":2},{"pattern":"^[A-Z]{2}$"}]}]},"examples":["public-west"]},"sku":{"type":"string","description":"Complex not example: disallow short numeric-only IDs and known placeholders.","not":{"anyOf":[{"pattern":"^[0-9]{1,4}$"},{"enum":["unknown","tbd","na"]},{"allOf":[{"pattern":"^[A-Z0-9_-]+$"},{"maxLength":3}]}]},"examples":["SKU-12345"]},"items":{"type":"array","items":{"type":"object","additionalProperties":{"type":["string","number","integer","boolean","null"]}}}}}}
+  schema={{
+    $schema: "https://json-schema.org/draft/2020-12/schema",
+    $id: "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+    title: "Custom Event",
+    description: "A custom Firebase event example for mobile apps.",
+    type: "object",
+    "x-tracking-targets": [
+      "android-firebase-kotlin-sdk",
+      "android-firebase-java-sdk",
+      "ios-firebase-swift-sdk",
+      "ios-firebase-objc-sdk",
+    ],
+    required: ["$schema", "event"],
+    $defs: {
+      firebaseScalar: {
+        type: ["string", "number", "integer", "boolean", "null"],
+      },
+      firebaseItem: {
+        type: "object",
+        additionalProperties: {
+          type: ["string", "number", "integer", "boolean", "null"],
+        },
+      },
+    },
+    additionalProperties: {
+      type: ["string", "number", "integer", "boolean", "null"],
+    },
+    properties: {
+      $schema: {
+        type: "string",
+        description: "Defines the structure of the event.",
+        const:
+          "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+      },
+      event: {
+        type: "string",
+        description: "Custom event name.",
+        examples: ["my_custom_event"],
+      },
+      custom_prop: {
+        type: "string",
+        description: "An example custom event parameter.",
+        examples: ["gold_user"],
+      },
+      custom_value: {
+        type: "number",
+        description: "An example numeric custom event parameter.",
+        examples: [42.5],
+      },
+      custom_flag: {
+        type: "boolean",
+        description: "An example boolean custom event parameter.",
+        examples: [true],
+      },
+      country: {
+        type: "string",
+        description:
+          "Country code that must not be US (demo for not + const rendering).",
+        not: { const: "US" },
+        examples: ["DE"],
+      },
+      status_code: {
+        type: "string",
+        description:
+          "Complex not example: disallow success-like codes via nested anyOf.",
+        not: {
+          anyOf: [
+            { const: "200" },
+            { pattern: "^2[0-9]{2}$" },
+            { enum: ["ok", "success"] },
+          ],
+        },
+        examples: ["500"],
+      },
+      region_bucket: {
+        type: "string",
+        description:
+          "Complex not example: disallow restricted prefixes and exact values.",
+        not: {
+          anyOf: [
+            { pattern: "^internal-" },
+            { enum: ["private", "secret"] },
+            {
+              allOf: [
+                { minLength: 2 },
+                { maxLength: 2 },
+                { pattern: "^[A-Z]{2}$" },
+              ],
+            },
+          ],
+        },
+        examples: ["public-west"],
+      },
+      sku: {
+        type: "string",
+        description:
+          "Complex not example: disallow short numeric-only IDs and known placeholders.",
+        not: {
+          anyOf: [
+            { pattern: "^[0-9]{1,4}$" },
+            { enum: ["unknown", "tbd", "na"] },
+            { allOf: [{ pattern: "^[A-Z0-9_-]+$" }, { maxLength: 3 }] },
+          ],
+        },
+        examples: ["SKU-12345"],
+      },
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: {
+            type: ["string", "number", "integer", "boolean", "null"],
+          },
+        },
+      },
+    },
+  }}
   sourcePath={"mobile/custom-event.json"}
-  schemaSources={{"mobile/custom-event.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json","title":"Custom Event","description":"A custom Firebase event example for mobile apps.","x-tracking-targets":["android-firebase-kotlin-sdk","android-firebase-java-sdk","ios-firebase-swift-sdk","ios-firebase-objc-sdk"],"type":"object","properties":{"$schema":{"type":"string","description":"Defines the structure of the event.","const":"https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json"},"event":{"type":"string","description":"Custom event name.","examples":["my_custom_event"]},"custom_prop":{"type":"string","description":"An example custom event parameter.","examples":["gold_user"]},"custom_value":{"type":"number","description":"An example numeric custom event parameter.","examples":[42.5]},"custom_flag":{"type":"boolean","description":"An example boolean custom event parameter.","examples":[true]},"country":{"type":"string","description":"Country code that must not be US (demo for not + const rendering).","not":{"const":"US"},"examples":["DE"]},"status_code":{"type":"string","description":"Complex not example: disallow success-like codes via nested anyOf.","not":{"anyOf":[{"const":"200"},{"pattern":"^2[0-9]{2}$"},{"enum":["ok","success"]}]},"examples":["500"]},"region_bucket":{"type":"string","description":"Complex not example: disallow restricted prefixes and exact values.","not":{"anyOf":[{"pattern":"^internal-"},{"enum":["private","secret"]},{"allOf":[{"minLength":2},{"maxLength":2},{"pattern":"^[A-Z]{2}$"}]}]},"examples":["public-west"]},"sku":{"type":"string","description":"Complex not example: disallow short numeric-only IDs and known placeholders.","not":{"anyOf":[{"pattern":"^[0-9]{1,4}$"},{"enum":["unknown","tbd","na"]},{"allOf":[{"pattern":"^[A-Z0-9_-]+$"},{"maxLength":3}]}]},"examples":["SKU-12345"]}},"required":["$schema","event"],"allOf":[{"$ref":"https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json"}]}}}
+  schemaSources={{
+    "mobile/custom-event.json": {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $id: "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+      title: "Custom Event",
+      description: "A custom Firebase event example for mobile apps.",
+      "x-tracking-targets": [
+        "android-firebase-kotlin-sdk",
+        "android-firebase-java-sdk",
+        "ios-firebase-swift-sdk",
+        "ios-firebase-objc-sdk",
+      ],
+      type: "object",
+      properties: {
+        $schema: {
+          type: "string",
+          description: "Defines the structure of the event.",
+          const:
+            "https://tracking-docs-demo.buchert.digital/schemas/mobile/custom-event.json",
+        },
+        event: {
+          type: "string",
+          description: "Custom event name.",
+          examples: ["my_custom_event"],
+        },
+        custom_prop: {
+          type: "string",
+          description: "An example custom event parameter.",
+          examples: ["gold_user"],
+        },
+        custom_value: {
+          type: "number",
+          description: "An example numeric custom event parameter.",
+          examples: [42.5],
+        },
+        custom_flag: {
+          type: "boolean",
+          description: "An example boolean custom event parameter.",
+          examples: [true],
+        },
+        country: {
+          type: "string",
+          description:
+            "Country code that must not be US (demo for not + const rendering).",
+          not: { const: "US" },
+          examples: ["DE"],
+        },
+        status_code: {
+          type: "string",
+          description:
+            "Complex not example: disallow success-like codes via nested anyOf.",
+          not: {
+            anyOf: [
+              { const: "200" },
+              { pattern: "^2[0-9]{2}$" },
+              { enum: ["ok", "success"] },
+            ],
+          },
+          examples: ["500"],
+        },
+        region_bucket: {
+          type: "string",
+          description:
+            "Complex not example: disallow restricted prefixes and exact values.",
+          not: {
+            anyOf: [
+              { pattern: "^internal-" },
+              { enum: ["private", "secret"] },
+              {
+                allOf: [
+                  { minLength: 2 },
+                  { maxLength: 2 },
+                  { pattern: "^[A-Z]{2}$" },
+                ],
+              },
+            ],
+          },
+          examples: ["public-west"],
+        },
+        sku: {
+          type: "string",
+          description:
+            "Complex not example: disallow short numeric-only IDs and known placeholders.",
+          not: {
+            anyOf: [
+              { pattern: "^[0-9]{1,4}$" },
+              { enum: ["unknown", "tbd", "na"] },
+              { allOf: [{ pattern: "^[A-Z0-9_-]+$" }, { maxLength: 3 }] },
+            ],
+          },
+          examples: ["SKU-12345"],
+        },
+      },
+      required: ["$schema", "event"],
+      allOf: [
+        {
+          $ref: "https://tracking-docs-demo.buchert.digital/constraints/schemas/firebase/v1/flat-event-params.json",
+        },
+      ],
+    },
+  }}
 />
-
-

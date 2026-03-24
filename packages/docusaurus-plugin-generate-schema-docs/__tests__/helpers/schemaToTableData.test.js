@@ -628,4 +628,161 @@ describe('schemaToTableData', () => {
       expect(countryProp.isLastInGroup).toBe(false);
     });
   });
+
+  it('returns empty array for schema with no properties, no type, no choices', () => {
+    expect(schemaToTableData({})).toEqual([]);
+  });
+
+  it('handles root-level oneOf with primitive options (no path, uses option title as name)', () => {
+    const schema = {
+      oneOf: [
+        { title: 'String Option', type: 'string', description: 'A string.' },
+        { type: 'integer', description: 'An integer.' },
+      ],
+    };
+    const tableData = schemaToTableData(schema);
+    const choiceRow = tableData.find((r) => r.type === 'choice');
+    expect(choiceRow).toBeDefined();
+    expect(choiceRow.options).toHaveLength(2);
+
+    // First option has a title, primitive type renders as property row
+    const opt1Rows = choiceRow.options[0].rows;
+    expect(opt1Rows).toHaveLength(1);
+    expect(opt1Rows[0].name).toBe('String Option');
+
+    // Second option has no title, falls back to 'Option'
+    const opt2Rows = choiceRow.options[1].rows;
+    expect(opt2Rows).toHaveLength(1);
+    expect(opt2Rows[0].name).toBe('Option');
+  });
+
+  it('handles conditional with only else (no then branch)', () => {
+    const schema = {
+      type: 'object',
+      properties: { status: { type: 'string' } },
+      if: { properties: { status: { const: 'inactive' } } },
+      else: {
+        properties: { reason: { type: 'string' } },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const conditionalRow = tableData.find((r) => r.type === 'conditional');
+    expect(conditionalRow).toBeDefined();
+    expect(conditionalRow.branches).toHaveLength(1);
+    expect(conditionalRow.branches[0].title).toBe('Else');
+  });
+
+  it('handles array items with if/else but no then', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        items: {
+          type: 'array',
+          items: {
+            type: 'object',
+            if: { properties: { kind: { const: 'physical' } } },
+            else: {
+              properties: { download_url: { type: 'string' } },
+            },
+          },
+        },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const conditionalRow = tableData.find((r) => r.type === 'conditional');
+    expect(conditionalRow).toBeDefined();
+    expect(conditionalRow.branches).toHaveLength(1);
+    expect(conditionalRow.branches[0].title).toBe('Else');
+  });
+
+  it('handles property with simple anyOf (scalar options)', () => {
+    const schema = {
+      properties: {
+        value: {
+          description: 'A flexible value.',
+          anyOf: [
+            { title: 'As String', type: 'string' },
+            { title: 'As Number', type: 'number' },
+          ],
+        },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const choiceRow = tableData.find(
+      (r) => r.type === 'choice' && r.name === 'value',
+    );
+    expect(choiceRow).toBeDefined();
+    expect(choiceRow.choiceType).toBe('anyOf');
+    expect(choiceRow.options).toHaveLength(2);
+  });
+
+  it('marks choice as not last when sibling conditional follows', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string' },
+      },
+      oneOf: [
+        {
+          title: 'Option A',
+          properties: { a: { type: 'string' } },
+        },
+      ],
+      if: { properties: { event: { const: 'special' } } },
+      then: {
+        properties: { extra: { type: 'string' } },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const choiceRow = tableData.find((r) => r.type === 'choice');
+    const conditionalRow = tableData.find((r) => r.type === 'conditional');
+    expect(choiceRow).toBeDefined();
+    expect(conditionalRow).toBeDefined();
+    // Choice is NOT last because conditional follows
+    expect(choiceRow.isLastInGroup).toBe(false);
+  });
+
+  it('marks choice as not last when if/else (no then) conditional follows', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string' },
+      },
+      anyOf: [
+        {
+          title: 'Option X',
+          properties: { x: { type: 'string' } },
+        },
+      ],
+      if: { properties: { event: { const: 'special' } } },
+      else: {
+        properties: { fallback: { type: 'string' } },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const choiceRow = tableData.find((r) => r.type === 'choice');
+    const conditionalRow = tableData.find((r) => r.type === 'conditional');
+    expect(choiceRow).toBeDefined();
+    expect(conditionalRow).toBeDefined();
+    expect(choiceRow.isLastInGroup).toBe(false);
+  });
+
+  it('marks choice as last when no sibling conditional follows', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string' },
+      },
+      oneOf: [
+        {
+          title: 'Option A',
+          properties: { a: { type: 'string' } },
+        },
+      ],
+    };
+    const tableData = schemaToTableData(schema);
+    const choiceRow = tableData.find((r) => r.type === 'choice');
+    expect(choiceRow).toBeDefined();
+    expect(choiceRow.isLastInGroup).toBe(true);
+  });
 });

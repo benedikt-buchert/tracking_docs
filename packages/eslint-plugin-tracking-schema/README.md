@@ -68,6 +68,7 @@ Requires every property definition to have a `description` field.
 ```
 
 **Skipped automatically for:**
+
 - Properties with a single `$ref` (the referenced schema carries its own description)
 - Properties inside `if` condition blocks
 - Constraint-only refinements (e.g. `{ "maxLength": 40 }` in a `then` block)
@@ -87,6 +88,7 @@ Requires every property definition to have a `type` field.
 ```
 
 **Skipped automatically for:**
+
 - Properties with `$ref`, `const`, `oneOf`, `anyOf`, or `allOf` — these define the type implicitly
 
 ---
@@ -104,6 +106,7 @@ Requires every leaf property definition to have an `examples` array so that gene
 ```
 
 **Skipped automatically for:**
+
 - Properties with `const` or `enum` — the value is already constrained
 - Properties with `type: "object"` or `type: "array"` — sub-properties/items carry their own examples
 - Properties with `oneOf`, `anyOf`, or `allOf` — examples live inside the branches
