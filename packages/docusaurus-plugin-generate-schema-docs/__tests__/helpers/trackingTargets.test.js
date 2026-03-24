@@ -17,6 +17,32 @@ describe('trackingTargets', () => {
     });
   });
 
+  it('returns all supported target IDs when configured', () => {
+    const schema = {
+      'x-tracking-targets': [
+        'web-datalayer-js',
+        'android-firebase-kotlin-sdk',
+        'android-firebase-java-sdk',
+        'ios-firebase-swift-sdk',
+        'ios-firebase-objc-sdk',
+      ],
+    };
+
+    const result = resolveTrackingTargets(schema, { schemaFile: 'event.json' });
+
+    expect(result).toEqual({
+      targets: [
+        'web-datalayer-js',
+        'android-firebase-kotlin-sdk',
+        'android-firebase-java-sdk',
+        'ios-firebase-swift-sdk',
+        'ios-firebase-objc-sdk',
+      ],
+      warning: null,
+      errors: [],
+    });
+  });
+
   it('falls back to default target when key is missing', () => {
     const result = resolveTrackingTargets(
       {},
@@ -70,6 +96,43 @@ describe('trackingTargets', () => {
     expect(result.warning).toContain('x-tracking-targets');
   });
 
+  it('does not warn for aggregators when properties is an empty object', () => {
+    const schema = {
+      type: 'object',
+      properties: {},
+      anyOf: [{ $ref: './option-a.json' }, { $ref: './option-b.json' }],
+    };
+
+    const result = resolveTrackingTargets(schema, {
+      schemaFile: 'reference.json',
+      isQuiet: false,
+    });
+
+    expect(result).toEqual({
+      targets: [DEFAULT_TRACKING_TARGET],
+      warning: null,
+      errors: [],
+    });
+  });
+
+  it('still warns when properties is present but not an object map', () => {
+    const schema = {
+      type: 'object',
+      properties: 'invalid',
+      oneOf: [{ $ref: './option-a.json' }, { $ref: './option-b.json' }],
+    };
+
+    const result = resolveTrackingTargets(schema, {
+      schemaFile: 'event.json',
+      isQuiet: false,
+    });
+
+    expect(result.targets).toEqual([DEFAULT_TRACKING_TARGET]);
+    expect(result.errors).toEqual([]);
+    expect(result.warning).toContain('event.json');
+    expect(result.warning).toContain('x-tracking-targets');
+  });
+
   it('returns an error for unknown targets', () => {
     const schema = {
       'x-tracking-targets': ['web-not-supported-js'],
@@ -80,6 +143,18 @@ describe('trackingTargets', () => {
     expect(result.targets).toEqual([]);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]).toContain('web-not-supported-js');
+  });
+
+  it('joins multiple unsupported targets with comma-space formatting', () => {
+    const schema = {
+      'x-tracking-targets': ['web-not-supported-js', 'ios-not-supported-sdk'],
+    };
+
+    const result = resolveTrackingTargets(schema, { schemaFile: 'event.json' });
+
+    expect(result.errors).toContain(
+      'x-tracking-targets contains unsupported target(s): web-not-supported-js, ios-not-supported-sdk.',
+    );
   });
 
   // L17: optional chaining — x-tracking-targets explicitly set to null
@@ -209,6 +284,39 @@ describe('trackingTargets', () => {
     );
     expect(formatError).toBeDefined();
     expect(formatError).toContain('bad_format');
+  });
+
+  it('joins multiple badly formatted values with comma-space formatting', () => {
+    const schema = { 'x-tracking-targets': ['bad_format', 'another_bad'] };
+    const result = resolveTrackingTargets(schema, { schemaFile: 'event.json' });
+
+    expect(result.errors).toContain(
+      'x-tracking-targets must use lowercase kebab-case IDs like "web-datalayer-js". Invalid value(s): bad_format, another_bad.',
+    );
+  });
+
+  it('rejects target IDs with leading punctuation even when the core pattern matches', () => {
+    const schema = { 'x-tracking-targets': ['!web-datalayer-js'] };
+    const result = resolveTrackingTargets(schema, { schemaFile: 'event.json' });
+
+    const formatError = result.errors.find((e) =>
+      e.includes('lowercase kebab-case'),
+    );
+
+    expect(formatError).toBeDefined();
+    expect(formatError).toContain('!web-datalayer-js');
+  });
+
+  it('rejects target IDs with trailing punctuation even when the core pattern matches', () => {
+    const schema = { 'x-tracking-targets': ['web-datalayer-js!'] };
+    const result = resolveTrackingTargets(schema, { schemaFile: 'event.json' });
+
+    const formatError = result.errors.find((e) =>
+      e.includes('lowercase kebab-case'),
+    );
+
+    expect(formatError).toBeDefined();
+    expect(formatError).toContain('web-datalayer-js!');
   });
 
   // targets are returned only when there are no errors

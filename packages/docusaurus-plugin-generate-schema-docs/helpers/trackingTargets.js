@@ -17,13 +17,19 @@ function isReferenceAggregatorSchema(schema) {
 
   const hasChoiceAggregation =
     Array.isArray(schema.oneOf) || Array.isArray(schema.anyOf);
-  const hasOwnProperties =
+  const hasPropertiesKeyword = Object.hasOwn(schema, 'properties');
+  const hasValidPropertiesMap =
+    hasPropertiesKeyword &&
     schema.properties &&
     typeof schema.properties === 'object' &&
-    !Array.isArray(schema.properties) &&
-    Object.keys(schema.properties).length > 0;
+    !Array.isArray(schema.properties);
+  const hasOwnProperties =
+    hasValidPropertiesMap && Object.keys(schema.properties).length > 0;
 
-  return hasChoiceAggregation && !hasOwnProperties;
+  return (
+    hasChoiceAggregation &&
+    (!hasPropertiesKeyword || (hasValidPropertiesMap && !hasOwnProperties))
+  );
 }
 
 export function resolveTrackingTargets(
