@@ -421,6 +421,76 @@ describe('generateEventDocs (edge cases)', () => {
     expect(choiceOutput).toContain('<TopPartial />');
   });
 
+  it('removes stale oneOf output files and directories between runs', async () => {
+    const testSiteDir = path.resolve(
+      __dirname,
+      '__fixtures_stale_oneof_cleanup__',
+    );
+    const schemaDir = path.join(testSiteDir, 'static/schemas');
+    const docsDir = path.join(testSiteDir, 'docs');
+    fs.vol.mkdirSync(schemaDir, { recursive: true });
+
+    const schemaFile = path.join(schemaDir, 'stale-choice.json');
+    const cleanupOptions = {
+      organizationName: 'test-org',
+      projectName: 'test-project',
+      siteDir: testSiteDir,
+      url: 'https://example.com',
+    };
+
+    const initialSchema = {
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
+      $id: 'https://example.com/schemas/stale-choice.json',
+      title: 'Stale Choice',
+      oneOf: [
+        {
+          title: 'Leaf A',
+          type: 'object',
+          properties: {
+            event: { type: 'string', const: 'leaf_a' },
+          },
+        },
+        {
+          title: 'Group B',
+          oneOf: [
+            {
+              title: 'Leaf B',
+              type: 'object',
+              properties: {
+                event: { type: 'string', const: 'leaf_b' },
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    fs.vol.writeFileSync(schemaFile, JSON.stringify(initialSchema, null, 2));
+    await generateEventDocs(cleanupOptions);
+
+    expect(
+      fs.existsSync(path.join(docsDir, 'stale-choice', '01-leaf-a.mdx')),
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(docsDir, 'stale-choice', '02-group-b')),
+    ).toBe(true);
+
+    const updatedSchema = {
+      ...initialSchema,
+      oneOf: [initialSchema.oneOf[0]],
+    };
+
+    fs.vol.writeFileSync(schemaFile, JSON.stringify(updatedSchema, null, 2));
+    await generateEventDocs(cleanupOptions);
+
+    expect(
+      fs.existsSync(path.join(docsDir, 'stale-choice', '01-leaf-a.mdx')),
+    ).toBe(true);
+    expect(
+      fs.existsSync(path.join(docsDir, 'stale-choice', '02-group-b')),
+    ).toBe(false);
+  });
+
   it('generates docs for inline nested oneOf schemas', async () => {
     // Covers L259 (sourceFilePath || filePath fallback in generateOneOfDocs)
     // and L114 (sourceFilePath || filePath fallback in collectLeafEventNames)

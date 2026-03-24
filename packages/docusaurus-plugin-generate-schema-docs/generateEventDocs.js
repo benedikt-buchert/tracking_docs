@@ -235,9 +235,14 @@ async function generateOneOfDocs(
 
   // Remove stale files/dirs from previous runs that are no longer in the schema
   const expectedNames = new Set(['index.mdx']);
-  for (const [index, { slug, schema: processedSchema }] of processed.entries()) {
+  for (const [
+    index,
+    { slug, schema: processedSchema },
+  ] of processed.entries()) {
     const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
-    expectedNames.add(processedSchema.oneOf ? prefixedSlug : `${prefixedSlug}.mdx`);
+    expectedNames.add(
+      processedSchema.oneOf ? prefixedSlug : `${prefixedSlug}.mdx`,
+    );
   }
   for (const entry of fs.readdirSync(eventOutputDir, { withFileTypes: true })) {
     if (!expectedNames.has(entry.name)) {
