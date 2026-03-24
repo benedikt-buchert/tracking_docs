@@ -1,22 +1,18 @@
 import path from 'path';
 import fs from 'fs';
 
+function buildCandidatePaths(baseSegments, packageName) {
+  return [
+    path.resolve(process.cwd(), ...baseSegments, packageName),
+    path.resolve(process.cwd(), '..', ...baseSegments, packageName),
+    path.resolve(process.cwd(), '..', '..', ...baseSegments, packageName),
+  ];
+}
+
 function getConstraintsPackageRoot() {
   const candidates = [
-    path.resolve(process.cwd(), 'packages', 'tracking-target-constraints'),
-    path.resolve(
-      process.cwd(),
-      '..',
-      'packages',
-      'tracking-target-constraints',
-    ),
-    path.resolve(
-      process.cwd(),
-      '..',
-      '..',
-      'packages',
-      'tracking-target-constraints',
-    ),
+    ...buildCandidatePaths(['packages'], 'tracking-target-constraints'),
+    ...buildCandidatePaths(['node_modules'], 'tracking-target-constraints'),
   ];
 
   return candidates.find((candidate) => fs.existsSync(candidate));

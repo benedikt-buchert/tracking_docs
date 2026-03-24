@@ -84,6 +84,19 @@ describe('resolveConstraintSchemaPath — when package root not found', () => {
     const result = resolveConstraintSchemaPath('/constraints/foo.json');
     expect(result).toBe(path.join(thirdCandidate, 'foo.json'));
   });
+
+  it('falls back to node_modules package when monorepo candidates are missing', () => {
+    const installedPackageCandidate = path.resolve(
+      process.cwd(),
+      'node_modules',
+      'tracking-target-constraints',
+    );
+    fs.existsSync.mockImplementation((p) => p === installedPackageCandidate);
+
+    const result = resolveConstraintSchemaPath('/constraints/foo.json');
+
+    expect(result).toBe(path.join(installedPackageCandidate, 'foo.json'));
+  });
 });
 
 describe('resolveConstraintSchemaPath — HTTP/HTTPS URIs', () => {
