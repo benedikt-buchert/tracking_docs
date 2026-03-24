@@ -1,9 +1,17 @@
 {
   "name": "tracking-target-constraints",
   "version": "0.1.0",
-  "private": true,
   "license": "MIT",
   "description": "Reusable target constraint schemas for tracking contracts.",
+  "files": [
+    "schemas",
+    "manifest.json",
+    "dist",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "jest __tests__/firebase-v1-constraints.test.js --runInBand",
     "build": "node scripts/build-static.mjs"

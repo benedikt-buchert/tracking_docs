@@ -25,6 +25,20 @@ npm run test -w tracking-target-constraints
 npm run build -w tracking-target-constraints
 ```
 
+## npm package
+
+The package can be consumed directly after publishing:
+
+```bash
+npm install tracking-target-constraints
+```
+
+That install includes:
+
+- `manifest.json`
+- `schemas/...`
+- `dist/...`
+
 ## Publishing as static URLs
 
 Deploy `packages/tracking-target-constraints/dist` to any static host (for example Cloudflare Pages, Netlify, Vercel static output, S3+CloudFront).
