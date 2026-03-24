@@ -481,6 +481,10 @@ describe('generateEventDocs (edge cases)', () => {
     };
 
     fs.vol.writeFileSync(schemaFile, JSON.stringify(updatedSchema, null, 2));
+
+    const unlinkSpy = jest.spyOn(fs, 'unlinkSync');
+    const rmSpy = jest.spyOn(fs, 'rmSync');
+
     await generateEventDocs(cleanupOptions);
 
     expect(
@@ -489,6 +493,13 @@ describe('generateEventDocs (edge cases)', () => {
     expect(
       fs.existsSync(path.join(docsDir, 'stale-choice', '02-group-b')),
     ).toBe(false);
+    expect(unlinkSpy).not.toHaveBeenCalledWith(
+      path.join(docsDir, 'stale-choice', '01-leaf-a.mdx'),
+    );
+    expect(rmSpy).toHaveBeenCalledWith(
+      path.join(docsDir, 'stale-choice', '02-group-b'),
+      { recursive: true },
+    );
   });
 
   it('generates docs for inline nested oneOf schemas', async () => {
