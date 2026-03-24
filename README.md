@@ -7,6 +7,7 @@ This repository contains a Docusaurus v3 plugin for generating documentation fro
 - [Main README (this file)](./README.md): Monorepo usage, demo workflows, release process, and contributor quick start.
 - [Plugin README](./packages/docusaurus-plugin-generate-schema-docs/README.md): Plugin API, options, schema layout, and CLI command behavior.
 - [ESLint Plugin README](./packages/eslint-plugin-tracking-schema/README.md): Linting rules to enforce annotation quality on JSON schema files.
+- [Constraints Package README](./packages/tracking-target-constraints/README.md): Reusable tracking target constraint schemas, packaging details, and static publishing guidance.
 
 ## Prerequisites
 
