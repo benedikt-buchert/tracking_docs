@@ -10,6 +10,28 @@ export const SUPPORTED_TRACKING_TARGETS = [
 
 const TARGET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+){2,}$/;
 
+function isReferenceAggregatorSchema(schema) {
+  if (!schema || typeof schema !== 'object') {
+    return false;
+  }
+
+  const hasChoiceAggregation =
+    Array.isArray(schema.oneOf) || Array.isArray(schema.anyOf);
+  const hasPropertiesKeyword = Object.hasOwn(schema, 'properties');
+  const hasValidPropertiesMap =
+    hasPropertiesKeyword &&
+    schema.properties &&
+    typeof schema.properties === 'object' &&
+    !Array.isArray(schema.properties);
+  const hasOwnProperties =
+    hasValidPropertiesMap && Object.keys(schema.properties).length > 0;
+
+  return (
+    hasChoiceAggregation &&
+    (!hasPropertiesKeyword || (hasValidPropertiesMap && !hasOwnProperties))
+  );
+}
+
 export function resolveTrackingTargets(
   schema,
   { schemaFile = 'schema', isQuiet = false } = {},
@@ -17,9 +39,10 @@ export function resolveTrackingTargets(
   const configuredTargets = schema?.['x-tracking-targets'];
 
   if (configuredTargets == null) {
-    const warning = isQuiet
-      ? null
-      : `Schema ${schemaFile} is missing x-tracking-targets. Falling back to "${DEFAULT_TRACKING_TARGET}".`;
+    const warning =
+      isQuiet || isReferenceAggregatorSchema(schema)
+        ? null
+        : `Schema ${schemaFile} is missing x-tracking-targets. Falling back to "${DEFAULT_TRACKING_TARGET}".`;
     return {
       targets: [DEFAULT_TRACKING_TARGET],
       warning,
