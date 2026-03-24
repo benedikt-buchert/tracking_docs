@@ -7,7 +7,7 @@ import {
   writeDoc,
   createDir,
 } from './helpers/file-system.js';
-import { processOneOfSchema, slugify } from './helpers/schema-processing.js';
+import { processOneOfSchema } from './helpers/schema-processing.js';
 import SchemaDocTemplate from './helpers/schema-doc-template.js';
 import ChoiceIndexTemplate from './helpers/choice-index-template.js';
 import processSchema from './helpers/processSchema.js';
@@ -232,6 +232,26 @@ async function generateOneOfDocs(
   createDir(eventOutputDir);
 
   const processed = await processOneOfSchema(schema, filePath);
+
+  // Remove stale files/dirs from previous runs that are no longer in the schema
+  const expectedNames = new Set(['index.mdx']);
+  for (const [
+    index,
+    { slug, schema: processedSchema },
+  ] of processed.entries()) {
+    const prefixedSlug = `${(index + 1).toString().padStart(2, '0')}-${slug}`;
+    expectedNames.add(
+      processedSchema.oneOf ? prefixedSlug : `${prefixedSlug}.mdx`,
+    );
+  }
+  for (const entry of fs.readdirSync(eventOutputDir, { withFileTypes: true })) {
+    if (!expectedNames.has(entry.name)) {
+      const fullPath = path.join(eventOutputDir, entry.name);
+      entry.isDirectory()
+        ? fs.rmSync(fullPath, { recursive: true })
+        : fs.unlinkSync(fullPath);
+    }
+  }
 
   const indexPageContent = ChoiceIndexTemplate({
     schema,
