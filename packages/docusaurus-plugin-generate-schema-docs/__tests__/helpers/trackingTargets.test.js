@@ -28,6 +28,48 @@ describe('trackingTargets', () => {
     expect(result.warning).toContain(DEFAULT_TRACKING_TARGET);
   });
 
+  it('does not warn for top-level reference schemas that aggregate via oneOf', () => {
+    const schema = {
+      type: 'object',
+      allOf: [{ $ref: './web/components/dataLayer.json' }],
+      oneOf: [
+        { $ref: './web/add-to-cart-event.json' },
+        { $ref: './web/purchase-event.json' },
+      ],
+    };
+
+    const result = resolveTrackingTargets(schema, {
+      schemaFile: 'event-reference.json',
+      isQuiet: false,
+    });
+
+    expect(result).toEqual({
+      targets: [DEFAULT_TRACKING_TARGET],
+      warning: null,
+      errors: [],
+    });
+  });
+
+  it('still warns when oneOf schemas define their own properties', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        event: { type: 'string' },
+      },
+      oneOf: [{ $ref: './option-a.json' }, { $ref: './option-b.json' }],
+    };
+
+    const result = resolveTrackingTargets(schema, {
+      schemaFile: 'event.json',
+      isQuiet: false,
+    });
+
+    expect(result.targets).toEqual([DEFAULT_TRACKING_TARGET]);
+    expect(result.errors).toEqual([]);
+    expect(result.warning).toContain('event.json');
+    expect(result.warning).toContain('x-tracking-targets');
+  });
+
   it('returns an error for unknown targets', () => {
     const schema = {
       'x-tracking-targets': ['web-not-supported-js'],
