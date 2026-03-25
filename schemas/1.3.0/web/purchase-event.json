@@ -9,7 +9,7 @@
     "$schema": {
       "type": "string",
       "description": "Defines the structure of the event. This can be used to validate an event against the schema provided.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/web/purchase-event.json"
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/purchase-event.json"
     },
     "event": {
       "type": "string",
