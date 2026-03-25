@@ -25,6 +25,7 @@ jest.mock('fs', () => ({
   existsSync: jest.fn(),
   readFileSync: jest.fn(),
   cpSync: jest.fn(),
+  rmSync: jest.fn(),
 }));
 
 import generateEventDocs from '../generateEventDocs.js';
@@ -49,6 +50,13 @@ const makeOptions = () => ({ dataLayerName: 'dataLayer' });
 beforeEach(() => {
   jest.clearAllMocks();
   fs.existsSync.mockReturnValue(false);
+  fs.cpSync.mockImplementation(() => {});
+  fs.rmSync.mockImplementation(() => {});
+  execSync.mockImplementation(() => {});
+  getPathsForVersion.mockReturnValue({
+    schemaDir: '/site/static/schemas/next',
+    outputDir: '/site/docs',
+  });
 });
 
 describe('loadContent', () => {
@@ -370,6 +378,18 @@ describe('extendCli - version-with-schemas', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     // versions.json absent (not versioned); nextSchemasDir present
     fs.existsSync.mockImplementation((p) => !p.includes('versions.json'));
+    getPathsForVersion.mockImplementation((version) => {
+      if (version === '1.2.0') {
+        return {
+          schemaDir: '/site/static/schemas/1.2.0',
+          outputDir: '/site/versioned_docs/version-1.2.0',
+        };
+      }
+      return {
+        schemaDir: '/site/static/schemas/next',
+        outputDir: '/site/docs',
+      };
+    });
   });
 
   it('creates version, copies schemas, updates IDs and generates docs on success', async () => {
@@ -431,6 +451,95 @@ describe('extendCli - version-with-schemas', () => {
     await action('1.2.0');
 
     expect(exitSpy).toHaveBeenCalledWith(1);
+    exitSpy.mockRestore();
+  });
+});
+
+describe('extendCli - sync-version-from-next', () => {
+  const getAction = async () => {
+    let captured = null;
+    const cli = {
+      command: jest.fn((name) => {
+        const cmd = {
+          description: jest.fn().mockReturnThis(),
+          option: jest.fn().mockReturnThis(),
+          action: jest.fn((fn) => {
+            if (name === 'sync-version-from-next <version>') captured = fn;
+            return cmd;
+          }),
+        };
+        return cmd;
+      }),
+    };
+    const plugin = await createPlugin(makeContext(), makeOptions());
+    plugin.extendCli(cli);
+    return captured;
+  };
+
+  beforeEach(() => {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+    fs.existsSync.mockImplementation((p) => p === '/site/versions.json');
+    fs.readFileSync.mockReturnValue(JSON.stringify(['1.2.0']));
+    getPathsForVersion.mockImplementation((version) => {
+      if (version === '1.2.0') {
+        return {
+          schemaDir: '/site/static/schemas/1.2.0',
+          outputDir: '/site/versioned_docs/version-1.2.0',
+        };
+      }
+      return {
+        schemaDir: '/site/static/schemas/next',
+        outputDir: '/site/docs',
+      };
+    });
+  });
+
+  it('syncs an existing version from next schemas without calling docs:version', async () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    fs.existsSync.mockImplementation(
+      (p) =>
+        p === '/site/versions.json' ||
+        p === '/site/static/schemas/next' ||
+        p === '/site/static/schemas/1.2.0' ||
+        p === '/site/versioned_docs/version-1.2.0',
+    );
+
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(exitSpy).not.toHaveBeenCalled();
+    expect(execSync).not.toHaveBeenCalled();
+    expect(fs.rmSync).toHaveBeenCalledWith('/site/static/schemas/1.2.0', {
+      recursive: true,
+      force: true,
+    });
+    expect(fs.cpSync).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      '/site/static/schemas/1.2.0',
+      { recursive: true },
+    );
+    expect(updateSchemaIds).toHaveBeenCalledWith(
+      '/site',
+      'https://example.com',
+      '1.2.0',
+    );
+    expect(generateEventDocs).toHaveBeenCalledWith(
+      expect.objectContaining({ version: '1.2.0' }),
+    );
+    exitSpy.mockRestore();
+  });
+
+  it('exits with code 1 when the target version is not in versions.json', async () => {
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});
+    fs.readFileSync.mockReturnValue(JSON.stringify(['1.1.1']));
+
+    const action = await getAction();
+    await action('1.2.0');
+
+    expect(exitSpy).toHaveBeenCalledWith(1);
+    expect(fs.cpSync).not.toHaveBeenCalled();
+    expect(generateEventDocs).not.toHaveBeenCalled();
     exitSpy.mockRestore();
   });
 });

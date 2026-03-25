@@ -1,6 +1,11 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/complex-event.json",
+  "$comment": "Authoring example for schema metadata in the raw schema viewer.",
+  "$vocabulary": {
+    "https://json-schema.org/draft/2020-12/vocab/core": true,
+    "https://json-schema.org/draft/2020-12/vocab/validation": true
+  },
   "title": "Complex Event with Validation Constraints",
   "description": "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
   "x-tracking-targets": ["web-datalayer-js"],
@@ -46,7 +51,7 @@
         },
         "attributes": {
           "type": "object",
-          "description": "Nested generic attributes.",
+          "description": "Nested generic attributes. Declared keys are documented below; undeclared keys are allowed when they satisfy the schema constraint row for additionalProperties.",
           "properties": {
             "segment": {
               "type": "string",
@@ -71,7 +76,15 @@
               "minimum": 0,
               "examples": [12]
             }
-          }
+          },
+          "examples": [
+            {
+              "segment": "premium",
+              "score": 95,
+              "loyalty_tier": "gold",
+              "custom_ltv": 12
+            }
+          ]
         },
         "addresses": {
           "type": "array",

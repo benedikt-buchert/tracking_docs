@@ -9,6 +9,66 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function readConfiguredVersions(siteDir) {
+  const versionsJsonPath = path.join(siteDir, 'versions.json');
+  if (!fs.existsSync(versionsJsonPath)) {
+    return null;
+  }
+
+  return JSON.parse(fs.readFileSync(versionsJsonPath, 'utf8'));
+}
+
+async function syncVersionFromNext({
+  siteDir,
+  url,
+  version,
+  pluginOptions,
+  requireExistingVersion = false,
+}) {
+  if (requireExistingVersion) {
+    const versions = readConfiguredVersions(siteDir);
+    if (!versions) {
+      console.error('❌ Versioning is not enabled for this site.');
+      return false;
+    }
+
+    if (!versions.includes(version)) {
+      console.error(`❌ Version ${version} is not present in versions.json`);
+      return false;
+    }
+  }
+
+  const nextSchemasDir = path.join(siteDir, 'static/schemas/next');
+  const { schemaDir: versionedSchemasDir } = getPathsForVersion(
+    version,
+    siteDir,
+  );
+
+  if (!fs.existsSync(nextSchemasDir)) {
+    console.error(`❌ Source schemas directory not found: ${nextSchemasDir}`);
+    return false;
+  }
+
+  try {
+    if (fs.existsSync(versionedSchemasDir)) {
+      fs.rmSync(versionedSchemasDir, { recursive: true, force: true });
+    }
+    fs.cpSync(nextSchemasDir, versionedSchemasDir, { recursive: true });
+    console.log(`✅ Schemas copied to ${versionedSchemasDir}`);
+  } catch (error) {
+    console.error(`❌ Failed to copy schemas: ${error.message}`);
+    return false;
+  }
+
+  console.log(`🔄 Updating schema $ids for version ${version}...`);
+  updateSchemaIds(siteDir, url, version);
+
+  console.log(`📝 Generating documentation for version ${version}...`);
+  await generateEventDocs({ ...pluginOptions, version });
+
+  return true;
+}
+
 export default async function (context, options) {
   const { siteDir } = context;
   const { dataLayerName } = options;
@@ -118,36 +178,15 @@ export default async function (context, options) {
         }
 
         console.log(`📂 Copying schemas from next to ${version}...`);
-        const nextSchemasDir = path.join(siteDir, 'static/schemas/next');
-        const versionedSchemasDir = path.join(
+        const success = await syncVersionFromNext({
           siteDir,
-          'static/schemas',
+          url,
           version,
-        );
-
-        if (!fs.existsSync(nextSchemasDir)) {
-          console.error(
-            `❌ Source schemas directory not found: ${nextSchemasDir}`,
-          );
+          pluginOptions,
+        });
+        if (!success) {
           process.exit(1);
         }
-
-        // Copy the schemas
-        try {
-          fs.cpSync(nextSchemasDir, versionedSchemasDir, { recursive: true });
-          console.log(`✅ Schemas copied to ${versionedSchemasDir}`);
-        } catch (error) {
-          console.error(`❌ Failed to copy schemas: ${error.message}`);
-          process.exit(1);
-        }
-
-        // Update schema IDs for the new version
-        console.log(`🔄 Updating schema $ids for version ${version}...`);
-        updateSchemaIds(siteDir, url, version);
-
-        // Generate documentation for the new version
-        console.log(`📝 Generating documentation for version ${version}...`);
-        await generateEventDocs({ ...pluginOptions, version });
 
         console.log(`\n✅ Version ${version} created successfully!`);
         console.log(`\nNext steps:`);
@@ -156,6 +195,34 @@ export default async function (context, options) {
           `  2. Review the changes in versioned_docs/version-${version}/`,
         );
         console.log(`  3. Commit the changes to version control`);
+      });
+
+    cli
+      .command('sync-version-from-next <version>')
+      .description(
+        'Replace an existing versioned schema snapshot from static/schemas/next and regenerate its docs',
+      )
+      .action(async (version) => {
+        console.log(`🔄 Syncing version ${version} from next schemas...`);
+        const success = await syncVersionFromNext({
+          siteDir,
+          url,
+          version,
+          pluginOptions,
+          requireExistingVersion: true,
+        });
+        if (!success) {
+          process.exit(1);
+        }
+
+        console.log(`\n✅ Version ${version} synced successfully!`);
+        console.log(`\nNotes:`);
+        console.log(
+          '  - This command syncs schemas and regenerated docs only.',
+        );
+        console.log(
+          '  - Manual MDX pages and partials remain repo-level maintenance.',
+        );
       });
   };
 
