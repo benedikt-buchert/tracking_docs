@@ -69,7 +69,7 @@
     "$schema": {
       "type": "string",
       "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/mobile/checkout-options-event.json"
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/mobile/checkout-options-event.json"
     },
     "event": {
       "type": "string",
