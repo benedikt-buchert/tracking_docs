@@ -171,6 +171,28 @@ When using the versioning feature, the plugin will automatically update the `$id
 
 This is done automatically by the plugin. However, if you need to update the `$id`s of your schemas manually, you can use the `update-schema-ids.js` script located in the plugin's `helpers` directory.
 
+### Versioning Commands
+
+- `docusaurus version-with-schemas <version>`
+  Creates a brand new Docusaurus docs version, copies `static/schemas/next` to `static/schemas/<version>`, updates schema `$id`s, and generates the versioned schema docs.
+- `docusaurus sync-version-from-next <version>`
+  Replaces an already existing `static/schemas/<version>` snapshot with the current `static/schemas/next` schemas, updates schema `$id`s, and regenerates the versioned schema docs for that existing version.
+
+### Scope of Plugin Version Sync
+
+The plugin's versioning commands only manage:
+
+- `static/schemas/next`
+- `static/schemas/<version>`
+- generated schema docs in `docs/` and `versioned_docs/version-<version>/`
+
+They do **not** attempt to sync or clean repo-specific manual content such as:
+
+- hand-maintained MDX pages
+- `partials/` content
+
+Those remain repository-level workflow concerns and should be copied or maintained explicitly when needed.
+
 ## Partials
 
 You can provide additional content to the generated documentation pages by creating partial files. Partials are Markdown files that can be automatically included in the generated pages.

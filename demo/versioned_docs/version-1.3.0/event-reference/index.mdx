@@ -65,7 +65,7 @@ Please select one of the following options:
     },
     "web/components/dataLayer.json": {
       $schema: "https://json-schema.org/draft/2020-12/schema",
-      $id: "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/events/components/dataLayer.json",
+      $id: "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/components/dataLayer.json",
       title: "dataLayer",
       description: "Schema for the object structure pushed to the dataLayer.",
       type: "object",
@@ -101,6 +101,12 @@ Please select one of the following options:
     "web/complex-event.json": {
       $schema: "https://json-schema.org/draft/2020-12/schema",
       $id: "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/complex-event.json",
+      $comment:
+        "Authoring example for schema metadata in the raw schema viewer.",
+      $vocabulary: {
+        "https://json-schema.org/draft/2020-12/vocab/core": true,
+        "https://json-schema.org/draft/2020-12/vocab/validation": true,
+      },
       title: "Complex Event with Validation Constraints",
       description:
         "A generic event demonstrating various validation constraints and recursive documentation capabilities.",
@@ -119,7 +125,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/complex-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/complex-event.json",
         },
         event: {
           type: "string",
@@ -149,7 +155,8 @@ Please select one of the following options:
             },
             attributes: {
               type: "object",
-              description: "Nested generic attributes.",
+              description:
+                "Nested generic attributes. Declared keys are documented below; undeclared keys are allowed when they satisfy the schema constraint row for additionalProperties.",
               properties: {
                 segment: {
                   type: "string",
@@ -177,6 +184,14 @@ Please select one of the following options:
                   examples: [12],
                 },
               },
+              examples: [
+                {
+                  segment: "premium",
+                  score: 95,
+                  loyalty_tier: "gold",
+                  custom_ltv: 12,
+                },
+              ],
             },
             addresses: {
               type: "array",
@@ -319,7 +334,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/purchase-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/purchase-event.json",
         },
         event: {
           type: "string",
@@ -546,7 +561,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/add-to-cart-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/add-to-cart-event.json",
           type: "string",
         },
         event: {
@@ -591,7 +606,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/root-any-of-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/root-any-of-event.json",
         },
         event: {
           type: "string",
@@ -639,7 +654,7 @@ Please select one of the following options:
               description:
                 "Defines the structure of the event. This can be used to validate an event against the schema provided.",
               const:
-                "https://tracking-docs-demo.buchert.digital/schemas/web/root-choice-event.json",
+                "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/root-choice-event.json",
             },
           },
           required: ["$schema"],
@@ -698,7 +713,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/choice-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/choice-event.json",
         },
         event: {
           type: "string",
@@ -786,7 +801,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/conditional-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/conditional-event.json",
         },
         event: {
           type: "string",
@@ -852,7 +867,7 @@ Please select one of the following options:
           description:
             "Defines the structure of the event. This can be used to validate an event against the schema provided.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/nested-conditional-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/nested-conditional-event.json",
         },
         event: {
           type: "string",
@@ -929,7 +944,7 @@ Please select one of the following options:
           type: "string",
           description: "Schema validation URL.",
           const:
-            "https://tracking-docs-demo.buchert.digital/schemas/web/battle-test-event.json",
+            "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/battle-test-event.json",
         },
         event: {
           type: "string",

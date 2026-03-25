@@ -10,7 +10,7 @@
     "$schema": {
       "type": "string",
       "description": "Schema validation URL.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/web/battle-test-event.json"
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/web/battle-test-event.json"
     },
     "event": {
       "type": "string",
