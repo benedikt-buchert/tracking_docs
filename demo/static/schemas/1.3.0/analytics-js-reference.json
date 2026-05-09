@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://tracking-docs-demo.buchert.digital/schemas/analytics-js-reference.json",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/analytics-js-reference.json",
   "title": "Analytics.js Reference",
   "description": "Analytics.js-compatible event examples for Segment, RudderStack, and Hightouch.",
   "type": "object",
