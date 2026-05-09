@@ -789,6 +789,75 @@ function generateIosObjcFirebaseSnippet({ example, targetId }) {
   return lines.join('\n');
 }
 
+const META_KEYS = new Set(['$schema']);
+
+function resolveCdpMethod(schema) {
+  return schema?.['x-method'] ?? 'track';
+}
+
+function cdpProperties(example, excludeKeys) {
+  return Object.fromEntries(
+    Object.entries(example).filter(
+      ([k]) => !META_KEYS.has(k) && !excludeKeys.has(k),
+    ),
+  );
+}
+
+function generateCdpSnippet(globalObj) {
+  return function ({ example, schema }) {
+    const method = resolveCdpMethod(schema);
+    const call = method
+      .split('.')
+      .reduce((acc, key) => `${acc}.${key}`, globalObj);
+
+    if (method === 'track') {
+      const eventName = example.event;
+      const props = cdpProperties(example, new Set(['event']));
+      const hasProps = Object.keys(props).length > 0;
+      return hasProps
+        ? `${call}(${JSON.stringify(eventName)}, ${JSON.stringify(props, null, 2)});`
+        : `${call}(${JSON.stringify(eventName)});`;
+    }
+
+    if (method === 'identify') {
+      const { userId } = example;
+      const traits = cdpProperties(example, new Set(['userId']));
+      const hasTraits = Object.keys(traits).length > 0;
+      if (userId !== undefined) {
+        return hasTraits
+          ? `${call}(${JSON.stringify(userId)}, ${JSON.stringify(traits, null, 2)});`
+          : `${call}(${JSON.stringify(userId)});`;
+      }
+      return hasTraits
+        ? `${call}(${JSON.stringify(traits, null, 2)});`
+        : `${call}();`;
+    }
+
+    if (method === 'group') {
+      const { groupId } = example;
+      const traits = cdpProperties(example, new Set(['groupId']));
+      const hasTraits = Object.keys(traits).length > 0;
+      return hasTraits
+        ? `${call}(${JSON.stringify(groupId)}, ${JSON.stringify(traits, null, 2)});`
+        : `${call}(${JSON.stringify(groupId)});`;
+    }
+
+    if (method === 'page') {
+      const props = cdpProperties(example, new Set());
+      const hasProps = Object.keys(props).length > 0;
+      return hasProps
+        ? `${call}(${JSON.stringify(props, null, 2)});`
+        : `${call}();`;
+    }
+
+    const props = cdpProperties(example, new Set());
+    const hasProps = Object.keys(props).length > 0;
+    return hasProps
+      ? `${call}(${JSON.stringify(props, null, 2)});`
+      : `${call}();`;
+  };
+}
+
 export const SNIPPET_TARGETS = [
   {
     id: 'web-datalayer-js',
@@ -824,6 +893,27 @@ export const SNIPPET_TARGETS = [
     label: 'iOS Firebase (Obj-C)',
     language: 'objectivec',
     generator: generateIosObjcFirebaseSnippet,
+  },
+  {
+    id: 'web-segment-js',
+    group: 'web',
+    label: 'Segment (JS)',
+    language: 'javascript',
+    generator: generateCdpSnippet('analytics'),
+  },
+  {
+    id: 'web-rudderstack-js',
+    group: 'web',
+    label: 'RudderStack (JS)',
+    language: 'javascript',
+    generator: generateCdpSnippet('rudderanalytics'),
+  },
+  {
+    id: 'web-hightouch-js',
+    group: 'web',
+    label: 'Hightouch (JS)',
+    language: 'javascript',
+    generator: generateCdpSnippet('htevents'),
   },
 ];
 

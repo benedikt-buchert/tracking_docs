@@ -6,9 +6,41 @@ export const SUPPORTED_TRACKING_TARGETS = [
   'android-firebase-java-sdk',
   'ios-firebase-swift-sdk',
   'ios-firebase-objc-sdk',
+  'web-segment-js',
+  'web-rudderstack-js',
+  'web-hightouch-js',
 ];
 
 const TARGET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+){2,}$/;
+
+const SUPPORTED_CALL_METHODS = ['track', 'identify', 'group', 'page'];
+const DOTTED_METHOD_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
+
+export function resolveCallMethod(schema) {
+  const method = schema?.['x-method'];
+
+  if (method == null) {
+    return { method: 'track', errors: [] };
+  }
+
+  if (typeof method !== 'string') {
+    return { method: null, errors: ['x-method must be a string.'] };
+  }
+
+  if (
+    SUPPORTED_CALL_METHODS.includes(method) ||
+    DOTTED_METHOD_PATTERN.test(method)
+  ) {
+    return { method, errors: [] };
+  }
+
+  return {
+    method: null,
+    errors: [
+      `x-method "${method}" is not supported. Use one of: ${SUPPORTED_CALL_METHODS.join(', ')}.`,
+    ],
+  };
+}
 
 function isReferenceAggregatorSchema(schema) {
   if (!schema || typeof schema !== 'object') {

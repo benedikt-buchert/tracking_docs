@@ -293,4 +293,48 @@ describe('validateSchemas', () => {
       .join('\n');
     expect(errorMessages).toContain('example data failed validation');
   });
+
+  it('should return false when x-method has an invalid value', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'bad-method.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        'x-tracking-targets': ['web-segment-js'],
+        'x-method': 'typo',
+        type: 'object',
+        properties: {
+          userId: { type: 'string', examples: ['usr_1'] },
+        },
+      }),
+    );
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(false);
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('x-method');
+  });
+
+  it('should return true when x-method is a valid value', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'identify.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        'x-tracking-targets': ['web-segment-js'],
+        'x-method': 'identify',
+        type: 'object',
+        properties: {
+          userId: { type: 'string', examples: ['usr_1'] },
+          email: { type: 'string', examples: ['a@b.com'] },
+        },
+      }),
+    );
+    const result = await validateSchemas(schemaDir);
+    expect(result).toBe(true);
+  });
 });
