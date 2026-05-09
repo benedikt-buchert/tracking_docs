@@ -114,7 +114,7 @@ const config = {
             items: [
               {
                 label: 'Example event',
-                to: '/event-reference/complex-event',
+                to: '/datalayer-reference/complex-event',
               },
               {
                 label: 'GTM Data Layer Documentation',
@@ -148,7 +148,27 @@ const config = {
         additionalLanguages: ['java', 'kotlin', 'swift', 'objectivec'],
       },
     }),
-  plugins: ['docusaurus-plugin-generate-schema-docs'],
+  plugins: [
+    'docusaurus-plugin-generate-schema-docs',
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        createRedirects(existingPath) {
+          if (existingPath.includes('/datalayer-reference')) {
+            return [
+              existingPath.replace('/datalayer-reference', '/event-reference'),
+            ];
+          }
+          if (existingPath.includes('/firebase-reference')) {
+            return [
+              existingPath.replace('/firebase-reference', '/mobile-reference'),
+            ];
+          }
+          return undefined;
+        },
+      },
+    ],
+  ],
 };
 
 export default config;
