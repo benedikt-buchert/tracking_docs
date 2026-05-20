@@ -1,6 +1,7 @@
 import {
   DEFAULT_TRACKING_TARGET,
   resolveTrackingTargets,
+  resolveCallMethod,
 } from '../../helpers/trackingTargets';
 
 describe('trackingTargets', () => {
@@ -357,5 +358,67 @@ describe('trackingTargets', () => {
     expect(result.errors).toEqual([]);
     // schemaFile defaults to 'schema'
     expect(result.warning).toContain('schema');
+  });
+
+  it('accepts web-segment-js as a supported target', () => {
+    const schema = { 'x-tracking-targets': ['web-segment-js'] };
+    const result = resolveTrackingTargets(schema);
+    expect(result.errors).toEqual([]);
+    expect(result.targets).toEqual(['web-segment-js']);
+  });
+
+  it('accepts web-rudderstack-js as a supported target', () => {
+    const schema = { 'x-tracking-targets': ['web-rudderstack-js'] };
+    const result = resolveTrackingTargets(schema);
+    expect(result.errors).toEqual([]);
+    expect(result.targets).toEqual(['web-rudderstack-js']);
+  });
+
+  it('accepts web-hightouch-js as a supported target', () => {
+    const schema = { 'x-tracking-targets': ['web-hightouch-js'] };
+    const result = resolveTrackingTargets(schema);
+    expect(result.errors).toEqual([]);
+    expect(result.targets).toEqual(['web-hightouch-js']);
+  });
+});
+
+describe('resolveCallMethod', () => {
+  it('defaults to track when x-method is absent', () => {
+    expect(resolveCallMethod({})).toEqual({ method: 'track', errors: [] });
+  });
+
+  it('defaults to track when schema is null', () => {
+    expect(resolveCallMethod(null)).toEqual({ method: 'track', errors: [] });
+  });
+
+  it.each(['track', 'identify', 'group', 'page'])(
+    'accepts "%s" as a valid method',
+    (method) => {
+      expect(resolveCallMethod({ 'x-method': method })).toEqual({
+        method,
+        errors: [],
+      });
+    },
+  );
+
+  it('accepts dotted method paths', () => {
+    expect(resolveCallMethod({ 'x-method': 'ecommerce.track' })).toEqual({
+      method: 'ecommerce.track',
+      errors: [],
+    });
+  });
+
+  it('returns an error for an unknown method', () => {
+    const result = resolveCallMethod({ 'x-method': 'typo' });
+    expect(result.method).toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('typo');
+  });
+
+  it('returns an error when x-method is not a string', () => {
+    const result = resolveCallMethod({ 'x-method': 42 });
+    expect(result.method).toBeNull();
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]).toContain('x-method');
   });
 });

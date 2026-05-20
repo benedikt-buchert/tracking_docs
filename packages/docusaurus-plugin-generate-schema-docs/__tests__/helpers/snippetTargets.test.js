@@ -1174,3 +1174,219 @@ describe('snippetTargets', () => {
     expect(snippet).toContain('kFIRParameterCurrency: @"USD"');
   });
 });
+
+function executeCdpSnippet(snippet, globalName) {
+  const sdk = {
+    track: jest.fn(),
+    identify: jest.fn(),
+    group: jest.fn(),
+    page: jest.fn(),
+  };
+  const runner = new Function(globalName, snippet);
+  runner(sdk);
+  return sdk;
+}
+
+const CDP_TARGETS = [
+  { targetId: 'web-segment-js', globalName: 'analytics', label: 'Segment' },
+  {
+    targetId: 'web-rudderstack-js',
+    globalName: 'rudderanalytics',
+    label: 'RudderStack',
+  },
+  { targetId: 'web-hightouch-js', globalName: 'htevents', label: 'Hightouch' },
+];
+
+describe.each(CDP_TARGETS)(
+  '$label ($targetId) snippet',
+  ({ targetId, globalName }) => {
+    it('is registered in SNIPPET_TARGETS', () => {
+      expect(SNIPPET_TARGETS.map((t) => t.id)).toContain(targetId);
+    });
+
+    it('has group=web and language=javascript', () => {
+      const target = getSnippetTarget(targetId);
+      expect(target.group).toBe('web');
+      expect(target.language).toBe('javascript');
+    });
+
+    describe('track (default)', () => {
+      it('defaults to track when x-method is absent', () => {
+        const snippet = generateSnippetForTarget({
+          targetId,
+          example: { event: 'purchase', revenue: 10 },
+          schema: {},
+        });
+        expect(snippet).toContain(`${globalName}.track(`);
+      });
+
+      it('extracts event name as first arg and remaining fields as properties', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { event: 'add_to_cart', item_id: 'SKU-1', quantity: 2 },
+            schema: {},
+          }),
+          globalName,
+        );
+        expect(sdk.track).toHaveBeenCalledWith('add_to_cart', {
+          item_id: 'SKU-1',
+          quantity: 2,
+        });
+      });
+
+      it('omits properties arg when no fields beyond event', () => {
+        const snippet = generateSnippetForTarget({
+          targetId,
+          example: { event: 'page_view' },
+          schema: {},
+        });
+        expect(snippet).toBe(`${globalName}.track("page_view");`);
+      });
+
+      it('excludes $schema from properties', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: {
+              event: 'test',
+              $schema: 'http://example.com',
+              foo: 'bar',
+            },
+            schema: {},
+          }),
+          globalName,
+        );
+        expect(sdk.track).toHaveBeenCalledWith('test', { foo: 'bar' });
+      });
+    });
+
+    describe('identify (x-method: identify)', () => {
+      it('calls identify with userId and traits when userId is present', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { userId: 'user-123', email: 'a@b.com', plan: 'pro' },
+            schema: { 'x-method': 'identify' },
+          }),
+          globalName,
+        );
+        expect(sdk.identify).toHaveBeenCalledWith('user-123', {
+          email: 'a@b.com',
+          plan: 'pro',
+        });
+      });
+
+      it('calls identify with traits only when userId is absent', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { email: 'a@b.com', plan: 'pro' },
+            schema: { 'x-method': 'identify' },
+          }),
+          globalName,
+        );
+        expect(sdk.identify).toHaveBeenCalledWith({
+          email: 'a@b.com',
+          plan: 'pro',
+        });
+      });
+
+      it('excludes $schema from traits', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: {
+              userId: 'u1',
+              $schema: 'http://example.com',
+              name: 'Alice',
+            },
+            schema: { 'x-method': 'identify' },
+          }),
+          globalName,
+        );
+        expect(sdk.identify).toHaveBeenCalledWith('u1', { name: 'Alice' });
+      });
+    });
+
+    describe('group (x-method: group)', () => {
+      it('calls group with groupId and traits', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { groupId: 'acme', plan: 'enterprise', employees: 500 },
+            schema: { 'x-method': 'group' },
+          }),
+          globalName,
+        );
+        expect(sdk.group).toHaveBeenCalledWith('acme', {
+          plan: 'enterprise',
+          employees: 500,
+        });
+      });
+
+      it('omits traits arg when no fields beyond groupId', () => {
+        const snippet = generateSnippetForTarget({
+          targetId,
+          example: { groupId: 'acme' },
+          schema: { 'x-method': 'group' },
+        });
+        expect(snippet).toBe(`${globalName}.group("acme");`);
+      });
+
+      it('excludes $schema from traits', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: {
+              groupId: 'g1',
+              $schema: 'http://example.com',
+              name: 'Acme',
+            },
+            schema: { 'x-method': 'group' },
+          }),
+          globalName,
+        );
+        expect(sdk.group).toHaveBeenCalledWith('g1', { name: 'Acme' });
+      });
+    });
+
+    describe('page (x-method: page)', () => {
+      it('calls page with all fields as properties', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { name: 'Home', url: 'https://example.com' },
+            schema: { 'x-method': 'page' },
+          }),
+          globalName,
+        );
+        expect(sdk.page).toHaveBeenCalledWith({
+          name: 'Home',
+          url: 'https://example.com',
+        });
+      });
+
+      it('excludes $schema from properties', () => {
+        const sdk = executeCdpSnippet(
+          generateSnippetForTarget({
+            targetId,
+            example: { $schema: 'http://example.com', name: 'Checkout' },
+            schema: { 'x-method': 'page' },
+          }),
+          globalName,
+        );
+        expect(sdk.page).toHaveBeenCalledWith({ name: 'Checkout' });
+      });
+
+      it('calls page with no args when example has only $schema', () => {
+        const snippet = generateSnippetForTarget({
+          targetId,
+          example: { $schema: 'http://example.com' },
+          schema: { 'x-method': 'page' },
+        });
+        expect(snippet).toBe(`${globalName}.page();`);
+      });
+    });
+  },
+);

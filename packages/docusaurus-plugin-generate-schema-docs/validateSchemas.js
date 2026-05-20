@@ -3,7 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import processSchema from './helpers/processSchema.js';
 import { schemaToExamples } from './helpers/schemaToExamples.js';
-import { resolveTrackingTargets } from './helpers/trackingTargets.js';
+import {
+  resolveTrackingTargets,
+  resolveCallMethod,
+} from './helpers/trackingTargets.js';
 
 const validateSingleSchema = async (filePath, schemaPath) => {
   const file = path.basename(filePath);
@@ -23,6 +26,14 @@ const validateSingleSchema = async (filePath, schemaPath) => {
     }
     if (trackingTargets.errors.length > 0) {
       trackingTargets.errors.forEach((error) =>
+        errors.push(`x Schema ${file} ${error}`),
+      );
+      return { allValid: false, errors };
+    }
+
+    const callMethod = resolveCallMethod(originalSchema);
+    if (callMethod.errors.length > 0) {
+      callMethod.errors.forEach((error) =>
         errors.push(`x Schema ${file} ${error}`),
       );
       return { allValid: false, errors };
