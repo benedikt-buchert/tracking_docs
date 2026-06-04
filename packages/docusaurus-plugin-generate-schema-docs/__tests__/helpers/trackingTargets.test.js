@@ -26,6 +26,7 @@ describe('trackingTargets', () => {
         'android-firebase-java-sdk',
         'ios-firebase-swift-sdk',
         'ios-firebase-objc-sdk',
+        'web-braze-js',
       ],
     };
 
@@ -38,6 +39,7 @@ describe('trackingTargets', () => {
         'android-firebase-java-sdk',
         'ios-firebase-swift-sdk',
         'ios-firebase-objc-sdk',
+        'web-braze-js',
       ],
       warning: null,
       errors: [],
@@ -380,6 +382,13 @@ describe('trackingTargets', () => {
     expect(result.errors).toEqual([]);
     expect(result.targets).toEqual(['web-hightouch-js']);
   });
+
+  it('accepts web-braze-js as a supported target', () => {
+    const schema = { 'x-tracking-targets': ['web-braze-js'] };
+    const result = resolveTrackingTargets(schema);
+    expect(result.errors).toEqual([]);
+    expect(result.targets).toEqual(['web-braze-js']);
+  });
 });
 
 describe('resolveCallMethod', () => {
@@ -391,7 +400,7 @@ describe('resolveCallMethod', () => {
     expect(resolveCallMethod(null)).toEqual({ method: 'track', errors: [] });
   });
 
-  it.each(['track', 'identify', 'group', 'page'])(
+  it.each(['track', 'identify', 'group', 'page', 'alias'])(
     'accepts "%s" as a valid method',
     (method) => {
       expect(resolveCallMethod({ 'x-method': method })).toEqual({

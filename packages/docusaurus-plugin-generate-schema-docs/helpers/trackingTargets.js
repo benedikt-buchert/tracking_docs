@@ -9,11 +9,12 @@ export const SUPPORTED_TRACKING_TARGETS = [
   'web-segment-js',
   'web-rudderstack-js',
   'web-hightouch-js',
+  'web-braze-js',
 ];
 
 const TARGET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+){2,}$/;
 
-const SUPPORTED_CALL_METHODS = ['track', 'identify', 'group', 'page'];
+const SUPPORTED_CALL_METHODS = ['track', 'identify', 'group', 'page', 'alias'];
 const DOTTED_METHOD_PATTERN = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)+$/;
 
 export function resolveCallMethod(schema) {
