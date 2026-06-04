@@ -65,10 +65,14 @@ function resolveInitialTargetId(targets) {
   return safeTargets[0].id;
 }
 
-export default function ExampleDataLayer({ schema, dataLayerName }) {
+export default function ExampleDataLayer({
+  schema,
+  dataLayerName,
+  exampleModel,
+}) {
   const model = useMemo(
-    () => buildExampleModel(schema, { dataLayerName }),
-    [schema, dataLayerName],
+    () => exampleModel || buildExampleModel(schema, { dataLayerName }),
+    [schema, dataLayerName, exampleModel],
   );
   const safeTargets = useMemo(
     () =>

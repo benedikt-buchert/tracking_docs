@@ -41,4 +41,43 @@ describe('SchemaViewer', () => {
     // There should be at least 3 required constraints visible at the top level.
     expect(requiredConstraints.length).toBeGreaterThanOrEqual(3);
   });
+
+  it('passes a prebuilt example model to the example renderer', () => {
+    const schema = {
+      title: 'Custom Target Event',
+      type: 'object',
+      'x-tracking-targets': ['web-custom-js'],
+      properties: {
+        event: { type: 'string', examples: ['ignored_event'] },
+      },
+    };
+    const exampleModel = {
+      targets: [
+        {
+          id: 'web-custom-js',
+          label: 'Custom Web',
+          language: 'javascript',
+        },
+      ],
+      variantGroups: [
+        {
+          property: 'default',
+          options: [
+            {
+              id: 'default-0',
+              title: 'Default',
+              snippets: {
+                'web-custom-js': 'custom.track("custom_event");',
+              },
+            },
+          ],
+        },
+      ],
+      isSimpleDefault: true,
+    };
+
+    render(<SchemaViewer schema={schema} exampleModel={exampleModel} />);
+
+    expect(screen.getByText('custom.track("custom_event");')).toBeVisible();
+  });
 });

@@ -103,6 +103,44 @@ describe('ExampleDataLayer', () => {
     expect(getByText(/window.customDataLayer.push/)).toBeInTheDocument();
   });
 
+  it('renders a prebuilt example model when provided', () => {
+    const schema = {
+      type: 'object',
+      'x-tracking-targets': ['web-custom-js'],
+      properties: {
+        event: { type: 'string', examples: ['ignored_event'] },
+      },
+    };
+    const exampleModel = {
+      targets: [
+        {
+          id: 'web-custom-js',
+          label: 'Custom Web',
+          language: 'javascript',
+        },
+      ],
+      variantGroups: [
+        {
+          property: 'default',
+          options: [
+            {
+              id: 'default-0',
+              title: 'Default',
+              snippets: {
+                'web-custom-js': 'custom.track("custom_event");',
+              },
+            },
+          ],
+        },
+      ],
+      isSimpleDefault: true,
+    };
+
+    render(<ExampleDataLayer schema={schema} exampleModel={exampleModel} />);
+
+    expect(screen.getByText('custom.track("custom_event");')).toBeVisible();
+  });
+
   it('should render target tabs when multiple targets are configured', () => {
     const schema = {
       type: 'object',
