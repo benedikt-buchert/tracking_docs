@@ -917,12 +917,84 @@ export const SNIPPET_TARGETS = [
   },
 ];
 
-export function getSnippetTarget(targetId = DEFAULT_SNIPPET_TARGET_ID) {
-  const target = SNIPPET_TARGETS.find((item) => item.id === targetId);
-  if (!target) {
+function normalizeTrackingTarget(target) {
+  const generateSnippet = target?.generateSnippet || target?.generator;
+  if (!target?.id || typeof target.id !== 'string') {
+    throw new Error('Tracking target must define a string id.');
+  }
+  if (typeof generateSnippet !== 'function') {
+    throw new Error(
+      `Tracking target "${target.id}" must define generateSnippet.`,
+    );
+  }
+
+  return {
+    ...target,
+    generator: generateSnippet,
+    generateSnippet,
+  };
+}
+
+export function createTrackingTargetRegistry({ customTargets = [] } = {}) {
+  const targets = [...SNIPPET_TARGETS, ...customTargets].map(
+    normalizeTrackingTarget,
+  );
+  const targetMap = new Map();
+
+  targets.forEach((target) => {
+    if (targetMap.has(target.id)) {
+      throw new Error(`Duplicate tracking target id: ${target.id}`);
+    }
+    targetMap.set(target.id, target);
+  });
+
+  return {
+    get(targetId = DEFAULT_SNIPPET_TARGET_ID) {
+      const target = targetMap.get(targetId);
+      if (!target) {
+        throw new Error(`Unknown snippet target: ${targetId}`);
+      }
+      return target;
+    },
+    has(targetId) {
+      return targetMap.has(targetId);
+    },
+    ids() {
+      return [...targetMap.keys()];
+    },
+    list() {
+      return [...targetMap.values()];
+    },
+    generateSnippet({
+      targetId = DEFAULT_SNIPPET_TARGET_ID,
+      example,
+      schema,
+      config = {},
+      dataLayerName,
+    }) {
+      const target = this.get(targetId);
+      return target.generateSnippet({
+        example,
+        schema,
+        config,
+        dataLayerName,
+        targetId,
+      });
+    },
+  };
+}
+
+const DEFAULT_TRACKING_TARGET_REGISTRY = createTrackingTargetRegistry();
+
+export function getSnippetTarget(
+  targetId = DEFAULT_SNIPPET_TARGET_ID,
+  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
+) {
+  try {
+    return targetRegistry.get(targetId);
+  } catch {
     throw new Error(`Unknown snippet target: ${targetId}`);
   }
-  return target;
 }
 
 export function generateSnippetForTarget({
@@ -931,13 +1003,13 @@ export function generateSnippetForTarget({
   schema,
   config = {},
   dataLayerName,
+  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
 }) {
-  const target = getSnippetTarget(targetId);
-  return target.generator({
+  return targetRegistry.generateSnippet({
+    targetId,
     example,
     schema,
     config,
     dataLayerName,
-    targetId,
   });
 }

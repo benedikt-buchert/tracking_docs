@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 import validateSchemas from '../validateSchemas';
+import { createTrackingTargetRegistry } from '../helpers/snippetTargets';
 
 describe('validateSchemas', () => {
   let tmpDir;
@@ -101,6 +102,84 @@ describe('validateSchemas', () => {
     expect(result).toBe(false);
     expect(consoleErrorSpy).toHaveBeenCalled();
     expect(consoleErrorSpy.mock.calls[0][0]).toContain('x-tracking-targets');
+  });
+
+  it('should accept custom targets from a tracking target registry', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          generateSnippet: () => 'custom.track();',
+        },
+      ],
+    });
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        'x-tracking-targets': ['web-custom-js'],
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir, { targetRegistry });
+
+    expect(result).toBe(true);
+  });
+
+  it('should fail when a custom target validation hook reports errors', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          validateSchema: (schema) =>
+            schema['x-custom-required']
+              ? []
+              : ['x-custom-required must be true.'],
+          generateSnippet: () => 'custom.track();',
+        },
+      ],
+    });
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        'x-tracking-targets': ['web-custom-js'],
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir, { targetRegistry });
+
+    expect(result).toBe(false);
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain('x-custom-required must be true.');
   });
 
   it('should treat falsy scalar examples as valid examples', async () => {

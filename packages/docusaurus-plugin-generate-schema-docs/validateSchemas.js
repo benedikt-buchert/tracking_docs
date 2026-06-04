@@ -7,8 +7,37 @@ import {
   resolveTrackingTargets,
   resolveCallMethod,
 } from './helpers/trackingTargets.js';
+import { createTrackingTargetRegistry } from './helpers/snippetTargets.js';
 
-const validateSingleSchema = async (filePath, schemaPath) => {
+const DEFAULT_TARGET_REGISTRY = createTrackingTargetRegistry();
+
+function normalizeTargetValidationErrors(result) {
+  if (!result) return [];
+  if (Array.isArray(result)) return result;
+  if (typeof result === 'string') return [result];
+  if (Array.isArray(result.errors)) return result.errors;
+  return [];
+}
+
+function validateTrackingTargetHooks({
+  trackingTargets,
+  targetRegistry,
+  schema,
+}) {
+  return trackingTargets.targets.flatMap((targetId) => {
+    const target = targetRegistry.get(targetId);
+    if (typeof target.validateSchema !== 'function') return [];
+    return normalizeTargetValidationErrors(target.validateSchema(schema)).map(
+      (error) => `[${targetId}] ${error}`,
+    );
+  });
+}
+
+const validateSingleSchema = async (
+  filePath,
+  schemaPath,
+  { targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+) => {
   const file = path.basename(filePath);
   const errors = [];
   let allValid = true;
@@ -19,6 +48,7 @@ const validateSingleSchema = async (filePath, schemaPath) => {
     const originalSchema = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
     const trackingTargets = resolveTrackingTargets(originalSchema, {
       schemaFile: file,
+      targetRegistry,
     });
 
     if (trackingTargets.warning) {
@@ -28,6 +58,15 @@ const validateSingleSchema = async (filePath, schemaPath) => {
       trackingTargets.errors.forEach((error) =>
         errors.push(`x Schema ${file} ${error}`),
       );
+      return { allValid: false, errors };
+    }
+
+    validateTrackingTargetHooks({
+      trackingTargets,
+      targetRegistry,
+      schema: originalSchema,
+    }).forEach((error) => errors.push(`x Schema ${file} ${error}`));
+    if (errors.length > 0) {
       return { allValid: false, errors };
     }
 
@@ -89,7 +128,10 @@ const validateSingleSchema = async (filePath, schemaPath) => {
   return { allValid, errors };
 };
 
-const validateSchemas = async (schemaPath) => {
+const validateSchemas = async (
+  schemaPath,
+  { targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+) => {
   const topLevelSchemaFiles = fs
     .readdirSync(schemaPath)
     .filter((file) => file.endsWith('.json'));
@@ -97,7 +139,7 @@ const validateSchemas = async (schemaPath) => {
   const results = await Promise.all(
     topLevelSchemaFiles.map((file) => {
       const filePath = path.join(schemaPath, file);
-      return validateSingleSchema(filePath, schemaPath);
+      return validateSingleSchema(filePath, schemaPath, { targetRegistry });
     }),
   );
 
