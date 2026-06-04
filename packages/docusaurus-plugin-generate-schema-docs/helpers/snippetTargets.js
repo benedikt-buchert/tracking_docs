@@ -864,75 +864,70 @@ export const SNIPPET_TARGETS = [
     group: 'web',
     label: 'Web Data Layer (JS)',
     language: 'javascript',
-    generator: generateWebDataLayerSnippet,
+    generateSnippet: generateWebDataLayerSnippet,
   },
   {
     id: 'android-firebase-kotlin-sdk',
     group: 'android',
     label: 'Android Firebase (Kotlin)',
     language: 'kotlin',
-    generator: generateAndroidKotlinFirebaseSnippet,
+    generateSnippet: generateAndroidKotlinFirebaseSnippet,
   },
   {
     id: 'android-firebase-java-sdk',
     group: 'android',
     label: 'Android Firebase (Java)',
     language: 'java',
-    generator: generateAndroidJavaFirebaseSnippet,
+    generateSnippet: generateAndroidJavaFirebaseSnippet,
   },
   {
     id: 'ios-firebase-swift-sdk',
     group: 'ios',
     label: 'iOS Firebase (Swift)',
     language: 'swift',
-    generator: generateIosSwiftFirebaseSnippet,
+    generateSnippet: generateIosSwiftFirebaseSnippet,
   },
   {
     id: 'ios-firebase-objc-sdk',
     group: 'ios',
     label: 'iOS Firebase (Obj-C)',
     language: 'objectivec',
-    generator: generateIosObjcFirebaseSnippet,
+    generateSnippet: generateIosObjcFirebaseSnippet,
   },
   {
     id: 'web-segment-js',
     group: 'web',
     label: 'Segment (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('analytics'),
+    generateSnippet: generateCdpSnippet('analytics'),
   },
   {
     id: 'web-rudderstack-js',
     group: 'web',
     label: 'RudderStack (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('rudderanalytics'),
+    generateSnippet: generateCdpSnippet('rudderanalytics'),
   },
   {
     id: 'web-hightouch-js',
     group: 'web',
     label: 'Hightouch (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('htevents'),
+    generateSnippet: generateCdpSnippet('htevents'),
   },
 ];
 
 function normalizeTrackingTarget(target) {
-  const generateSnippet = target?.generateSnippet || target?.generator;
   if (!target?.id || typeof target.id !== 'string') {
     throw new Error('Tracking target must define a string id.');
   }
-  if (typeof generateSnippet !== 'function') {
+  if (typeof target.generateSnippet !== 'function') {
     throw new Error(
       `Tracking target "${target.id}" must define generateSnippet.`,
     );
   }
 
-  return {
-    ...target,
-    generator: generateSnippet,
-    generateSnippet,
-  };
+  return target;
 }
 
 export function createTrackingTargetRegistry({ customTargets = [] } = {}) {
