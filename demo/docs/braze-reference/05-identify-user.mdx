@@ -1,0 +1,32 @@
+---
+title: Identify User
+description: "Associates a known web user with Braze and sets custom user attributes."
+sidebar_label: Identify User
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/braze/identify-user.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Identify User
+
+Associates a known web user with Braze and sets custom user attributes.
+
+
+
+<SchemaViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/identify-user.json","title":"Identify User","description":"Associates a known web user with Braze and sets custom user attributes.","x-tracking-targets":["web-braze-js"],"type":"object","x-method":"identify","required":["userId"],"properties":{"userId":{"type":"string","description":"The unique external identifier for the user.","minLength":1,"examples":["user_98765","usr_12345"]},"loyalty_tier":{"type":"string","description":"The user's loyalty tier.","enum":["bronze","silver","gold"],"examples":["gold","silver"]},"preferred_store":{"type":"string","description":"The user's preferred store or fulfillment location.","examples":["store_042","berlin_mitte"]},"marketing_opt_in":{"type":"boolean","description":"Whether the user has opted into marketing communication.","examples":[true,false]}}}}
+  sourceSchema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/identify-user.json","title":"Identify User","description":"Associates a known web user with Braze and sets custom user attributes.","x-tracking-targets":["web-braze-js"],"x-method":"identify","type":"object","properties":{"userId":{"type":"string","description":"The unique external identifier for the user.","minLength":1,"examples":["user_98765","usr_12345"]},"loyalty_tier":{"type":"string","description":"The user's loyalty tier.","enum":["bronze","silver","gold"],"examples":["gold","silver"]},"preferred_store":{"type":"string","description":"The user's preferred store or fulfillment location.","examples":["store_042","berlin_mitte"]},"marketing_opt_in":{"type":"boolean","description":"Whether the user has opted into marketing communication.","examples":[true,false]}},"required":["userId"]}}
+  sourcePath={"braze/identify-user.json"}
+  schemaSources={{"braze/identify-user.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/identify-user.json","title":"Identify User","description":"Associates a known web user with Braze and sets custom user attributes.","x-tracking-targets":["web-braze-js"],"x-method":"identify","type":"object","properties":{"userId":{"type":"string","description":"The unique external identifier for the user.","minLength":1,"examples":["user_98765","usr_12345"]},"loyalty_tier":{"type":"string","description":"The user's loyalty tier.","enum":["bronze","silver","gold"],"examples":["gold","silver"]},"preferred_store":{"type":"string","description":"The user's preferred store or fulfillment location.","examples":["store_042","berlin_mitte"]},"marketing_opt_in":{"type":"boolean","description":"Whether the user has opted into marketing communication.","examples":[true,false]}},"required":["userId"]}}}
+  
+/>
+<SchemaJsonViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/identify-user.json","title":"Identify User","description":"Associates a known web user with Braze and sets custom user attributes.","x-tracking-targets":["web-braze-js"],"type":"object","x-method":"identify","required":["userId"],"properties":{"userId":{"type":"string","description":"The unique external identifier for the user.","minLength":1,"examples":["user_98765","usr_12345"]},"loyalty_tier":{"type":"string","description":"The user's loyalty tier.","enum":["bronze","silver","gold"],"examples":["gold","silver"]},"preferred_store":{"type":"string","description":"The user's preferred store or fulfillment location.","examples":["store_042","berlin_mitte"]},"marketing_opt_in":{"type":"boolean","description":"Whether the user has opted into marketing communication.","examples":[true,false]}}}}
+  sourcePath={"braze/identify-user.json"}
+  schemaSources={{"braze/identify-user.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/identify-user.json","title":"Identify User","description":"Associates a known web user with Braze and sets custom user attributes.","x-tracking-targets":["web-braze-js"],"x-method":"identify","type":"object","properties":{"userId":{"type":"string","description":"The unique external identifier for the user.","minLength":1,"examples":["user_98765","usr_12345"]},"loyalty_tier":{"type":"string","description":"The user's loyalty tier.","enum":["bronze","silver","gold"],"examples":["gold","silver"]},"preferred_store":{"type":"string","description":"The user's preferred store or fulfillment location.","examples":["store_042","berlin_mitte"]},"marketing_opt_in":{"type":"boolean","description":"Whether the user has opted into marketing communication.","examples":[true,false]}},"required":["userId"]}}}
+/>
+
+

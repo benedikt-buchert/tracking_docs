@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/braze/cart-updated-event.json",
+  "title": "Cart Updated Event",
+  "description": "A Braze recommended eCommerce event for replacing the user's current cart state.",
+  "x-tracking-targets": ["web-braze-js"],
+  "x-method": "track",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "ecommerce.cart_updated",
+      "description": "The Braze recommended event name for cart updates."
+    },
+    "cart_id": {
+      "type": "string",
+      "description": "The unique identifier for the cart.",
+      "examples": ["cart_abc123", "cart_456"]
+    },
+    "action": {
+      "type": "string",
+      "description": "The cart update mode.",
+      "const": "replace"
+    },
+    "total_value": {
+      "type": "number",
+      "description": "The total monetary value of the full cart.",
+      "examples": [234.96, 84.99]
+    },
+    "subtotal_value": {
+      "type": "number",
+      "description": "The cart subtotal after discounts and before tax or shipping.",
+      "examples": [219.97, 74.99]
+    },
+    "tax": {
+      "type": "number",
+      "description": "The total tax applied to the cart.",
+      "examples": [9, 5]
+    },
+    "shipping": {
+      "type": "number",
+      "description": "The shipping cost applied to the cart.",
+      "examples": [5.99, 5]
+    },
+    "currency": {
+      "type": "string",
+      "description": "The ISO 4217 three-letter currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["USD", "EUR"]
+    },
+    "products": {
+      "type": "array",
+      "description": "The line items in the full cart.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The unique product identifier.",
+            "examples": ["SKU-RUN-4821", "sku_2001"]
+          },
+          "product_name": {
+            "type": "string",
+            "description": "The product display name.",
+            "examples": ["Ultraboost Running Shoe", "Trail Runner Pro"]
+          },
+          "variant_id": {
+            "type": "string",
+            "description": "The product variant identifier.",
+            "examples": ["UB-BLK-11", "var_2001_black_10"]
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The product image URL.",
+            "examples": ["https://cdn.example.com/shoes/ub-blk-11.jpg"]
+          },
+          "product_url": {
+            "type": "string",
+            "description": "The product page URL.",
+            "examples": [
+              "https://www.example.com/products/ultraboost-running-shoe"
+            ]
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "The number of units in the cart for this line.",
+            "minimum": 1,
+            "examples": [1, 2]
+          },
+          "price": {
+            "type": "number",
+            "description": "The product variant unit price.",
+            "examples": [189.99, 94.99]
+          }
+        },
+        "required": [
+          "product_id",
+          "product_name",
+          "variant_id",
+          "quantity",
+          "price"
+        ]
+      }
+    },
+    "source": {
+      "type": "string",
+      "description": "The source the event originates from.",
+      "const": "web"
+    }
+  },
+  "required": [
+    "event",
+    "cart_id",
+    "action",
+    "total_value",
+    "currency",
+    "products",
+    "source"
+  ]
+}

@@ -804,11 +804,17 @@ function cdpProperties(example, excludeKeys) {
 }
 
 function generateCdpSnippet(globalObj) {
-  return function ({ example, schema }) {
+  return function ({ example, schema, targetId }) {
     const method = resolveCdpMethod(schema);
     const call = method
       .split('.')
       .reduce((acc, key) => `${acc}.${key}`, globalObj);
+
+    if (method === 'alias') {
+      throw new Error(
+        `[${targetId}] Snippet target does not support x-method "alias".`,
+      );
+    }
 
     if (method === 'track') {
       const eventName = example.event;
@@ -856,6 +862,64 @@ function generateCdpSnippet(globalObj) {
       ? `${call}(${JSON.stringify(props, null, 2)});`
       : `${call}();`;
   };
+}
+
+function generateBrazeWebSnippet({ example, schema, targetId }) {
+  const method = resolveCdpMethod(schema);
+
+  if (method === 'alias') {
+    const { alias_name: aliasName, alias_label: aliasLabel } = example;
+    if (
+      typeof aliasName !== 'string' ||
+      aliasName.trim().length === 0 ||
+      typeof aliasLabel !== 'string' ||
+      aliasLabel.trim().length === 0
+    ) {
+      throw new Error(
+        `[${targetId}] Braze alias snippets require non-empty string alias_name and alias_label.`,
+      );
+    }
+
+    return `braze.getUser().addAlias(${JSON.stringify(aliasName)}, ${JSON.stringify(aliasLabel)});`;
+  }
+
+  if (method === 'identify') {
+    const { userId } = example;
+    if (typeof userId !== 'string' || userId.trim().length === 0) {
+      throw new Error(
+        `[${targetId}] Braze identify snippets require a non-empty string userId.`,
+      );
+    }
+
+    const traits = cdpProperties(example, new Set(['userId']));
+    const lines = [`braze.changeUser(${JSON.stringify(userId)});`];
+    const traitEntries = Object.entries(traits);
+
+    if (traitEntries.length > 0) {
+      lines.push('const user = braze.getUser();');
+      traitEntries.forEach(([key, value]) => {
+        lines.push(
+          `user.setCustomUserAttribute(${JSON.stringify(key)}, ${JSON.stringify(value)});`,
+        );
+      });
+    }
+
+    return lines.join('\n');
+  }
+
+  if (method !== 'track') {
+    throw new Error(
+      `[${targetId}] Braze snippets only support x-method "track", "identify", or "alias".`,
+    );
+  }
+
+  const eventName = example.event;
+  const properties = cdpProperties(example, new Set(['event']));
+  const hasProperties = Object.keys(properties).length > 0;
+
+  return hasProperties
+    ? `braze.logCustomEvent(${JSON.stringify(eventName)}, ${JSON.stringify(properties, null, 2)});`
+    : `braze.logCustomEvent(${JSON.stringify(eventName)});`;
 }
 
 export const SNIPPET_TARGETS = [
@@ -914,6 +978,13 @@ export const SNIPPET_TARGETS = [
     label: 'Hightouch (JS)',
     language: 'javascript',
     generateSnippet: generateCdpSnippet('htevents'),
+  },
+  {
+    id: 'web-braze-js',
+    group: 'web',
+    label: 'Braze Web SDK (JS)',
+    language: 'javascript',
+    generateSnippet: generateBrazeWebSnippet,
   },
 ];
 

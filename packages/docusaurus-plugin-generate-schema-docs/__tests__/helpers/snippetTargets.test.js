@@ -25,6 +25,7 @@ describe('snippetTargets', () => {
         'android-firebase-java-sdk',
         'ios-firebase-swift-sdk',
         'ios-firebase-objc-sdk',
+        'web-braze-js',
       ]),
     );
   });
@@ -77,6 +78,149 @@ describe('snippetTargets', () => {
 
     expect(snippet).toContain('window.customDataLayer.push');
     expect(snippet).toContain('"event": "test_event"');
+  });
+
+  it('generates web braze custom event snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-braze-js',
+      example: {
+        $schema: 'https://example.com/schemas/share-image-event.json',
+        event: 'share_image',
+        image_name: 'hero.jpg',
+        count: 2,
+        premium: true,
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toBe(`braze.logCustomEvent("share_image", {
+  "image_name": "hero.jpg",
+  "count": 2,
+  "premium": true
+});`);
+  });
+
+  it('omits event properties for web braze snippets when only event metadata is present', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-braze-js',
+      example: {
+        $schema: 'https://example.com/schemas/login-event.json',
+        event: 'login',
+      },
+      schema: { properties: {} },
+    });
+
+    expect(snippet).toBe('braze.logCustomEvent("login");');
+  });
+
+  it('generates web braze identify snippet with custom user attributes', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-braze-js',
+      example: {
+        $schema: 'https://example.com/schemas/identify-user.json',
+        userId: 'user-123',
+        plan: 'pro',
+        account_age_days: 42,
+        premium: true,
+      },
+      schema: { 'x-method': 'identify', properties: {} },
+    });
+
+    expect(snippet).toBe(`braze.changeUser("user-123");
+const user = braze.getUser();
+user.setCustomUserAttribute("plan", "pro");
+user.setCustomUserAttribute("account_age_days", 42);
+user.setCustomUserAttribute("premium", true);`);
+  });
+
+  it('generates web braze identify snippet without user attributes when only userId is present', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-braze-js',
+      example: {
+        $schema: 'https://example.com/schemas/identify-user.json',
+        userId: 'user-123',
+      },
+      schema: { 'x-method': 'identify', properties: {} },
+    });
+
+    expect(snippet).toBe('braze.changeUser("user-123");');
+  });
+
+  it('generates web braze alias snippet', () => {
+    const snippet = generateSnippetForTarget({
+      targetId: 'web-braze-js',
+      example: {
+        $schema: 'https://example.com/schemas/add-user-alias.json',
+        alias_name: 'guest_abc123',
+        alias_label: 'guest_id',
+      },
+      schema: { 'x-method': 'alias', properties: {} },
+    });
+
+    expect(snippet).toBe(
+      'braze.getUser().addAlias("guest_abc123", "guest_id");',
+    );
+  });
+
+  it.each([
+    ['alias_name', { alias_label: 'guest_id' }],
+    ['alias_label', { alias_name: 'guest_abc123' }],
+  ])('rejects web braze alias snippets without %s', (_field, example) => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'web-braze-js',
+        example,
+        schema: { 'x-method': 'alias', properties: {} },
+      }),
+    ).toThrow(
+      '[web-braze-js] Braze alias snippets require non-empty string alias_name and alias_label.',
+    );
+  });
+
+  it.each(['web-segment-js', 'web-rudderstack-js', 'web-hightouch-js'])(
+    'rejects alias snippets for %s until target-specific semantics are implemented',
+    (targetId) => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId,
+          example: {
+            alias_name: 'guest_abc123',
+            alias_label: 'guest_id',
+          },
+          schema: { 'x-method': 'alias', properties: {} },
+        }),
+      ).toThrow(
+        `[${targetId}] Snippet target does not support x-method "alias".`,
+      );
+    },
+  );
+
+  it('rejects web braze identify snippets without userId', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'web-braze-js',
+        example: {
+          plan: 'pro',
+        },
+        schema: { 'x-method': 'identify', properties: {} },
+      }),
+    ).toThrow(
+      '[web-braze-js] Braze identify snippets require a non-empty string userId.',
+    );
+  });
+
+  it('rejects unsupported methods for web braze snippets', () => {
+    expect(() =>
+      generateSnippetForTarget({
+        targetId: 'web-braze-js',
+        example: {
+          groupId: 'group-123',
+        },
+        schema: { 'x-method': 'group', properties: {} },
+      }),
+    ).toThrow(
+      '[web-braze-js] Braze snippets only support x-method "track", "identify", or "alias".',
+    );
   });
 
   it('executes web-datalayer snippet and pushes expected payload', () => {

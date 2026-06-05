@@ -137,7 +137,23 @@ By default, it resolves schemas from the project root. Use `--path=<siteDir>` to
 
 Only schemas tagged with `x-tracking-targets` including `web-datalayer-js` are used for GTM variable sync. Untagged schemas are ignored.
 
-### Firebase Snippet Targets
+### Snippet Targets
+
+`ExampleDataLayer` supports web snippet targets for:
+
+- `web-datalayer-js`
+- `web-segment-js`
+- `web-rudderstack-js`
+- `web-hightouch-js`
+- `web-braze-js`
+
+Braze Web SDK snippets support:
+
+- `x-method: track` via `braze.logCustomEvent(...)`
+- `x-method: identify` via `braze.changeUser(...)` and `braze.getUser().setCustomUserAttribute(...)`
+- `x-method: alias` via `braze.getUser().addAlias(...)`
+
+#### Firebase
 
 `ExampleDataLayer` supports Firebase snippet targets for:
 

@@ -1,0 +1,32 @@
+---
+title: Add User Alias
+description: "Adds a secondary alias identifier to the current Braze user."
+sidebar_label: Add User Alias
+custom_edit_url: https://github.com/benedikt-buchert/tracking_docs/edit/main/demo/static/schemas/next/braze/add-user-alias.json
+---
+
+import SchemaViewer from '@theme/SchemaViewer';
+import SchemaJsonViewer from '@theme/SchemaJsonViewer';
+
+
+
+# Add User Alias
+
+Adds a secondary alias identifier to the current Braze user.
+
+
+
+<SchemaViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/add-user-alias.json","title":"Add User Alias","description":"Adds a secondary alias identifier to the current Braze user.","x-tracking-targets":["web-braze-js"],"type":"object","x-method":"alias","required":["alias_name","alias_label"],"properties":{"alias_name":{"type":"string","description":"The alias identifier to attach to the current Braze user.","minLength":1,"examples":["guest_abc123","support_987654"]},"alias_label":{"type":"string","description":"The label that describes the alias source or identifier type.","minLength":1,"examples":["guest_id","support_id"]}}}}
+  sourceSchema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/add-user-alias.json","title":"Add User Alias","description":"Adds a secondary alias identifier to the current Braze user.","x-tracking-targets":["web-braze-js"],"x-method":"alias","type":"object","properties":{"alias_name":{"type":"string","description":"The alias identifier to attach to the current Braze user.","minLength":1,"examples":["guest_abc123","support_987654"]},"alias_label":{"type":"string","description":"The label that describes the alias source or identifier type.","minLength":1,"examples":["guest_id","support_id"]}},"required":["alias_name","alias_label"]}}
+  sourcePath={"braze/add-user-alias.json"}
+  schemaSources={{"braze/add-user-alias.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/add-user-alias.json","title":"Add User Alias","description":"Adds a secondary alias identifier to the current Braze user.","x-tracking-targets":["web-braze-js"],"x-method":"alias","type":"object","properties":{"alias_name":{"type":"string","description":"The alias identifier to attach to the current Braze user.","minLength":1,"examples":["guest_abc123","support_987654"]},"alias_label":{"type":"string","description":"The label that describes the alias source or identifier type.","minLength":1,"examples":["guest_id","support_id"]}},"required":["alias_name","alias_label"]}}}
+  
+/>
+<SchemaJsonViewer
+  schema={{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/add-user-alias.json","title":"Add User Alias","description":"Adds a secondary alias identifier to the current Braze user.","x-tracking-targets":["web-braze-js"],"type":"object","x-method":"alias","required":["alias_name","alias_label"],"properties":{"alias_name":{"type":"string","description":"The alias identifier to attach to the current Braze user.","minLength":1,"examples":["guest_abc123","support_987654"]},"alias_label":{"type":"string","description":"The label that describes the alias source or identifier type.","minLength":1,"examples":["guest_id","support_id"]}}}}
+  sourcePath={"braze/add-user-alias.json"}
+  schemaSources={{"braze/add-user-alias.json":{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://tracking-docs-demo.buchert.digital/schemas/braze/add-user-alias.json","title":"Add User Alias","description":"Adds a secondary alias identifier to the current Braze user.","x-tracking-targets":["web-braze-js"],"x-method":"alias","type":"object","properties":{"alias_name":{"type":"string","description":"The alias identifier to attach to the current Braze user.","minLength":1,"examples":["guest_abc123","support_987654"]},"alias_label":{"type":"string","description":"The label that describes the alias source or identifier type.","minLength":1,"examples":["guest_id","support_id"]}},"required":["alias_name","alias_label"]}}}
+/>
+
+
