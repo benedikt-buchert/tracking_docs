@@ -3,6 +3,7 @@ import {
   resolveTrackingTargets,
   resolveCallMethod,
 } from '../../helpers/trackingTargets';
+import { createTrackingTargetRegistry } from '../../helpers/snippetTargets';
 
 describe('trackingTargets', () => {
   it('returns the configured targets when valid', () => {
@@ -144,6 +145,34 @@ describe('trackingTargets', () => {
     expect(result.targets).toEqual([]);
     expect(result.errors).toHaveLength(1);
     expect(result.errors[0]).toContain('web-not-supported-js');
+  });
+
+  it('accepts custom targets from a tracking target registry', () => {
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          generateSnippet: () => 'custom.track();',
+        },
+      ],
+    });
+    const schema = {
+      'x-tracking-targets': ['web-custom-js'],
+    };
+
+    const result = resolveTrackingTargets(schema, {
+      schemaFile: 'event.json',
+      targetRegistry,
+    });
+
+    expect(result).toEqual({
+      targets: ['web-custom-js'],
+      warning: null,
+      errors: [],
+    });
   });
 
   it('joins multiple unsupported targets with comma-space formatting', () => {

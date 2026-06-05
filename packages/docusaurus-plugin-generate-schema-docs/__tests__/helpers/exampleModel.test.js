@@ -2,7 +2,10 @@ import {
   buildExampleModel,
   resolveExampleTargets,
 } from '../../helpers/exampleModel';
-import { DEFAULT_SNIPPET_TARGET_ID } from '../../helpers/snippetTargets';
+import {
+  createTrackingTargetRegistry,
+  DEFAULT_SNIPPET_TARGET_ID,
+} from '../../helpers/snippetTargets';
 import choiceEventSchema from '../__fixtures__/static/schemas/choice-event.json';
 import conditionalEventSchema from '../__fixtures__/static/schemas/conditional-event.json';
 
@@ -115,6 +118,35 @@ describe('buildExampleModel', () => {
     expect(
       model.variantGroups[0].options[0].snippets[DEFAULT_SNIPPET_TARGET_ID],
     ).toContain('window.customDataLayer.push');
+  });
+
+  it('builds snippets for custom targets from a tracking target registry', () => {
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          generateSnippet: ({ example }) =>
+            `custom.track(${JSON.stringify(example.event)});`,
+        },
+      ],
+    });
+    const schema = {
+      'x-tracking-targets': ['web-custom-js'],
+      type: 'object',
+      properties: {
+        event: { type: 'string', examples: ['custom_event'] },
+      },
+    };
+
+    const model = buildExampleModel(schema, { targetRegistry });
+
+    expect(model.targets.map((target) => target.id)).toEqual(['web-custom-js']);
+    expect(model.variantGroups[0].options[0].snippets['web-custom-js']).toBe(
+      'custom.track("custom_event");',
+    );
   });
 
   it('resolves multiple targets when x-tracking-targets is provided', () => {

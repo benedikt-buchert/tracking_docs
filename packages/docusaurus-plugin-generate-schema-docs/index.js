@@ -6,6 +6,7 @@ import generateEventDocs from './generateEventDocs.js';
 import path from 'path';
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
+import { createTrackingTargetRegistry } from './helpers/snippetTargets.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -71,8 +72,11 @@ async function syncVersionFromNext({
 
 export default async function (context, options) {
   const { siteDir } = context;
-  const { dataLayerName } = options;
+  const { dataLayerName, trackingTargets = [] } = options || {};
   const { organizationName, projectName, url } = context.siteConfig;
+  const targetRegistry = createTrackingTargetRegistry({
+    customTargets: trackingTargets,
+  });
 
   const pluginOptions = {
     organizationName,
@@ -80,6 +84,7 @@ export default async function (context, options) {
     siteDir,
     url,
     dataLayerName,
+    trackingTargets,
   };
   const versionsJsonPath = path.join(siteDir, 'versions.json');
   const isVersioned = fs.existsSync(versionsJsonPath);
@@ -95,7 +100,7 @@ export default async function (context, options) {
           schemaVersion,
           context.siteDir,
         );
-        const success = await validateSchemas(schemaDir);
+        const success = await validateSchemas(schemaDir, { targetRegistry });
         if (!success) {
           console.error('Validation failed.');
           process.exit(1);

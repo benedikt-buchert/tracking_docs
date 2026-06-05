@@ -864,65 +864,132 @@ export const SNIPPET_TARGETS = [
     group: 'web',
     label: 'Web Data Layer (JS)',
     language: 'javascript',
-    generator: generateWebDataLayerSnippet,
+    generateSnippet: generateWebDataLayerSnippet,
   },
   {
     id: 'android-firebase-kotlin-sdk',
     group: 'android',
     label: 'Android Firebase (Kotlin)',
     language: 'kotlin',
-    generator: generateAndroidKotlinFirebaseSnippet,
+    generateSnippet: generateAndroidKotlinFirebaseSnippet,
   },
   {
     id: 'android-firebase-java-sdk',
     group: 'android',
     label: 'Android Firebase (Java)',
     language: 'java',
-    generator: generateAndroidJavaFirebaseSnippet,
+    generateSnippet: generateAndroidJavaFirebaseSnippet,
   },
   {
     id: 'ios-firebase-swift-sdk',
     group: 'ios',
     label: 'iOS Firebase (Swift)',
     language: 'swift',
-    generator: generateIosSwiftFirebaseSnippet,
+    generateSnippet: generateIosSwiftFirebaseSnippet,
   },
   {
     id: 'ios-firebase-objc-sdk',
     group: 'ios',
     label: 'iOS Firebase (Obj-C)',
     language: 'objectivec',
-    generator: generateIosObjcFirebaseSnippet,
+    generateSnippet: generateIosObjcFirebaseSnippet,
   },
   {
     id: 'web-segment-js',
     group: 'web',
     label: 'Segment (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('analytics'),
+    generateSnippet: generateCdpSnippet('analytics'),
   },
   {
     id: 'web-rudderstack-js',
     group: 'web',
     label: 'RudderStack (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('rudderanalytics'),
+    generateSnippet: generateCdpSnippet('rudderanalytics'),
   },
   {
     id: 'web-hightouch-js',
     group: 'web',
     label: 'Hightouch (JS)',
     language: 'javascript',
-    generator: generateCdpSnippet('htevents'),
+    generateSnippet: generateCdpSnippet('htevents'),
   },
 ];
 
-export function getSnippetTarget(targetId = DEFAULT_SNIPPET_TARGET_ID) {
-  const target = SNIPPET_TARGETS.find((item) => item.id === targetId);
-  if (!target) {
+function normalizeTrackingTarget(target) {
+  if (!target?.id || typeof target.id !== 'string') {
+    throw new Error('Tracking target must define a string id.');
+  }
+  if (typeof target.generateSnippet !== 'function') {
+    throw new Error(
+      `Tracking target "${target.id}" must define generateSnippet.`,
+    );
+  }
+
+  return target;
+}
+
+export function createTrackingTargetRegistry({ customTargets = [] } = {}) {
+  const targets = [...SNIPPET_TARGETS, ...customTargets].map(
+    normalizeTrackingTarget,
+  );
+  const targetMap = new Map();
+
+  targets.forEach((target) => {
+    if (targetMap.has(target.id)) {
+      throw new Error(`Duplicate tracking target id: ${target.id}`);
+    }
+    targetMap.set(target.id, target);
+  });
+
+  return {
+    get(targetId = DEFAULT_SNIPPET_TARGET_ID) {
+      const target = targetMap.get(targetId);
+      if (!target) {
+        throw new Error(`Unknown snippet target: ${targetId}`);
+      }
+      return target;
+    },
+    has(targetId) {
+      return targetMap.has(targetId);
+    },
+    ids() {
+      return [...targetMap.keys()];
+    },
+    list() {
+      return [...targetMap.values()];
+    },
+    generateSnippet({
+      targetId = DEFAULT_SNIPPET_TARGET_ID,
+      example,
+      schema,
+      config = {},
+      dataLayerName,
+    }) {
+      const target = this.get(targetId);
+      return target.generateSnippet({
+        example,
+        schema,
+        config,
+        dataLayerName,
+        targetId,
+      });
+    },
+  };
+}
+
+const DEFAULT_TRACKING_TARGET_REGISTRY = createTrackingTargetRegistry();
+
+export function getSnippetTarget(
+  targetId = DEFAULT_SNIPPET_TARGET_ID,
+  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
+) {
+  try {
+    return targetRegistry.get(targetId);
+  } catch {
     throw new Error(`Unknown snippet target: ${targetId}`);
   }
-  return target;
 }
 
 export function generateSnippetForTarget({
@@ -931,13 +998,13 @@ export function generateSnippetForTarget({
   schema,
   config = {},
   dataLayerName,
+  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
 }) {
-  const target = getSnippetTarget(targetId);
-  return target.generator({
+  return targetRegistry.generateSnippet({
+    targetId,
     example,
     schema,
     config,
     dataLayerName,
-    targetId,
   });
 }
