@@ -45,7 +45,17 @@ const makeContext = (overrides = {}) => ({
   ...overrides,
 });
 
-const makeOptions = () => ({ dataLayerName: 'dataLayer' });
+const makeOptions = (overrides = {}) => ({
+  dataLayerName: 'dataLayer',
+  ...overrides,
+});
+
+const makeCustomTarget = () => ({
+  id: 'web-custom-js',
+  label: 'Custom Web',
+  language: 'javascript',
+  generateSnippet: jest.fn(() => 'custom.track();'),
+});
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -119,7 +129,10 @@ describe('extendCli - validate-schemas', () => {
     expect(cli.command).toHaveBeenCalledWith('validate-schemas [version]');
     await action.fn('next');
 
-    expect(validateSchemas).toHaveBeenCalledWith('/site/static/schemas/next');
+    expect(validateSchemas).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      expect.objectContaining({ targetRegistry: expect.any(Object) }),
+    );
   });
 
   it('defaults to "next" version when no version argument given', async () => {
@@ -129,7 +142,25 @@ describe('extendCli - validate-schemas', () => {
 
     await action.fn(undefined);
     expect(getPathsForVersion).toHaveBeenCalledWith('next', '/site');
-    expect(validateSchemas).toHaveBeenCalledWith('/site/static/schemas/next');
+    expect(validateSchemas).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      expect.objectContaining({ targetRegistry: expect.any(Object) }),
+    );
+  });
+
+  it('configures schema validation with custom tracking targets', async () => {
+    const customTarget = makeCustomTarget();
+    const { cli, action } = makeCli();
+    const plugin = await createPlugin(
+      makeContext(),
+      makeOptions({ trackingTargets: [customTarget] }),
+    );
+    plugin.extendCli(cli);
+
+    await action.fn('next');
+
+    const targetRegistry = validateSchemas.mock.calls[0][1].targetRegistry;
+    expect(targetRegistry.has('web-custom-js')).toBe(true);
   });
 
   it('exits with code 1 when validation fails', async () => {
@@ -165,6 +196,21 @@ describe('plugin structure', () => {
         siteDir: '/site',
         url: 'https://example.com',
         dataLayerName: 'dataLayer',
+      }),
+    );
+  });
+
+  it('passes configured tracking targets to generateEventDocs', async () => {
+    const customTarget = makeCustomTarget();
+    const plugin = await createPlugin(
+      makeContext(),
+      makeOptions({ trackingTargets: [customTarget] }),
+    );
+    await plugin.loadContent();
+
+    expect(generateEventDocs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        trackingTargets: [customTarget],
       }),
     );
   });

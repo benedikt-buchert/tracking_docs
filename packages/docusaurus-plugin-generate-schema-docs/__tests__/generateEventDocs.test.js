@@ -97,6 +97,54 @@ describe('generateEventDocs (non-versioned)', () => {
       'custom_edit_url: https://github.com/test-org/test-project/edit/main/__fixtures__/static/schemas/root-choice-event.json',
     );
   });
+
+  it('embeds a prebuilt example model for configured custom tracking targets', async () => {
+    console.log = jest.fn();
+    const schemaDir = path.join(options.siteDir, 'static/schemas');
+    fs.writeFileSync(
+      path.join(schemaDir, 'custom-target-event.json'),
+      JSON.stringify(
+        {
+          $schema: 'https://json-schema.org/draft/2020-12/schema',
+          $id: 'https://example.com/schemas/custom-target-event.json',
+          title: 'Custom Target Event',
+          description: 'An event rendered with a custom target.',
+          type: 'object',
+          'x-tracking-targets': ['web-custom-js'],
+          required: ['event'],
+          properties: {
+            event: {
+              type: 'string',
+              const: 'custom_event',
+            },
+          },
+        },
+        null,
+        2,
+      ),
+    );
+
+    await generateEventDocs({
+      ...options,
+      trackingTargets: [
+        {
+          id: 'web-custom-js',
+          label: 'Custom Web',
+          language: 'javascript',
+          generateSnippet: ({ example }) =>
+            `custom.track(${JSON.stringify(example.event)});`,
+        },
+      ],
+    });
+
+    const customTargetDoc = fs.readFileSync(
+      path.join(outputDir, 'custom-target-event.mdx'),
+      'utf-8',
+    );
+    expect(customTargetDoc).toContain('exampleModel={');
+    expect(customTargetDoc).toContain('"id":"web-custom-js"');
+    expect(customTargetDoc).toContain('custom.track(\\"custom_event\\");');
+  });
 });
 
 describe('generateEventDocs (edge cases)', () => {

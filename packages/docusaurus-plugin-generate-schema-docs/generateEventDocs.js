@@ -11,6 +11,8 @@ import { processOneOfSchema } from './helpers/schema-processing.js';
 import SchemaDocTemplate from './helpers/schema-doc-template.js';
 import ChoiceIndexTemplate from './helpers/choice-index-template.js';
 import processSchema from './helpers/processSchema.js';
+import { buildExampleModel } from './helpers/exampleModel.js';
+import { createTrackingTargetRegistry } from './helpers/snippetTargets.js';
 
 function buildEditUrl(organizationName, projectName, siteDir, filePath) {
   const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
@@ -152,8 +154,14 @@ async function generateAndWriteDoc(
   schemaSources = {},
   schemaDir,
 ) {
-  const { organizationName, projectName, siteDir, dataLayerName, version } =
-    options;
+  const {
+    organizationName,
+    projectName,
+    siteDir,
+    dataLayerName,
+    version,
+    targetRegistry,
+  } = options;
 
   const { outputDir: versionOutputDir } = getPathsForVersion(version, siteDir);
   const PARTIALS_DIR = path.join(versionOutputDir, 'partials');
@@ -165,6 +173,9 @@ async function generateAndWriteDoc(
   const allowBasenameFallback = !partialNameConflicts.has(eventName);
 
   const mergedSchema = alreadyMergedSchema || (await processSchema(filePath));
+  const exampleModel = targetRegistry
+    ? buildExampleModel(schema, { dataLayerName, targetRegistry })
+    : null;
 
   // Resolve scoped partials first; basename fallback is disabled for ambiguous names.
   const top = resolvePartial({
@@ -199,6 +210,7 @@ async function generateAndWriteDoc(
     topPartialComponent: top.component,
     bottomPartialComponent: bottom.component,
     dataLayerName,
+    exampleModel,
     sourcePath: toSchemaSourceKey(schemaDir, editFilePath || filePath),
     schemaSources: collectReachableSchemaSources(
       toSchemaSourceKey(schemaDir, editFilePath || filePath),
@@ -302,6 +314,17 @@ async function generateOneOfDocs(
 
 export default async function generateEventDocs(options) {
   const { siteDir, version, url } = options || {};
+  const trackingTargets = Array.isArray(options?.trackingTargets)
+    ? options.trackingTargets
+    : [];
+  const targetRegistry =
+    options?.targetRegistry ||
+    (trackingTargets.length > 0
+      ? createTrackingTargetRegistry({ customTargets: trackingTargets })
+      : null);
+  const generationOptions = targetRegistry
+    ? { ...options, targetRegistry }
+    : options;
   const { schemaDir, outputDir } = getPathsForVersion(version, siteDir);
 
   createDir(outputDir);
@@ -329,7 +352,7 @@ export default async function generateEventDocs(options) {
         schema,
         filePath,
         outputDir,
-        options,
+        generationOptions,
         partialNameConflicts,
         schemaSources,
         schemaDir,
@@ -340,7 +363,7 @@ export default async function generateEventDocs(options) {
         schema,
         eventName,
         outputDir,
-        options,
+        generationOptions,
         null,
         null,
         partialNameConflicts,

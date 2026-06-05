@@ -1,4 +1,5 @@
 import {
+  createTrackingTargetRegistry,
   DEFAULT_SNIPPET_TARGET_ID,
   generateSnippetForTarget,
   getSnippetTarget,
@@ -27,6 +28,26 @@ describe('snippetTargets', () => {
         'web-braze-js',
       ]),
     );
+  });
+
+  it('exposes generateSnippet as the single target snippet API', () => {
+    SNIPPET_TARGETS.forEach((target) => {
+      expect(target.generateSnippet).toEqual(expect.any(Function));
+      expect(target).not.toHaveProperty('generator');
+    });
+  });
+
+  it('rejects custom targets that use the legacy generator API', () => {
+    expect(() =>
+      createTrackingTargetRegistry({
+        customTargets: [
+          {
+            id: 'web-legacy-js',
+            generator: () => 'legacy.track();',
+          },
+        ],
+      }),
+    ).toThrow('Tracking target "web-legacy-js" must define generateSnippet.');
   });
 
   it('resolves the default target when no id is provided', () => {
@@ -1251,7 +1272,7 @@ user.setCustomUserAttribute("premium", true);`);
   // L222: config default-arg — call web generator directly without config
   it('web generator defaults config to {} when config is omitted', () => {
     const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
-    const snippet = webTarget.generator({
+    const snippet = webTarget.generateSnippet({
       example: { event: 'test_event' },
       schema: { properties: {} },
       dataLayerName: 'myDL',
@@ -1263,7 +1284,7 @@ user.setCustomUserAttribute("premium", true);`);
   // L227: schema || {} — call web generator with schema undefined
   it('web generator falls back to empty schema when schema is falsy', () => {
     const webTarget = SNIPPET_TARGETS.find((t) => t.id === 'web-datalayer-js');
-    const snippet = webTarget.generator({
+    const snippet = webTarget.generateSnippet({
       example: { event: 'test_event' },
       schema: undefined,
       config: {},
@@ -1280,7 +1301,7 @@ user.setCustomUserAttribute("premium", true);`);
     );
     // example with only event triggers toFirebaseParamEntries with a truthy example
     // but no additional params — the || {} fallback is defensive
-    const snippet = kotlinTarget.generator({
+    const snippet = kotlinTarget.generateSnippet({
       example: { event: 'simple_event' },
       targetId: 'android-firebase-kotlin-sdk',
     });

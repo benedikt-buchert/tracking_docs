@@ -9,6 +9,7 @@ export default function SchemaViewer({
   sourcePath,
   schemaSources,
   dataLayerName,
+  exampleModel,
 }) {
   const resolvedSourceSchema =
     (sourcePath && schemaSources?.[sourcePath]) || sourceSchema || schema;
@@ -29,7 +30,11 @@ export default function SchemaViewer({
   return (
     <div>
       <Heading as="h2">{exampleTitle}</Heading>
-      <ExampleDataLayer schema={schema} dataLayerName={dataLayerName} />
+      <ExampleDataLayer
+        schema={schema}
+        dataLayerName={dataLayerName}
+        exampleModel={exampleModel}
+      />
 
       <Heading as="h2">Event Properties</Heading>
       <PropertiesTable schema={schema} sourceSchema={resolvedSourceSchema} />

@@ -1,16 +1,13 @@
-export const DEFAULT_TRACKING_TARGET = 'web-datalayer-js';
+import {
+  createTrackingTargetRegistry,
+  DEFAULT_SNIPPET_TARGET_ID,
+} from './snippetTargets.js';
 
-export const SUPPORTED_TRACKING_TARGETS = [
-  DEFAULT_TRACKING_TARGET,
-  'android-firebase-kotlin-sdk',
-  'android-firebase-java-sdk',
-  'ios-firebase-swift-sdk',
-  'ios-firebase-objc-sdk',
-  'web-segment-js',
-  'web-rudderstack-js',
-  'web-hightouch-js',
-  'web-braze-js',
-];
+const DEFAULT_TARGET_REGISTRY = createTrackingTargetRegistry();
+
+export const DEFAULT_TRACKING_TARGET = DEFAULT_SNIPPET_TARGET_ID;
+
+export const SUPPORTED_TRACKING_TARGETS = DEFAULT_TARGET_REGISTRY.ids();
 
 const TARGET_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+){2,}$/;
 
@@ -67,7 +64,11 @@ function isReferenceAggregatorSchema(schema) {
 
 export function resolveTrackingTargets(
   schema,
-  { schemaFile = 'schema', isQuiet = false } = {},
+  {
+    schemaFile = 'schema',
+    isQuiet = false,
+    targetRegistry = DEFAULT_TARGET_REGISTRY,
+  } = {},
 ) {
   const configuredTargets = schema?.['x-tracking-targets'];
 
@@ -99,7 +100,7 @@ export function resolveTrackingTargets(
 
   const errors = [];
   const unknownTargets = configuredTargets.filter(
-    (target) => !SUPPORTED_TRACKING_TARGETS.includes(target),
+    (target) => !targetRegistry.has(target),
   );
 
   if (unknownTargets.length > 0) {

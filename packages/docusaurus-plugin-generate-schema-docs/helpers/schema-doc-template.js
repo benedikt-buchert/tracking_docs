@@ -9,10 +9,17 @@ export default function MdxTemplate(data) {
     topPartialComponent,
     bottomPartialComponent,
     dataLayerName,
+    exampleModel,
     sourcePath,
     schemaSources,
   } = data;
   const sourceSchema = schemaSources?.[sourcePath] || schema;
+  const schemaViewerOptionLines = [
+    dataLayerName ? `dataLayerName={'${dataLayerName}'}` : null,
+    exampleModel ? `exampleModel={${JSON.stringify(exampleModel)}}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n  ');
 
   return `---
 title: ${schema.title}
@@ -37,7 +44,7 @@ ${topPartialComponent}
   sourceSchema={${JSON.stringify(sourceSchema)}}
   sourcePath={${JSON.stringify(sourcePath)}}
   schemaSources={${JSON.stringify(schemaSources)}}
-  ${dataLayerName ? ` dataLayerName={'${dataLayerName}'}` : ''}
+  ${schemaViewerOptionLines}
 />
 <SchemaJsonViewer
   schema={${JSON.stringify(schema)}}

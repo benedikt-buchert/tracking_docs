@@ -30,6 +30,16 @@ npm install --save docusaurus-plugin-generate-schema-docs
           {
             // Options if any
             dataLayerName: 'customDataLayer',
+            trackingTargets: [
+              {
+                id: 'web-custom-js',
+                label: 'Custom Web',
+                language: 'javascript',
+                generateSnippet({ example }) {
+                  return `custom.track(${JSON.stringify(example.event)});`;
+                },
+              },
+            ],
           },
         ],
       ],
@@ -40,6 +50,41 @@ npm install --save docusaurus-plugin-generate-schema-docs
     The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
 
 2.  Place your JSON schemas in the `schemas` directory at the root of your project.
+
+## Custom Tracking Targets
+
+Use `trackingTargets` to add snippet targets that schemas can select with `x-tracking-targets`.
+
+```json
+{
+  "title": "Custom Event",
+  "type": "object",
+  "x-tracking-targets": ["web-custom-js"],
+  "properties": {
+    "event": { "type": "string", "const": "custom_event" }
+  }
+}
+```
+
+A target must define:
+
+```javascript
+{
+  id: 'web-custom-js',
+  label: 'Custom Web',
+  language: 'javascript',
+  generateSnippet({ example, schema, config, dataLayerName, targetId }) {
+    return `custom.track(${JSON.stringify(example.event)});`;
+  },
+  validateSchema(schema) {
+    return [];
+  },
+}
+```
+
+`id` must be unique across built-in and custom targets. `generateSnippet` runs during validation and documentation generation; generated MDX receives serialized snippets, not adapter functions.
+
+`validateSchema` is optional. Return an array of error messages, a single error string, `{ errors: [...] }`, or a falsy value when the schema is valid.
 
 ## CLI Commands
 

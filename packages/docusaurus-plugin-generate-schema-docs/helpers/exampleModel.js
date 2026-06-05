@@ -1,12 +1,17 @@
 import { schemaToExamples } from './schemaToExamples';
 import {
+  createTrackingTargetRegistry,
   DEFAULT_SNIPPET_TARGET_ID,
   findClearableProperties,
   generateSnippetForTarget,
-  getSnippetTarget,
 } from './snippetTargets';
 
-export function resolveExampleTargets(schema) {
+const DEFAULT_TARGET_REGISTRY = createTrackingTargetRegistry();
+
+export function resolveExampleTargets(
+  schema,
+  { targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+) {
   const configured = schema?.['x-tracking-targets'];
   const targetIds =
     Array.isArray(configured) && configured.length > 0
@@ -16,7 +21,7 @@ export function resolveExampleTargets(schema) {
   const targets = targetIds
     .map((id) => {
       try {
-        return getSnippetTarget(id);
+        return targetRegistry.get(id);
       } catch {
         return null;
       }
@@ -24,12 +29,15 @@ export function resolveExampleTargets(schema) {
     .filter(Boolean);
 
   if (targets.length > 0) return targets;
-  return [getSnippetTarget(DEFAULT_SNIPPET_TARGET_ID)];
+  return [targetRegistry.get(DEFAULT_SNIPPET_TARGET_ID)];
 }
 
-export function buildExampleModel(schema, { dataLayerName } = {}) {
+export function buildExampleModel(
+  schema,
+  { dataLayerName, targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+) {
   const exampleGroups = schemaToExamples(schema);
-  const targets = resolveExampleTargets(schema);
+  const targets = resolveExampleTargets(schema, { targetRegistry });
 
   if (!exampleGroups || exampleGroups.length === 0) {
     return {
@@ -53,6 +61,7 @@ export function buildExampleModel(schema, { dataLayerName } = {}) {
             example: option.example,
             schema,
             dataLayerName,
+            targetRegistry,
           }),
         ]),
       ),
