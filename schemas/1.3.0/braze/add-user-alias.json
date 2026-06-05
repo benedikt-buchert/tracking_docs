@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/braze/add-user-alias.json",
+  "title": "Add User Alias",
+  "description": "Adds a secondary alias identifier to the current Braze user.",
+  "x-tracking-targets": ["web-braze-js"],
+  "x-method": "alias",
+  "type": "object",
+  "properties": {
+    "alias_name": {
+      "type": "string",
+      "description": "The alias identifier to attach to the current Braze user.",
+      "minLength": 1,
+      "examples": ["guest_abc123", "support_987654"]
+    },
+    "alias_label": {
+      "type": "string",
+      "description": "The label that describes the alias source or identifier type.",
+      "minLength": 1,
+      "examples": ["guest_id", "support_id"]
+    }
+  },
+  "required": ["alias_name", "alias_label"]
+}

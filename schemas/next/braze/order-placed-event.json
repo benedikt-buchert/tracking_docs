@@ -1,0 +1,126 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/braze/order-placed-event.json",
+  "title": "Order Placed Event",
+  "description": "A Braze recommended eCommerce event for a completed order.",
+  "x-tracking-targets": ["web-braze-js"],
+  "x-method": "track",
+  "type": "object",
+  "properties": {
+    "event": {
+      "type": "string",
+      "const": "ecommerce.order_placed",
+      "description": "The Braze recommended event name for a completed order."
+    },
+    "order_id": {
+      "type": "string",
+      "description": "The unique identifier for the order.",
+      "examples": ["order_7891011", "order_12345"]
+    },
+    "cart_id": {
+      "type": "string",
+      "description": "The cart identifier shared across cart, checkout, and order events.",
+      "examples": ["cart_abc123", "cart_456"]
+    },
+    "total_value": {
+      "type": "number",
+      "description": "The total monetary value of the order.",
+      "examples": [84.99, 234.96]
+    },
+    "subtotal_value": {
+      "type": "number",
+      "description": "The order subtotal after discounts and before tax or shipping.",
+      "examples": [74.99, 219.97]
+    },
+    "tax": {
+      "type": "number",
+      "description": "The total tax applied to the order.",
+      "examples": [5, 9]
+    },
+    "shipping": {
+      "type": "number",
+      "description": "The shipping cost applied to the order.",
+      "examples": [5, 5.99]
+    },
+    "currency": {
+      "type": "string",
+      "description": "The ISO 4217 three-letter currency code.",
+      "minLength": 3,
+      "maxLength": 3,
+      "examples": ["USD", "EUR"]
+    },
+    "total_discounts": {
+      "type": "number",
+      "description": "The total value of discounts applied to the order.",
+      "examples": [10, 15]
+    },
+    "products": {
+      "type": "array",
+      "description": "The line items in the order.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "description": "The unique product identifier.",
+            "examples": ["sku_2001", "SKU-RUN-4821"]
+          },
+          "product_name": {
+            "type": "string",
+            "description": "The product display name.",
+            "examples": ["Trail Runner Pro", "Ultraboost Running Shoe"]
+          },
+          "variant_id": {
+            "type": "string",
+            "description": "The product variant identifier.",
+            "examples": ["var_2001_black_10", "UB-BLK-11"]
+          },
+          "image_url": {
+            "type": "string",
+            "description": "The product image URL.",
+            "examples": [
+              "https://cdn.example.com/products/trail-runner-pro.jpg"
+            ]
+          },
+          "product_url": {
+            "type": "string",
+            "description": "The product page URL.",
+            "examples": ["https://www.example.com/products/trail-runner-pro"]
+          },
+          "quantity": {
+            "type": "integer",
+            "description": "The number of units in the order.",
+            "minimum": 1,
+            "examples": [1, 2]
+          },
+          "price": {
+            "type": "number",
+            "description": "The product variant unit price.",
+            "examples": [94.99, 189.99]
+          }
+        },
+        "required": [
+          "product_id",
+          "product_name",
+          "variant_id",
+          "quantity",
+          "price"
+        ]
+      }
+    },
+    "source": {
+      "type": "string",
+      "description": "The source the event originates from.",
+      "const": "web"
+    }
+  },
+  "required": [
+    "event",
+    "order_id",
+    "total_value",
+    "currency",
+    "products",
+    "source"
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/braze-reference.json",
+  "title": "Braze Reference",
+  "description": "Dedicated Braze Web SDK snippets and schema examples.",
+  "x-tracking-targets": ["web-braze-js"],
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "./braze/order-placed-event.json"
+    },
+    {
+      "$ref": "./braze/cart-updated-event.json"
+    },
+    {
+      "$ref": "./braze/user-signup-event.json"
+    },
+    {
+      "$ref": "./braze/newsletter-subscribed-event.json"
+    },
+    {
+      "$ref": "./braze/identify-user.json"
+    },
+    {
+      "$ref": "./braze/add-user-alias.json"
+    }
+  ]
+}
