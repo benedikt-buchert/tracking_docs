@@ -7,11 +7,6 @@
   "x-method": "track",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/braze/cart-updated-event.json"
-    },
     "event": {
       "type": "string",
       "const": "ecommerce.cart_updated",
@@ -116,7 +111,6 @@
     }
   },
   "required": [
-    "$schema",
     "event",
     "cart_id",
     "action",

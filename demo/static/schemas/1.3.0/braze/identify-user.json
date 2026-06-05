@@ -7,11 +7,6 @@
   "x-method": "identify",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the identify call.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/braze/identify-user.json"
-    },
     "userId": {
       "type": "string",
       "description": "The unique external identifier for the user.",
@@ -35,5 +30,5 @@
       "examples": [true, false]
     }
   },
-  "required": ["$schema", "userId"]
+  "required": ["userId"]
 }

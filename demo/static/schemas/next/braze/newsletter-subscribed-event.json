@@ -7,11 +7,6 @@
   "x-method": "track",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/braze/newsletter-subscribed-event.json"
-    },
     "event": {
       "type": "string",
       "const": "newsletter_subscribed",
@@ -34,5 +29,5 @@
       "examples": ["footer_form", "checkout_opt_in"]
     }
   },
-  "required": ["$schema", "event"]
+  "required": ["event"]
 }

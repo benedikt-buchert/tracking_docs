@@ -7,11 +7,6 @@
   "x-method": "track",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/braze/order-placed-event.json"
-    },
     "event": {
       "type": "string",
       "const": "ecommerce.order_placed",
@@ -121,7 +116,6 @@
     }
   },
   "required": [
-    "$schema",
     "event",
     "order_id",
     "total_value",

@@ -7,11 +7,6 @@
   "x-method": "track",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the event.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/braze/user-signup-event.json"
-    },
     "event": {
       "type": "string",
       "const": "user_signup",
@@ -29,5 +24,5 @@
       "examples": ["homepage", "checkout"]
     }
   },
-  "required": ["$schema", "event"]
+  "required": ["event"]
 }

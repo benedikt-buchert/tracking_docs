@@ -7,11 +7,6 @@
   "x-method": "alias",
   "type": "object",
   "properties": {
-    "$schema": {
-      "type": "string",
-      "description": "Defines the structure of the alias call.",
-      "const": "https://tracking-docs-demo.buchert.digital/schemas/1.3.0/braze/add-user-alias.json"
-    },
     "alias_name": {
       "type": "string",
       "description": "The alias identifier to attach to the current Braze user.",
@@ -25,5 +20,5 @@
       "examples": ["guest_id", "support_id"]
     }
   },
-  "required": ["$schema", "alias_name", "alias_label"]
+  "required": ["alias_name", "alias_label"]
 }

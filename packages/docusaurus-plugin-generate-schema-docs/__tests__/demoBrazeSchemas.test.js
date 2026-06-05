@@ -46,17 +46,13 @@ describe('demo Braze schemas', () => {
       expect(schema['x-tracking-targets']).toEqual(['web-braze-js']);
       expect(schema['x-method']).toBe('track');
       expect(schema.properties.event.const).toBe(eventName);
-      expect(schema.required).toEqual(
-        expect.arrayContaining(['$schema', 'event']),
-      );
+      expect(schema.required).toEqual(expect.arrayContaining(['event']));
     });
 
     const identifySchema = readSchema('braze/identify-user.json');
     expect(identifySchema['x-tracking-targets']).toEqual(['web-braze-js']);
     expect(identifySchema['x-method']).toBe('identify');
-    expect(identifySchema.required).toEqual(
-      expect.arrayContaining(['$schema', 'userId']),
-    );
+    expect(identifySchema.required).toEqual(expect.arrayContaining(['userId']));
     expect(identifySchema.properties).toHaveProperty('loyalty_tier');
     expect(identifySchema.properties).toHaveProperty('preferred_store');
     expect(identifySchema.properties).toHaveProperty('marketing_opt_in');
@@ -65,7 +61,7 @@ describe('demo Braze schemas', () => {
     expect(aliasSchema['x-tracking-targets']).toEqual(['web-braze-js']);
     expect(aliasSchema['x-method']).toBe('alias');
     expect(aliasSchema.required).toEqual(
-      expect.arrayContaining(['$schema', 'alias_name', 'alias_label']),
+      expect.arrayContaining(['alias_name', 'alias_label']),
     );
   });
 
