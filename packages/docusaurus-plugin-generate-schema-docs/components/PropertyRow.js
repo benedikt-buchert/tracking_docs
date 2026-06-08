@@ -147,6 +147,25 @@ export default function PropertyRow({
       allPositions.push(`${pos}rem top`);
     });
 
+  // When the immediate parent (level - 1) is not the last sibling at its level,
+  // the existing filter (lvl < level - 1) misses drawing the pass-through line at
+  // getLevelPosition(level - 2) — the x-position of the parent-level siblings connector.
+  // This gap makes visually disconnected siblings (e.g. trial_end_date ↔ is_trial when
+  // $time sits between them). Only add when level - 2 is not already in continuingLevels,
+  // which would mean the existing filter already handles it.
+  if (
+    level >= 2 &&
+    continuingLevels.includes(level - 1) &&
+    !continuingLevels.includes(level - 2)
+  ) {
+    const pos = getLevelPosition(level - 2);
+    allGradients.push(
+      'linear-gradient(var(--ifm-table-border-color), var(--ifm-table-border-color))',
+    );
+    allSizes.push('1px 100%');
+    allPositions.push(`${pos}rem top`);
+  }
+
   const continuingLinesStyle =
     allGradients.length > 0
       ? {

@@ -1,6 +1,6 @@
 # Rules
 
-**TDD (red-green):** Write failing tests first, confirm they fail, then write minimum code to pass. Never write implementation before tests.
+**Always use Kent Beck Canon TDD**
 
 **Refactor before changing:** If code is not open for the changes, refactor first Never refactor and change behavior together.
 

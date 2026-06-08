@@ -784,6 +784,42 @@ describe('PropertyRow', () => {
       expect(gradientCount).toBe(1);
     });
 
+    it('draws a pass-through line at the parent-level siblings connector when parent is not last', () => {
+      // Reproduces the visual gap between trial_end_date and is_trial.
+      // $time is level 3, the last child of trial_end_date (level 2, NOT last — is_trial follows).
+      // continuingLevels = [2] means trial_end_date is not last.
+      // The level-2 siblings connector (trial_end_date ↔ is_trial) sits at
+      // getLevelPosition(level - 2) = getLevelPosition(1) = 1.75rem.
+      // Without the fix there is no gradient at 1.75rem and the connector has a visual gap
+      // through $time's row.
+      const row = {
+        name: '$time',
+        level: 3,
+        required: true,
+        propertyType: 'string',
+        description: 'ISO 8601 date string.',
+        examples: ['2025-12-30'],
+        constraints: ['required', 'format: date'],
+        path: ['PAYLOAD', 'products', '[n]', 'trial_end_date', '$time'],
+        hasChildren: false,
+        containerType: null,
+        continuingLevels: [2],
+        groupBrackets: [],
+        isLastInGroup: true,
+      };
+
+      const { container } = render(
+        <table>
+          <tbody>
+            <PropertyRow row={row} isLastInGroup={true} />
+          </tbody>
+        </table>,
+      );
+
+      const td = container.querySelector('td.level-3');
+      expect(td.style.backgroundPosition).toContain('1.75rem');
+    });
+
     it('has no background-image when continuingLevels is empty and no children', () => {
       const row = {
         name: 'simple',
