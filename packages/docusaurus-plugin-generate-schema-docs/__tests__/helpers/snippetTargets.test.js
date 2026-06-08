@@ -1555,3 +1555,137 @@ describe.each(CDP_TARGETS)(
     });
   },
 );
+
+describe('server-rudderstack-php snippet', () => {
+  it('is registered in SNIPPET_TARGETS', () => {
+    expect(SNIPPET_TARGETS.map((t) => t.id)).toContain(
+      'server-rudderstack-php',
+    );
+  });
+
+  it('has group=server and language=php', () => {
+    const target = getSnippetTarget('server-rudderstack-php');
+    expect(target.group).toBe('server');
+    expect(target.language).toBe('php');
+  });
+
+  describe('track (default)', () => {
+    it('generates a track call with userId, event, and properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123', event: 'Order Completed', revenue: 20 },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `Rudder::track([\n    'userId' => 'user-123',\n    'event' => 'Order Completed',\n    'properties' => [\n        'revenue' => 20,\n    ],\n]);`,
+      );
+    });
+
+    it('omits properties key when no fields beyond userId and event', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123', event: 'page_view' },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `Rudder::track([\n    'userId' => 'user-123',\n    'event' => 'page_view',\n]);`,
+      );
+    });
+
+    it('throws when userId is missing', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-php',
+          example: { event: 'page_view' },
+          schema: {},
+        }),
+      ).toThrow('[server-rudderstack-php]');
+    });
+  });
+
+  describe('identify (x-method: identify)', () => {
+    it('generates an identify call with userId and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123', email: 'a@b.com', plan: 'pro' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(
+        `Rudder::identify([\n    'userId' => 'user-123',\n    'traits' => [\n        'email' => 'a@b.com',\n        'plan' => 'pro',\n    ],\n]);`,
+      );
+    });
+
+    it('omits traits key when no fields beyond userId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(
+        `Rudder::identify([\n    'userId' => 'user-123',\n]);`,
+      );
+    });
+  });
+
+  describe('group (x-method: group)', () => {
+    it('generates a group call with userId, groupId, and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123', groupId: 'acme', plan: 'enterprise' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(
+        `Rudder::group([\n    'userId' => 'user-123',\n    'groupId' => 'acme',\n    'traits' => [\n        'plan' => 'enterprise',\n    ],\n]);`,
+      );
+    });
+
+    it('omits traits key when no fields beyond userId and groupId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123', groupId: 'acme' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(
+        `Rudder::group([\n    'userId' => 'user-123',\n    'groupId' => 'acme',\n]);`,
+      );
+    });
+  });
+
+  describe('page (x-method: page)', () => {
+    it('generates a page call with userId and properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: {
+          userId: 'user-123',
+          name: 'Home',
+          url: 'https://example.com',
+        },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `Rudder::page([\n    'userId' => 'user-123',\n    'properties' => [\n        'name' => 'Home',\n        'url' => 'https://example.com',\n    ],\n]);`,
+      );
+    });
+
+    it('omits properties key when no fields beyond userId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: { userId: 'user-123' },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(`Rudder::page([\n    'userId' => 'user-123',\n]);`);
+    });
+  });
+
+  describe('alias (x-method: alias)', () => {
+    it('throws for alias', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-php',
+          example: { userId: 'user-123' },
+          schema: { 'x-method': 'alias' },
+        }),
+      ).toThrow('[server-rudderstack-php]');
+    });
+  });
+});

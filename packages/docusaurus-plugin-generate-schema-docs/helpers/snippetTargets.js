@@ -922,6 +922,92 @@ function generateBrazeWebSnippet({ example, schema, targetId }) {
     : `braze.logCustomEvent(${JSON.stringify(eventName)});`;
 }
 
+function toPhpValue(value, indent) {
+  if (value === null) return 'null';
+  if (value === true) return 'true';
+  if (value === false) return 'false';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return `'${value}'`;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]';
+    const inner = value
+      .map((v) => `${indent}    ${toPhpValue(v, indent + '    ')}`)
+      .join(',\n');
+    return `[\n${inner},\n${indent}]`;
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '[]';
+    const inner = entries
+      .map(
+        ([k, v]) => `${indent}    '${k}' => ${toPhpValue(v, indent + '    ')}`,
+      )
+      .join(',\n');
+    return `[\n${inner},\n${indent}]`;
+  }
+  return String(value);
+}
+
+function generatePhpRudderstackSnippet({ example, schema, targetId }) {
+  const method = resolveCdpMethod(schema);
+  const { userId, event, ...rest } = cdpProperties(example, new Set());
+
+  if (
+    typeof example.userId !== 'string' ||
+    example.userId.trim().length === 0
+  ) {
+    throw new Error(
+      `[${targetId}] PHP RudderStack snippets require a non-empty string userId.`,
+    );
+  }
+
+  if (method === 'track') {
+    const props = cdpProperties(example, new Set(['userId', 'event']));
+    const lines = [
+      `    'userId' => '${example.userId}'`,
+      `    'event' => '${example.event}'`,
+    ];
+    if (Object.keys(props).length > 0) {
+      lines.push(`    'properties' => ${toPhpValue(props, '    ')}`);
+    }
+    return `Rudder::track([\n${lines.join(',\n')},\n]);`;
+  }
+
+  if (method === 'identify') {
+    const traits = cdpProperties(example, new Set(['userId']));
+    const lines = [`    'userId' => '${example.userId}'`];
+    if (Object.keys(traits).length > 0) {
+      lines.push(`    'traits' => ${toPhpValue(traits, '    ')}`);
+    }
+    return `Rudder::identify([\n${lines.join(',\n')},\n]);`;
+  }
+
+  if (method === 'group') {
+    const traits = cdpProperties(example, new Set(['userId', 'groupId']));
+    const lines = [
+      `    'userId' => '${example.userId}'`,
+      `    'groupId' => '${example.groupId}'`,
+    ];
+    if (Object.keys(traits).length > 0) {
+      lines.push(`    'traits' => ${toPhpValue(traits, '    ')}`);
+    }
+    return `Rudder::group([\n${lines.join(',\n')},\n]);`;
+  }
+
+  if (method === 'page') {
+    const props = cdpProperties(example, new Set(['userId']));
+    const lines = [`    'userId' => '${example.userId}'`];
+    if (Object.keys(props).length > 0) {
+      lines.push(`    'properties' => ${toPhpValue(props, '    ')}`);
+    }
+    return `Rudder::page([\n${lines.join(',\n')},\n]);`;
+  }
+
+  throw new Error(
+    `[${targetId}] PHP RudderStack snippet does not support x-method "${method}".`,
+  );
+}
+
 export const SNIPPET_TARGETS = [
   {
     id: 'web-datalayer-js',
@@ -985,6 +1071,13 @@ export const SNIPPET_TARGETS = [
     label: 'Braze Web SDK (JS)',
     language: 'javascript',
     generateSnippet: generateBrazeWebSnippet,
+  },
+  {
+    id: 'server-rudderstack-php',
+    group: 'server',
+    label: 'RudderStack (PHP)',
+    language: 'php',
+    generateSnippet: generatePhpRudderstackSnippet,
   },
 ];
 

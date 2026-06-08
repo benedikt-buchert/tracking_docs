@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/analytics-js-reference.json",
+  "title": "Analytics.js Reference",
+  "description": "Analytics.js-compatible event examples for Segment, RudderStack, and Hightouch.",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "./analytics-js/track-purchase.json"
+    },
+    {
+      "$ref": "./analytics-js/identify-user.json"
+    },
+    {
+      "$ref": "./analytics-js/group-company.json"
+    },
+    {
+      "$ref": "./analytics-js/page-view.json"
+    }
+  ]
+}
