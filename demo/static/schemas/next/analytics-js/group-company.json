@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tracking-docs-demo.buchert.digital/schemas/analytics-js/group-company.json",
+  "title": "Group Company",
+  "description": "Associates the current user with a company or organization via the group() call.",
+  "x-tracking-targets": [
+    "web-segment-js",
+    "web-rudderstack-js",
+    "web-hightouch-js"
+  ],
+  "x-method": "group",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Defines the structure of the event.",
+      "const": "https://tracking-docs-demo.buchert.digital/schemas/analytics-js/group-company.json"
+    },
+    "groupId": {
+      "type": "string",
+      "description": "The unique identifier for the group (company, organization, or account).",
+      "examples": ["acme-corp", "company_789", "org_42"]
+    },
+    "name": {
+      "type": "string",
+      "description": "The name of the group.",
+      "examples": ["Acme Corp", "Example Inc"]
+    },
+    "industry": {
+      "type": "string",
+      "description": "The industry the group operates in.",
+      "examples": ["Technology", "Retail", "Finance"]
+    },
+    "plan": {
+      "type": "string",
+      "description": "The subscription plan of the group.",
+      "enum": ["free", "pro", "enterprise"],
+      "examples": ["free", "pro", "enterprise"]
+    },
+    "employee_count": {
+      "type": "number",
+      "description": "The number of employees in the organization.",
+      "examples": [10, 250, 5000]
+    }
+  },
+  "required": ["$schema", "groupId"]
+}
