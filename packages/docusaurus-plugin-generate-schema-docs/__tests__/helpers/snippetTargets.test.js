@@ -1707,3 +1707,173 @@ describe('server-rudderstack-php snippet', () => {
     });
   });
 });
+
+describe('server-rudderstack-java snippet', () => {
+  it('is registered in SNIPPET_TARGETS', () => {
+    expect(SNIPPET_TARGETS.map((t) => t.id)).toContain(
+      'server-rudderstack-java',
+    );
+  });
+
+  it('has group=server and language=java', () => {
+    const target = getSnippetTarget('server-rudderstack-java');
+    expect(target.group).toBe('server');
+    expect(target.language).toBe('java');
+  });
+
+  describe('track (default)', () => {
+    it('generates a track call with userId, event, and properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', event: 'Order Completed', revenue: 20 },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(TrackMessage.builder("Order Completed")\n    .userId("user-123")\n    .properties(ImmutableMap.builder()\n        .put("revenue", 20)\n        .build()));`,
+      );
+    });
+
+    it('omits properties when no fields beyond userId and event', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', event: 'page_view' },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(TrackMessage.builder("page_view")\n    .userId("user-123"));`,
+      );
+    });
+
+    it('unwraps a nested properties object instead of double-nesting it', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: {
+          userId: '12345',
+          event: 'website_builder.chat_message_sent',
+          properties: {
+            website_category: 'Restaurant',
+            website_category_changed: true,
+          },
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(TrackMessage.builder("website_builder.chat_message_sent")\n    .userId("12345")\n    .properties(ImmutableMap.builder()\n        .put("website_category", "Restaurant")\n        .put("website_category_changed", true)\n        .build()));`,
+      );
+    });
+
+    it('renders nested objects and arrays as Guava immutable collections', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: {
+          userId: 'user-123',
+          event: 'Order Completed',
+          products: [{ sku: 'A1' }],
+          address: { city: 'NYC' },
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(TrackMessage.builder("Order Completed")\n    .userId("user-123")\n    .properties(ImmutableMap.builder()\n        .put("products", ImmutableList.of(\n            ImmutableMap.builder()\n                .put("sku", "A1")\n                .build()\n        ))\n        .put("address", ImmutableMap.builder()\n            .put("city", "NYC")\n            .build())\n        .build()));`,
+      );
+    });
+
+    it('throws when userId is missing', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-java',
+          example: { event: 'page_view' },
+          schema: {},
+        }),
+      ).toThrow('[server-rudderstack-java]');
+    });
+  });
+
+  describe('identify (x-method: identify)', () => {
+    it('generates an identify call with userId and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', email: 'a@b.com', plan: 'pro' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(IdentifyMessage.builder()\n    .userId("user-123")\n    .traits(ImmutableMap.builder()\n        .put("email", "a@b.com")\n        .put("plan", "pro")\n        .build()));`,
+      );
+    });
+
+    it('omits traits when no fields beyond userId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(IdentifyMessage.builder()\n    .userId("user-123"));`,
+      );
+    });
+  });
+
+  describe('group (x-method: group)', () => {
+    it('generates a group call with userId, groupId, and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', groupId: 'acme', plan: 'enterprise' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(GroupMessage.builder("acme")\n    .userId("user-123")\n    .traits(ImmutableMap.builder()\n        .put("plan", "enterprise")\n        .build()));`,
+      );
+    });
+
+    it('omits traits when no fields beyond userId and groupId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', groupId: 'acme' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(GroupMessage.builder("acme")\n    .userId("user-123"));`,
+      );
+    });
+  });
+
+  describe('page (x-method: page)', () => {
+    it('uses name as the page builder argument and the rest as properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: {
+          userId: 'user-123',
+          name: 'Home',
+          url: 'https://example.com',
+        },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(PageMessage.builder("Home")\n    .userId("user-123")\n    .properties(ImmutableMap.builder()\n        .put("url", "https://example.com")\n        .build()));`,
+      );
+    });
+
+    it('omits properties when no fields beyond userId and name', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-java',
+        example: { userId: 'user-123', name: 'Home' },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `analytics.enqueue(PageMessage.builder("Home")\n    .userId("user-123"));`,
+      );
+    });
+  });
+
+  describe('alias (x-method: alias)', () => {
+    it('throws for alias', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-java',
+          example: { userId: 'user-123' },
+          schema: { 'x-method': 'alias' },
+        }),
+      ).toThrow('[server-rudderstack-java]');
+    });
+  });
+});
