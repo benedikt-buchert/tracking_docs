@@ -1592,6 +1592,24 @@ describe('server-rudderstack-php snippet', () => {
       );
     });
 
+    it('unwraps a nested properties object instead of double-nesting it', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-php',
+        example: {
+          userId: '12345',
+          event: 'website_builder.chat_message_sent',
+          properties: {
+            website_category: 'Restaurant',
+            website_category_changed: true,
+          },
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `Rudder::track([\n    'userId' => '12345',\n    'event' => 'website_builder.chat_message_sent',\n    'properties' => [\n        'website_category' => 'Restaurant',\n        'website_category_changed' => true,\n    ],\n]);`,
+      );
+    });
+
     it('throws when userId is missing', () => {
       expect(() =>
         generateSnippetForTarget({

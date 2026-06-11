@@ -962,7 +962,11 @@ function generatePhpRudderstackSnippet({ example, schema, targetId }) {
   }
 
   if (method === 'track') {
-    const props = cdpProperties(example, new Set(['userId', 'event']));
+    const remaining = cdpProperties(example, new Set(['userId', 'event']));
+    const { properties: nestedProps, ...otherRemaining } = remaining;
+    const props = isPlainObject(nestedProps)
+      ? { ...nestedProps, ...otherRemaining }
+      : remaining;
     const lines = [
       `    'userId' => '${example.userId}'`,
       `    'event' => '${example.event}'`,
