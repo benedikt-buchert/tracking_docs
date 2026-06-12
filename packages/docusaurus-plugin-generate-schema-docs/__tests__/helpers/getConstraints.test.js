@@ -143,4 +143,70 @@ describe('getConstraints', () => {
       'not: { items: [{ type: "string" }, { type: "number" }] }',
     ]);
   });
+
+  it('should prefix constraints from scalar array items with "items."', () => {
+    const prop = {
+      type: 'array',
+      items: {
+        enum: ['newsmail', 'engagement', 'customerPanel'],
+      },
+    };
+    expect(getConstraints(prop, false)).toEqual([
+      'items.enum: [newsmail, engagement, customerPanel]',
+    ]);
+  });
+
+  it('should prefix non-enum item constraints with "items."', () => {
+    const prop = {
+      type: 'array',
+      items: { type: 'string', minLength: 3 },
+    };
+    expect(getConstraints(prop, false)).toEqual(['items.minLength: 3']);
+  });
+
+  it('should keep array-level and item-level constraints distinguishable', () => {
+    const prop = {
+      type: 'array',
+      minItems: 1,
+      default: [],
+      items: { type: 'string', default: 'a' },
+    };
+    expect(getConstraints(prop, false)).toEqual([
+      'minItems: 1',
+      'default: []',
+      'items.default: "a"',
+    ]);
+  });
+
+  it('should not emit item constraints when items are objects with properties', () => {
+    const prop = {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: { id: { type: 'string' } },
+        additionalProperties: false,
+      },
+    };
+    expect(getConstraints(prop, false)).toEqual([]);
+  });
+
+  it('should not emit item constraints when items use if/then conditionals', () => {
+    const prop = {
+      type: 'array',
+      items: {
+        if: { properties: { kind: { const: 'a' } } },
+        then: { required: ['value'] },
+        enum: ['x'],
+      },
+    };
+    expect(getConstraints(prop, false)).toEqual([]);
+  });
+
+  it('should ignore tuple-form items arrays', () => {
+    const prop = {
+      type: 'array',
+      items: [{ enum: ['a'] }, { enum: ['b'] }],
+    };
+    expect(getConstraints(prop, false)).toEqual([]);
+  });
 });
