@@ -948,67 +948,160 @@ function toPhpValue(value, indent) {
   return String(value);
 }
 
-function generatePhpRudderstackSnippet({ example, schema, targetId }) {
+/**
+ * Resolves a RudderStack server-side call (track/identify/group/page) into a
+ * syntax-agnostic descriptor that target renderers turn into PHP, Java, etc.
+ *
+ * Captures the logic shared across server targets: the non-empty userId guard,
+ * the per-method identity fields and payload (properties/traits), the track
+ * "unwrap a nested properties object" rule, and the unsupported-method guard.
+ *
+ * `pageNameAsArgument` toggles the one genuine divergence between SDKs: builder
+ * SDKs (Java) take the page name as a constructor argument and drop it from the
+ * properties, while array SDKs (PHP) keep it inside the properties payload.
+ */
+function resolveCdpServerMessage(
+  example,
+  schema,
+  { targetId, label, pageNameAsArgument = false },
+) {
   const method = resolveCdpMethod(schema);
-  const { userId, event, ...rest } = cdpProperties(example, new Set());
 
   if (
     typeof example.userId !== 'string' ||
     example.userId.trim().length === 0
   ) {
     throw new Error(
-      `[${targetId}] PHP RudderStack snippets require a non-empty string userId.`,
+      `[${targetId}] ${label} RudderStack snippets require a non-empty string userId.`,
     );
   }
+
+  const message = { method, userId: example.userId };
 
   if (method === 'track') {
     const remaining = cdpProperties(example, new Set(['userId', 'event']));
     const { properties: nestedProps, ...otherRemaining } = remaining;
-    const props = isPlainObject(nestedProps)
+    message.event = example.event;
+    message.payloadKey = 'properties';
+    message.payload = isPlainObject(nestedProps)
       ? { ...nestedProps, ...otherRemaining }
       : remaining;
-    const lines = [
-      `    'userId' => '${example.userId}'`,
-      `    'event' => '${example.event}'`,
-    ];
-    if (Object.keys(props).length > 0) {
-      lines.push(`    'properties' => ${toPhpValue(props, '    ')}`);
-    }
-    return `Rudder::track([\n${lines.join(',\n')},\n]);`;
+    return message;
   }
 
   if (method === 'identify') {
-    const traits = cdpProperties(example, new Set(['userId']));
-    const lines = [`    'userId' => '${example.userId}'`];
-    if (Object.keys(traits).length > 0) {
-      lines.push(`    'traits' => ${toPhpValue(traits, '    ')}`);
-    }
-    return `Rudder::identify([\n${lines.join(',\n')},\n]);`;
+    message.payloadKey = 'traits';
+    message.payload = cdpProperties(example, new Set(['userId']));
+    return message;
   }
 
   if (method === 'group') {
-    const traits = cdpProperties(example, new Set(['userId', 'groupId']));
-    const lines = [
-      `    'userId' => '${example.userId}'`,
-      `    'groupId' => '${example.groupId}'`,
-    ];
-    if (Object.keys(traits).length > 0) {
-      lines.push(`    'traits' => ${toPhpValue(traits, '    ')}`);
-    }
-    return `Rudder::group([\n${lines.join(',\n')},\n]);`;
+    message.groupId = example.groupId;
+    message.payloadKey = 'traits';
+    message.payload = cdpProperties(example, new Set(['userId', 'groupId']));
+    return message;
   }
 
   if (method === 'page') {
-    const props = cdpProperties(example, new Set(['userId']));
-    const lines = [`    'userId' => '${example.userId}'`];
-    if (Object.keys(props).length > 0) {
-      lines.push(`    'properties' => ${toPhpValue(props, '    ')}`);
+    const excluded = new Set(['userId']);
+    if (pageNameAsArgument) {
+      message.name = example.name ?? '';
+      excluded.add('name');
     }
-    return `Rudder::page([\n${lines.join(',\n')},\n]);`;
+    message.payloadKey = 'properties';
+    message.payload = cdpProperties(example, excluded);
+    return message;
   }
 
   throw new Error(
-    `[${targetId}] PHP RudderStack snippet does not support x-method "${method}".`,
+    `[${targetId}] ${label} RudderStack snippet does not support x-method "${method}".`,
+  );
+}
+
+function generatePhpRudderstackSnippet({ example, schema, targetId }) {
+  const message = resolveCdpServerMessage(example, schema, {
+    targetId,
+    label: 'PHP',
+  });
+
+  const lines = [`    'userId' => '${message.userId}'`];
+  if (message.method === 'track') {
+    lines.push(`    'event' => '${message.event}'`);
+  }
+  if (message.method === 'group') {
+    lines.push(`    'groupId' => '${message.groupId}'`);
+  }
+  if (Object.keys(message.payload).length > 0) {
+    lines.push(
+      `    '${message.payloadKey}' => ${toPhpValue(message.payload, '    ')}`,
+    );
+  }
+
+  return `Rudder::${message.method}([\n${lines.join(',\n')},\n]);`;
+}
+
+function toJavaValue(value, indent) {
+  if (value === null) return 'null';
+  if (value === true) return 'true';
+  if (value === false) return 'false';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return JSON.stringify(value);
+  if (Array.isArray(value)) {
+    if (value.length === 0) return 'ImmutableList.of()';
+    const inner = value
+      .map((v) => `${indent}    ${toJavaValue(v, indent + '    ')}`)
+      .join(',\n');
+    return `ImmutableList.of(\n${inner}\n${indent})`;
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return 'ImmutableMap.of()';
+    const inner = entries
+      .map(
+        ([k, v]) =>
+          `${indent}    .put(${JSON.stringify(k)}, ${toJavaValue(
+            v,
+            indent + '    ',
+          )})`,
+      )
+      .join('\n');
+    return `ImmutableMap.builder()\n${inner}\n${indent}    .build()`;
+  }
+  return String(value);
+}
+
+function buildJavaEnqueue(builderExpr, chainLines) {
+  const lines = [`analytics.enqueue(${builderExpr}`, ...chainLines];
+  const lastIndex = lines.length - 1;
+  lines[lastIndex] = `${lines[lastIndex]});`;
+  return lines.join('\n');
+}
+
+const JAVA_MESSAGE_BUILDERS = {
+  track: (message) => `TrackMessage.builder(${JSON.stringify(message.event)})`,
+  identify: () => 'IdentifyMessage.builder()',
+  group: (message) =>
+    `GroupMessage.builder(${JSON.stringify(message.groupId)})`,
+  page: (message) => `PageMessage.builder(${JSON.stringify(message.name)})`,
+};
+
+function generateJavaRudderstackSnippet({ example, schema, targetId }) {
+  const message = resolveCdpServerMessage(example, schema, {
+    targetId,
+    label: 'Java',
+    pageNameAsArgument: true,
+  });
+
+  const chain = [`    .userId(${JSON.stringify(message.userId)})`];
+  if (Object.keys(message.payload).length > 0) {
+    chain.push(
+      `    .${message.payloadKey}(${toJavaValue(message.payload, '    ')})`,
+    );
+  }
+
+  return buildJavaEnqueue(
+    JAVA_MESSAGE_BUILDERS[message.method](message),
+    chain,
   );
 }
 
@@ -1082,6 +1175,13 @@ export const SNIPPET_TARGETS = [
     label: 'RudderStack (PHP)',
     language: 'php',
     generateSnippet: generatePhpRudderstackSnippet,
+  },
+  {
+    id: 'server-rudderstack-java',
+    group: 'server',
+    label: 'RudderStack (Java)',
+    language: 'java',
+    generateSnippet: generateJavaRudderstackSnippet,
   },
 ];
 
