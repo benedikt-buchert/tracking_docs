@@ -54,33 +54,41 @@ const constraintHandlers = {
   not: (val) => formatNotConstraint(val),
 };
 
+function collectConstraints(schema, prefix = '') {
+  const constraints = [];
+  for (const keyword in constraintHandlers) {
+    if (schema[keyword] !== undefined) {
+      const result = constraintHandlers[keyword](schema[keyword]);
+      if (result) {
+        constraints.push(`${prefix}${result}`);
+      }
+    }
+  }
+  return constraints;
+}
+
+// Scalar array items get no rows of their own in the docs table (only object
+// or conditional items are expanded), so surface their constraints here.
+function isScalarItemsSchema(items) {
+  return (
+    items &&
+    typeof items === 'object' &&
+    !Array.isArray(items) &&
+    !items.properties &&
+    !items.if
+  );
+}
+
 export const getConstraints = (prop, isReq) => {
   const constraints = [];
   if (isReq) {
     constraints.push('required');
   }
 
-  for (const keyword in constraintHandlers) {
-    if (prop[keyword] !== undefined) {
-      const handler = constraintHandlers[keyword];
-      const result = handler(prop[keyword]);
-      if (result) {
-        constraints.push(result);
-      }
-    }
-  }
+  constraints.push(...collectConstraints(prop));
 
-  // For array types, also capture constraints from items schema
-  if (prop.type === 'array' && prop.items && typeof prop.items === 'object') {
-    for (const keyword in constraintHandlers) {
-      if (prop.items[keyword] !== undefined) {
-        const handler = constraintHandlers[keyword];
-        const result = handler(prop.items[keyword]);
-        if (result) {
-          constraints.push(result);
-        }
-      }
-    }
+  if (prop.type === 'array' && isScalarItemsSchema(prop.items)) {
+    constraints.push(...collectConstraints(prop.items, 'items.'));
   }
 
   return constraints;

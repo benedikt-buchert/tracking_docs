@@ -793,6 +793,7 @@ describe('schemaToTableData', () => {
         subscription_groups: {
           type: 'array',
           items: {
+            type: 'string',
             enum: [
               'newsmail',
               'engagement',
@@ -811,7 +812,7 @@ describe('schemaToTableData', () => {
     );
     expect(subscriptionGroupsProp).toBeDefined();
     expect(subscriptionGroupsProp.constraints).toContain(
-      'enum: [newsmail, engagement, customerPanel, specialoffers, promotedContent]',
+      'items.enum: [newsmail, engagement, customerPanel, specialoffers, promotedContent]',
     );
   });
 });
