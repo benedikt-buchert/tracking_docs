@@ -785,4 +785,33 @@ describe('schemaToTableData', () => {
     expect(choiceRow).toBeDefined();
     expect(choiceRow.isLastInGroup).toBe(true);
   });
+
+  it('captures enum constraints on array items', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        subscription_groups: {
+          type: 'array',
+          items: {
+            enum: [
+              'newsmail',
+              'engagement',
+              'customerPanel',
+              'specialoffers',
+              'promotedContent',
+            ],
+          },
+          description: 'Subscription group identifiers',
+        },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+    const subscriptionGroupsProp = tableData.find(
+      (r) => r.name === 'subscription_groups',
+    );
+    expect(subscriptionGroupsProp).toBeDefined();
+    expect(subscriptionGroupsProp.constraints).toContain(
+      'enum: [newsmail, engagement, customerPanel, specialoffers, promotedContent]',
+    );
+  });
 });

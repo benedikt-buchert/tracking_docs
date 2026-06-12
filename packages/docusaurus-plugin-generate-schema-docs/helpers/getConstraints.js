@@ -69,5 +69,19 @@ export const getConstraints = (prop, isReq) => {
       }
     }
   }
+
+  // For array types, also capture constraints from items schema
+  if (prop.type === 'array' && prop.items && typeof prop.items === 'object') {
+    for (const keyword in constraintHandlers) {
+      if (prop.items[keyword] !== undefined) {
+        const handler = constraintHandlers[keyword];
+        const result = handler(prop.items[keyword]);
+        if (result) {
+          constraints.push(result);
+        }
+      }
+    }
+  }
+
   return constraints;
 };
