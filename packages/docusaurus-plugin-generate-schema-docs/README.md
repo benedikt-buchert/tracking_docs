@@ -30,6 +30,7 @@ npm install --save docusaurus-plugin-generate-schema-docs
           {
             // Options if any
             dataLayerName: 'customDataLayer',
+            editUrlBase: 'https://gitlab.example/group/project/-/edit/main',
             trackingTargets: [
               {
                 id: 'web-custom-js',
@@ -48,6 +49,11 @@ npm install --save docusaurus-plugin-generate-schema-docs
     ```
 
     The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
+
+    The `editUrlBase` option customizes the generated `custom_edit_url` front
+    matter. Use it for GitLab or other repository hosts whose edit URL format
+    differs from GitHub. If omitted, edit URLs default to
+    `https://github.com/<organizationName>/<projectName>/edit/main/<schema-path>`.
 
 2.  Place your JSON schemas in the `schemas` directory at the root of your project.
 

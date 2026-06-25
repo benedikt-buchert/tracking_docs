@@ -186,7 +186,12 @@ describe('plugin structure', () => {
   });
 
   it('passes all pluginOptions properties to generateEventDocs', async () => {
-    const plugin = await createPlugin(makeContext(), makeOptions());
+    const plugin = await createPlugin(
+      makeContext(),
+      makeOptions({
+        editUrlBase: 'https://gitlab.example/group/project/-/edit/main',
+      }),
+    );
     await plugin.loadContent();
 
     expect(generateEventDocs).toHaveBeenCalledWith(
@@ -196,6 +201,7 @@ describe('plugin structure', () => {
         siteDir: '/site',
         url: 'https://example.com',
         dataLayerName: 'dataLayer',
+        editUrlBase: 'https://gitlab.example/group/project/-/edit/main',
       }),
     );
   });
