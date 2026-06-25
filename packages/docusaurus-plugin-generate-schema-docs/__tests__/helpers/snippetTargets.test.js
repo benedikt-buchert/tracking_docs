@@ -2,7 +2,6 @@ import {
   createTrackingTargetRegistry,
   DEFAULT_SNIPPET_TARGET_ID,
   generateSnippetForTarget,
-  getSnippetTarget,
   SNIPPET_TARGETS,
 } from '../../helpers/snippetTargets';
 
@@ -17,6 +16,8 @@ function executeWebSnippet(snippet, dataLayerName = 'dataLayer') {
 }
 
 describe('snippetTargets', () => {
+  const targetRegistry = createTrackingTargetRegistry();
+
   it('exposes expected baseline target ids', () => {
     expect(SNIPPET_TARGETS.map((target) => target.id)).toEqual(
       expect.arrayContaining([
@@ -51,12 +52,12 @@ describe('snippetTargets', () => {
   });
 
   it('resolves the default target when no id is provided', () => {
-    const target = getSnippetTarget();
+    const target = targetRegistry.get();
     expect(target.id).toBe(DEFAULT_SNIPPET_TARGET_ID);
   });
 
   it('throws for unknown target id', () => {
-    expect(() => getSnippetTarget('unknown-target-id')).toThrow(
+    expect(() => targetRegistry.get('unknown-target-id')).toThrow(
       'Unknown snippet target',
     );
   });
@@ -1370,7 +1371,7 @@ describe.each(CDP_TARGETS)(
     });
 
     it('has group=web and language=javascript', () => {
-      const target = getSnippetTarget(targetId);
+      const target = createTrackingTargetRegistry().get(targetId);
       expect(target.group).toBe('web');
       expect(target.language).toBe('javascript');
     });
@@ -1564,7 +1565,7 @@ describe('server-rudderstack-php snippet', () => {
   });
 
   it('has group=server and language=php', () => {
-    const target = getSnippetTarget('server-rudderstack-php');
+    const target = createTrackingTargetRegistry().get('server-rudderstack-php');
     expect(target.group).toBe('server');
     expect(target.language).toBe('php');
   });
@@ -1716,7 +1717,9 @@ describe('server-rudderstack-java snippet', () => {
   });
 
   it('has group=server and language=java', () => {
-    const target = getSnippetTarget('server-rudderstack-java');
+    const target = createTrackingTargetRegistry().get(
+      'server-rudderstack-java',
+    );
     expect(target.group).toBe('server');
     expect(target.language).toBe('java');
   });
