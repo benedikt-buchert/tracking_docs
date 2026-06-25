@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Link from '@docusaurus/Link';
 import { usePrismTheme } from '@docusaurus/theme-common';
 import { Highlight } from 'prism-react-renderer';
+import clsx from 'clsx';
 
 const SCHEMA_META_KEYS = [
   '$schema',
@@ -94,16 +95,6 @@ function getSchemaKeywordClassName(key, parentKey) {
   }
 
   return '';
-}
-
-function joinClassNames(...classNames) {
-  return classNames.filter(Boolean).join(' ');
-}
-
-function createParserState() {
-  return {
-    stack: [],
-  };
 }
 
 function beginNestedValue(state, tokenContent) {
@@ -210,7 +201,7 @@ function renderToken({
   const propertyKeyClassName = semantic.propertyKey
     ? getSchemaKeywordClassName(semantic.propertyKey, semantic.parentKey)
     : '';
-  const className = joinClassNames(tokenProps.className, propertyKeyClassName);
+  const className = clsx(tokenProps.className, propertyKeyClassName);
 
   if (
     semantic.valueKey === '$ref' &&
@@ -220,7 +211,7 @@ function renderToken({
       return (
         <Link
           key={tokenIndex}
-          className={joinClassNames(
+          className={clsx(
             className,
             'schema-json-viewer__link',
             'schema-json-viewer__ref-link',
@@ -241,7 +232,7 @@ function renderToken({
         <button
           key={tokenIndex}
           type="button"
-          className={joinClassNames(
+          className={clsx(
             className,
             'schema-json-viewer__link',
             'schema-json-viewer__ref-link',
@@ -297,7 +288,7 @@ export default function SchemaJsonViewer({
       ) : null}
       <Highlight code={formattedSchema} language="json" theme={prismTheme}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => {
-          const parserState = createParserState();
+          const parserState = { stack: [] };
 
           return (
             <pre className={className} style={style} data-language="json">
