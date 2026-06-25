@@ -2,6 +2,8 @@
 
 const { parse } = require('@babel/parser');
 
+const AST_METADATA_KEYS = new Set(['type', 'loc', 'start', 'end']);
+
 function calculateCrap(complexity, coveragePercent) {
   const coverage = Math.max(0, Math.min(100, coveragePercent)) / 100;
   const crap = complexity ** 2 * (1 - coverage) ** 3 + complexity;
@@ -59,24 +61,24 @@ function findReportsOverThreshold(reports, threshold) {
 
 function collectFunctionCandidates(ast) {
   const functions = [];
-  visitNode(ast, null, functions);
+  walkAst(ast, (node, parent) => {
+    const candidate = toFunctionCandidate(node, parent);
+    if (candidate) functions.push(candidate);
+  });
   return functions;
 }
 
-function visitNode(node, parent, functions) {
+function walkAst(node, visitor, parent = null) {
   if (!node || typeof node !== 'object') return;
-
-  const candidate = toFunctionCandidate(node, parent);
-  if (candidate) functions.push(candidate);
+  visitor(node, parent);
 
   for (const key of Object.keys(node)) {
-    if (key === 'type' || key === 'loc' || key === 'start' || key === 'end')
-      continue;
+    if (AST_METADATA_KEYS.has(key)) continue;
     const child = node[key];
     if (Array.isArray(child)) {
-      for (const item of child) visitNode(item, node, functions);
+      for (const item of child) walkAst(item, visitor, node);
     } else if (child && typeof child === 'object' && child.type) {
-      visitNode(child, node, functions);
+      walkAst(child, visitor, node);
     }
   }
 }
@@ -115,32 +117,9 @@ function toFunctionCandidate(node, parent) {
 function computeCyclomaticComplexity(node) {
   let complexity = 1;
 
-  function visit(child) {
-    if (!child || typeof child !== 'object') return;
+  walkAst(node, (child) => {
     if (increasesCyclomaticComplexity(child)) complexity += 1;
-
-    for (const key of Object.keys(child)) {
-      if (key === 'type' || key === 'loc' || key === 'start' || key === 'end')
-        continue;
-      const value = child[key];
-      if (Array.isArray(value)) {
-        for (const item of value) visit(item);
-      } else if (value && typeof value === 'object' && value.type) {
-        visit(value);
-      }
-    }
-  }
-
-  for (const key of Object.keys(node)) {
-    if (key === 'type' || key === 'loc' || key === 'start' || key === 'end')
-      continue;
-    const value = node[key];
-    if (Array.isArray(value)) {
-      for (const item of value) visit(item);
-    } else if (value && typeof value === 'object' && value.type) {
-      visit(value);
-    }
-  }
+  });
 
   return complexity;
 }
