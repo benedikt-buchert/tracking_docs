@@ -63,10 +63,12 @@ beforeEach(() => {
   fs.cpSync.mockImplementation(() => {});
   fs.rmSync.mockImplementation(() => {});
   execSync.mockImplementation(() => {});
-  getPathsForVersion.mockReturnValue({
-    schemaDir: '/site/static/schemas/next',
+  getPathsForVersion.mockImplementation((version) => ({
+    schemaDir: version
+      ? `/site/static/schemas/${version}`
+      : '/site/static/schemas',
     outputDir: '/site/docs',
-  });
+  }));
 });
 
 describe('loadContent', () => {
@@ -135,7 +137,21 @@ describe('extendCli - validate-schemas', () => {
     );
   });
 
-  it('defaults to "next" version when no version argument given', async () => {
+  it('defaults to unversioned schemas when no version argument is given and the site is not versioned', async () => {
+    const { cli, action } = makeCli();
+    const plugin = await createPlugin(makeContext(), makeOptions());
+    plugin.extendCli(cli);
+
+    await action.fn(undefined);
+    expect(getPathsForVersion).toHaveBeenCalledWith(undefined, '/site');
+    expect(validateSchemas).toHaveBeenCalledWith(
+      '/site/static/schemas',
+      expect.objectContaining({ targetRegistry: expect.any(Object) }),
+    );
+  });
+
+  it('defaults to next schemas when no version argument is given and the site is versioned', async () => {
+    fs.existsSync.mockReturnValue(true);
     const { cli, action } = makeCli();
     const plugin = await createPlugin(makeContext(), makeOptions());
     plugin.extendCli(cli);
