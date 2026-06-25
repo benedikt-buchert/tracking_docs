@@ -1040,6 +1040,53 @@ function generatePhpRudderstackSnippet({ example, schema, targetId }) {
   return `Rudder::${message.method}([\n${lines.join(',\n')},\n]);`;
 }
 
+function toPythonValue(value, indent) {
+  if (value === null) return 'None';
+  if (value === true) return 'True';
+  if (value === false) return 'False';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return `'${value}'`;
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]';
+    const inner = value
+      .map((v) => `${indent}    ${toPythonValue(v, indent + '    ')},`)
+      .join('\n');
+    return `[\n${inner}\n${indent}]`;
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '{}';
+    const inner = entries
+      .map(
+        ([k, v]) =>
+          `${indent}    '${k}': ${toPythonValue(v, indent + '    ')},`,
+      )
+      .join('\n');
+    return `{\n${inner}\n${indent}}`;
+  }
+  return String(value);
+}
+
+function generatePythonRudderstackSnippet({ example, schema, targetId }) {
+  const message = resolveCdpServerMessage(example, schema, {
+    targetId,
+    label: 'Python',
+  });
+
+  const args = [`'${message.userId}'`];
+  if (message.method === 'track') {
+    args.push(`'${message.event}'`);
+  }
+  if (message.method === 'group') {
+    args.push(`'${message.groupId}'`);
+  }
+  if (Object.keys(message.payload).length > 0) {
+    args.push(toPythonValue(message.payload, ''));
+  }
+
+  return `rudder_analytics.${message.method}(${args.join(', ')})`;
+}
+
 function toJavaValue(value, indent) {
   if (value === null) return 'null';
   if (value === true) return 'true';
@@ -1182,6 +1229,13 @@ export const SNIPPET_TARGETS = [
     label: 'RudderStack (Java)',
     language: 'java',
     generateSnippet: generateJavaRudderstackSnippet,
+  },
+  {
+    id: 'server-rudderstack-python',
+    group: 'server',
+    label: 'RudderStack (Python)',
+    language: 'python',
+    generateSnippet: generatePythonRudderstackSnippet,
   },
 ];
 
