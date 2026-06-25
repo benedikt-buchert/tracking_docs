@@ -14,9 +14,20 @@ import processSchema from './helpers/processSchema.js';
 import { buildExampleModel } from './helpers/exampleModel.js';
 import { createTrackingTargetRegistry } from './helpers/snippetTargets.js';
 
-function buildEditUrl(organizationName, projectName, siteDir, filePath) {
-  const baseEditUrl = `https://github.com/${organizationName}/${projectName}/edit/main`;
-  return `${baseEditUrl}/${path.relative(path.join(siteDir, '..'), filePath)}`;
+function buildEditUrl(
+  organizationName,
+  projectName,
+  siteDir,
+  filePath,
+  editUrlBase,
+) {
+  const baseEditUrl = (
+    editUrlBase ||
+    `https://github.com/${organizationName}/${projectName}/edit/main`
+  ).replace(/\/+$/, '');
+  return `${baseEditUrl}/${path
+    .relative(path.join(siteDir, '..'), filePath)
+    .replace(/\\/g, '/')}`;
 }
 
 function toSiteImportPath(siteDir, absolutePath) {
@@ -161,6 +172,7 @@ async function generateAndWriteDoc(
     dataLayerName,
     version,
     targetRegistry,
+    editUrlBase,
   } = options;
 
   const { outputDir: versionOutputDir } = getPathsForVersion(version, siteDir);
@@ -198,6 +210,7 @@ async function generateAndWriteDoc(
     projectName,
     siteDir,
     editFilePath || filePath,
+    editUrlBase,
   );
 
   const mdxContent = SchemaDocTemplate({
@@ -232,12 +245,13 @@ async function generateOneOfDocs(
   schemaSources,
   schemaDir,
 ) {
-  const { organizationName, projectName, siteDir } = options;
+  const { organizationName, projectName, siteDir, editUrlBase } = options;
   const editUrl = buildEditUrl(
     organizationName,
     projectName,
     siteDir,
     filePath,
+    editUrlBase,
   );
 
   const eventOutputDir = path.join(outputDir, eventName);

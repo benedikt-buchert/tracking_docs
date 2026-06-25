@@ -72,7 +72,7 @@ async function syncVersionFromNext({
 
 export default async function (context, options) {
   const { siteDir } = context;
-  const { dataLayerName, trackingTargets = [] } = options || {};
+  const { dataLayerName, trackingTargets = [], editUrlBase } = options || {};
   const { organizationName, projectName, url } = context.siteConfig;
   const targetRegistry = createTrackingTargetRegistry({
     customTargets: trackingTargets,
@@ -85,6 +85,7 @@ export default async function (context, options) {
     url,
     dataLayerName,
     trackingTargets,
+    editUrlBase,
   };
   const versionsJsonPath = path.join(siteDir, 'versions.json');
   const isVersioned = fs.existsSync(versionsJsonPath);

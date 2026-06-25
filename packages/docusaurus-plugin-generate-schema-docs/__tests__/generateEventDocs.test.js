@@ -145,6 +145,41 @@ describe('generateEventDocs (non-versioned)', () => {
     expect(customTargetDoc).toContain('"id":"web-custom-js"');
     expect(customTargetDoc).toContain('custom.track(\\"custom_event\\");');
   });
+
+  it('uses configured edit URL base for generated edit links', async () => {
+    console.log = jest.fn();
+    const relative = path.relative;
+    const relativeSpy = jest
+      .spyOn(path, 'relative')
+      .mockImplementation((from, to) =>
+        relative(from, to).replace(/\//g, '\\'),
+      );
+
+    try {
+      await generateEventDocs({
+        ...options,
+        editUrlBase: 'https://gitlab.example/group/project/-/edit/main',
+      });
+    } finally {
+      relativeSpy.mockRestore();
+    }
+
+    const addToCart = fs.readFileSync(
+      path.join(outputDir, 'add-to-cart-event.mdx'),
+      'utf-8',
+    );
+    expect(addToCart).toContain(
+      'custom_edit_url: https://gitlab.example/group/project/-/edit/main/__fixtures__/static/schemas/add-to-cart-event.json',
+    );
+
+    const rootChoiceA = fs.readFileSync(
+      path.join(outputDir, 'root-choice-event', '01-option-a.mdx'),
+      'utf-8',
+    );
+    expect(rootChoiceA).toContain(
+      'custom_edit_url: https://gitlab.example/group/project/-/edit/main/__fixtures__/static/schemas/root-choice-event.json',
+    );
+  });
 });
 
 describe('generateEventDocs (edge cases)', () => {
