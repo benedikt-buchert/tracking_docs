@@ -95,7 +95,7 @@ export default async function (context, options) {
       .description('Validate JSON Schemas with the examples inside the schemas')
       .action(async (version) => {
         console.log('Validating GTM Schemas...');
-        const schemaVersion = version || 'next';
+        const schemaVersion = version || (isVersioned ? 'next' : undefined);
         const { schemaDir } = getPathsForVersion(
           schemaVersion,
           context.siteDir,
