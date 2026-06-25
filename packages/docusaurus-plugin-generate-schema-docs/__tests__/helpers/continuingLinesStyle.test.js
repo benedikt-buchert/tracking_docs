@@ -4,6 +4,7 @@ import {
   getBracketLinesStyle,
   mergeBackgroundStyles,
   getContinuingLinesStyle,
+  getControlRowStyles,
 } from '../../helpers/continuingLinesStyle';
 
 describe('getBracketPosition', () => {
@@ -488,5 +489,30 @@ describe('getContinuingLinesStyle', () => {
     const result = getContinuingLinesStyle([0], 0);
     // Only one size entry for one continuing level
     expect(result.backgroundSize.split(', ').length).toBe(1);
+  });
+});
+
+describe('getControlRowStyles', () => {
+  it('builds shared header, middle, and closed-last styles for control rows', () => {
+    const parentBracket = { level: 0, bracketIndex: 0 };
+    const result = getControlRowStyles({
+      level: 2,
+      continuingLevels: [0, 1],
+      groupBrackets: [parentBracket],
+      parentBracketEnds: [parentBracket],
+    });
+
+    expect(result.ownBracket).toEqual({ level: 2, bracketIndex: 1 });
+    expect(result.headerStyle.paddingLeft).toBe('3rem');
+    expect(result.headerStyle.paddingTop).toBe('0.5rem');
+    expect(result.headerStyle.backgroundPosition).toContain('top 6px');
+
+    expect(result.middleStyle.paddingLeft).toBe('3rem');
+    expect(result.middleStyle).not.toHaveProperty('paddingTop');
+    expect(result.middleStyle).not.toHaveProperty('paddingBottom');
+
+    expect(result.lastToggleStyle.paddingLeft).toBe('3rem');
+    expect(result.lastToggleStyle.paddingBottom).toBe('0.5rem');
+    expect(result.lastToggleStyle.backgroundPosition).toContain('bottom 6px');
   });
 });
