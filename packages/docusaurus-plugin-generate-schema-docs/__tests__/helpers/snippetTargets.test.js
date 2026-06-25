@@ -1877,3 +1877,195 @@ describe('server-rudderstack-java snippet', () => {
     });
   });
 });
+
+describe('server-rudderstack-python snippet', () => {
+  it('is registered in SNIPPET_TARGETS', () => {
+    expect(SNIPPET_TARGETS.map((t) => t.id)).toContain(
+      'server-rudderstack-python',
+    );
+  });
+
+  it('has group=server and language=python', () => {
+    const target = getSnippetTarget('server-rudderstack-python');
+    expect(target.group).toBe('server');
+    expect(target.language).toBe('python');
+  });
+
+  describe('track (default)', () => {
+    it('generates a track call with userId, event, and properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123', event: 'Order Completed', revenue: 20 },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.track('user-123', 'Order Completed', {\n    'revenue': 20,\n})`,
+      );
+    });
+
+    it('omits properties when no fields beyond userId and event', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123', event: 'page_view' },
+        schema: {},
+      });
+      expect(snippet).toBe(`rudder_analytics.track('user-123', 'page_view')`);
+    });
+
+    it('unwraps a nested properties object instead of double-nesting it', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: '12345',
+          event: 'website_builder.chat_message_sent',
+          properties: {
+            website_category: 'Restaurant',
+            website_category_changed: true,
+          },
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.track('12345', 'website_builder.chat_message_sent', {\n    'website_category': 'Restaurant',\n    'website_category_changed': True,\n})`,
+      );
+    });
+
+    it('renders nested objects and arrays as Python literals', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: 'user-123',
+          event: 'Order Completed',
+          products: [{ sku: 'A1' }],
+          address: { city: 'NYC' },
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.track('user-123', 'Order Completed', {\n    'products': [\n        {\n            'sku': 'A1',\n        },\n    ],\n    'address': {\n        'city': 'NYC',\n    },\n})`,
+      );
+    });
+
+    it('escapes apostrophes in Python string literals', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: "user'123",
+          event: "Order's Completed",
+          "item's_note": "Bob's order",
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.track('user\\'123', 'Order\\'s Completed', {\n    'item\\'s_note': 'Bob\\'s order',\n})`,
+      );
+    });
+
+    it('throws when userId is missing', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-python',
+          example: { event: 'page_view' },
+          schema: {},
+        }),
+      ).toThrow('[server-rudderstack-python]');
+    });
+  });
+
+  describe('identify (x-method: identify)', () => {
+    it('generates an identify call with userId and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123', email: 'a@b.com', plan: 'pro' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.identify('user-123', {\n    'email': 'a@b.com',\n    'plan': 'pro',\n})`,
+      );
+    });
+
+    it('omits traits when no fields beyond userId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123' },
+        schema: { 'x-method': 'identify' },
+      });
+      expect(snippet).toBe(`rudder_analytics.identify('user-123')`);
+    });
+  });
+
+  describe('group (x-method: group)', () => {
+    it('generates a group call with userId, groupId, and traits', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123', groupId: 'acme', plan: 'enterprise' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.group('user-123', 'acme', {\n    'plan': 'enterprise',\n})`,
+      );
+    });
+
+    it('omits traits when no fields beyond userId and groupId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123', groupId: 'acme' },
+        schema: { 'x-method': 'group' },
+      });
+      expect(snippet).toBe(`rudder_analytics.group('user-123', 'acme')`);
+    });
+  });
+
+  describe('page (x-method: page)', () => {
+    it('generates a page call with userId and properties', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: 'user-123',
+          category: 'Marketing',
+          name: 'Home',
+          url: 'https://example.com',
+        },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.page('user-123', 'Marketing', 'Home', {\n    'url': 'https://example.com',\n})`,
+      );
+    });
+
+    it('uses positional placeholders when page properties exist without category or name', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: 'user-123',
+          url: 'https://example.com',
+        },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.page('user-123', None, None, {\n    'url': 'https://example.com',\n})`,
+      );
+    });
+
+    it('omits properties when no fields beyond userId', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: { userId: 'user-123' },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(`rudder_analytics.page('user-123')`);
+    });
+  });
+
+  describe('alias (x-method: alias)', () => {
+    it('throws for alias', () => {
+      expect(() =>
+        generateSnippetForTarget({
+          targetId: 'server-rudderstack-python',
+          example: { userId: 'user-123' },
+          schema: { 'x-method': 'alias' },
+        }),
+      ).toThrow('[server-rudderstack-python]');
+    });
+  });
+});
