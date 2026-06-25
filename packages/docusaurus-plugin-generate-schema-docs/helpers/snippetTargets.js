@@ -1045,7 +1045,7 @@ function toPythonValue(value, indent) {
   if (value === true) return 'True';
   if (value === false) return 'False';
   if (typeof value === 'number') return String(value);
-  if (typeof value === 'string') return `'${value}'`;
+  if (typeof value === 'string') return toPythonString(value);
   if (Array.isArray(value)) {
     if (value.length === 0) return '[]';
     const inner = value
@@ -1059,12 +1059,20 @@ function toPythonValue(value, indent) {
     const inner = entries
       .map(
         ([k, v]) =>
-          `${indent}    '${k}': ${toPythonValue(v, indent + '    ')},`,
+          `${indent}    ${toPythonString(k)}: ${toPythonValue(
+            v,
+            indent + '    ',
+          )},`,
       )
       .join('\n');
     return `{\n${inner}\n${indent}}`;
   }
   return String(value);
+}
+
+function toPythonString(value) {
+  const encoded = JSON.stringify(value).slice(1, -1).replace(/'/g, "\\'");
+  return `'${encoded}'`;
 }
 
 function generatePythonRudderstackSnippet({ example, schema, targetId }) {
@@ -1073,12 +1081,31 @@ function generatePythonRudderstackSnippet({ example, schema, targetId }) {
     label: 'Python',
   });
 
-  const args = [`'${message.userId}'`];
+  const args = [toPythonValue(message.userId, '')];
   if (message.method === 'track') {
-    args.push(`'${message.event}'`);
+    args.push(toPythonValue(message.event, ''));
   }
   if (message.method === 'group') {
-    args.push(`'${message.groupId}'`);
+    args.push(toPythonValue(message.groupId, ''));
+  }
+  if (message.method === 'page') {
+    const properties = cdpProperties(
+      example,
+      new Set(['userId', 'category', 'name']),
+    );
+    const hasCategory = example.category !== undefined;
+    const hasName = example.name !== undefined;
+    const hasProperties = Object.keys(properties).length > 0;
+    if (hasCategory || hasName || hasProperties) {
+      args.push(hasCategory ? toPythonValue(example.category, '') : 'None');
+    }
+    if (hasName || hasProperties) {
+      args.push(hasName ? toPythonValue(example.name, '') : 'None');
+    }
+    if (hasProperties) {
+      args.push(toPythonValue(properties, ''));
+    }
+    return `rudder_analytics.page(${args.join(', ')})`;
   }
   if (Object.keys(message.payload).length > 0) {
     args.push(toPythonValue(message.payload, ''));

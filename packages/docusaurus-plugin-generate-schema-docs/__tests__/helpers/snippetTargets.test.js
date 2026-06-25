@@ -1946,6 +1946,21 @@ describe('server-rudderstack-python snippet', () => {
       );
     });
 
+    it('escapes apostrophes in Python string literals', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: "user'123",
+          event: "Order's Completed",
+          "item's_note": "Bob's order",
+        },
+        schema: {},
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.track('user\\'123', 'Order\\'s Completed', {\n    'item\\'s_note': 'Bob\\'s order',\n})`,
+      );
+    });
+
     it('throws when userId is missing', () => {
       expect(() =>
         generateSnippetForTarget({
@@ -2007,13 +2022,28 @@ describe('server-rudderstack-python snippet', () => {
         targetId: 'server-rudderstack-python',
         example: {
           userId: 'user-123',
+          category: 'Marketing',
           name: 'Home',
           url: 'https://example.com',
         },
         schema: { 'x-method': 'page' },
       });
       expect(snippet).toBe(
-        `rudder_analytics.page('user-123', {\n    'name': 'Home',\n    'url': 'https://example.com',\n})`,
+        `rudder_analytics.page('user-123', 'Marketing', 'Home', {\n    'url': 'https://example.com',\n})`,
+      );
+    });
+
+    it('uses positional placeholders when page properties exist without category or name', () => {
+      const snippet = generateSnippetForTarget({
+        targetId: 'server-rudderstack-python',
+        example: {
+          userId: 'user-123',
+          url: 'https://example.com',
+        },
+        schema: { 'x-method': 'page' },
+      });
+      expect(snippet).toBe(
+        `rudder_analytics.page('user-123', None, None, {\n    'url': 'https://example.com',\n})`,
       );
     });
 
