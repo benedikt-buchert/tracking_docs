@@ -182,6 +182,92 @@ describe('validateSchemas', () => {
     expect(errorMessages).toContain('x-custom-required must be true.');
   });
 
+  it('should fail when a tracking target cannot generate a snippet for an example', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          generateSnippet: ({ example }) => {
+            throw new Error(`Cannot generate ${example.event}.`);
+          },
+        },
+      ],
+    });
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        'x-tracking-targets': ['web-custom-js'],
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir, { targetRegistry });
+
+    expect(result).toBe(false);
+    const errorMessages = consoleErrorSpy.mock.calls
+      .map((c) => c[0])
+      .join('\n');
+    expect(errorMessages).toContain(
+      '[web-custom-js] Cannot generate test_event.',
+    );
+  });
+
+  it('should pass configured dataLayerName to tracking target snippet generation', async () => {
+    const schemaDir = path.join(tmpDir, 'schemas');
+    const targetRegistry = createTrackingTargetRegistry({
+      customTargets: [
+        {
+          id: 'web-custom-js',
+          group: 'web',
+          label: 'Custom Web SDK',
+          language: 'javascript',
+          generateSnippet: ({ dataLayerName }) => {
+            if (dataLayerName !== 'customDataLayer') {
+              throw new Error(`Unexpected dataLayerName: ${dataLayerName}`);
+            }
+            return 'custom.track();';
+          },
+        },
+      ],
+    });
+    fs.mkdirSync(schemaDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(schemaDir, 'event.json'),
+      JSON.stringify({
+        $schema: 'https://json-schema.org/draft/2020-12/schema',
+        type: 'object',
+        'x-tracking-targets': ['web-custom-js'],
+        properties: {
+          event: {
+            type: 'string',
+            const: 'test_event',
+          },
+        },
+        required: ['event'],
+      }),
+    );
+
+    const result = await validateSchemas(schemaDir, {
+      targetRegistry,
+      dataLayerName: 'customDataLayer',
+    });
+
+    expect(result).toBe(true);
+  });
+
   it('should treat falsy scalar examples as valid examples', async () => {
     const schemaDir = path.join(tmpDir, 'schemas');
     fs.mkdirSync(schemaDir, { recursive: true });

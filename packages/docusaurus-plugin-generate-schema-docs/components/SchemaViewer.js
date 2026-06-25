@@ -21,11 +21,7 @@ export default function SchemaViewer({
       Object.values(schema.properties).some(
         (prop) => prop.oneOf || prop.anyOf,
       ));
-  const targets = schema['x-tracking-targets'] ?? [];
-  const prefix = targets.includes('web-datalayer-js') ? 'DataLayer' : 'Code';
-  const exampleTitle = hasOneOfAnyOf
-    ? `${prefix} Examples`
-    : `${prefix} Example`;
+  const exampleTitle = hasOneOfAnyOf ? 'Code Examples' : 'Code Example';
 
   return (
     <div>
