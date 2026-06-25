@@ -1330,17 +1330,6 @@ export function createTrackingTargetRegistry({ customTargets = [] } = {}) {
 
 const DEFAULT_TRACKING_TARGET_REGISTRY = createTrackingTargetRegistry();
 
-export function getSnippetTarget(
-  targetId = DEFAULT_SNIPPET_TARGET_ID,
-  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
-) {
-  try {
-    return targetRegistry.get(targetId);
-  } catch {
-    throw new Error(`Unknown snippet target: ${targetId}`);
-  }
-}
-
 export function generateSnippetForTarget({
   targetId = DEFAULT_SNIPPET_TARGET_ID,
   example,
