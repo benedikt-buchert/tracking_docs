@@ -436,6 +436,72 @@ describe('extendCli - sync-gtm', () => {
   });
 });
 
+describe('extendCli - sync addons', () => {
+  it('registers configured sync addon commands', async () => {
+    const desiredState = { events: ['checkout_started'] };
+    const collect = jest.fn().mockResolvedValue(desiredState);
+    const apply = jest
+      .fn()
+      .mockResolvedValue({ updated: ['checkout_started'] });
+    let syncBrazeAction = null;
+    let syncBrazeCommand = null;
+    const cli = {
+      command: jest.fn((name) => {
+        const cmd = {
+          description: jest.fn().mockReturnThis(),
+          option: jest.fn().mockReturnThis(),
+          action: jest.fn((fn) => {
+            if (name === 'sync-braze') syncBrazeAction = fn;
+            return cmd;
+          }),
+        };
+        if (name === 'sync-braze') syncBrazeCommand = cmd;
+        return cmd;
+      }),
+    };
+    const syncAddon = {
+      id: 'braze-event-sync',
+      command: 'sync-braze',
+      description: 'Synchronize Braze Events',
+      targetIds: ['web-braze-js'],
+      options: [['--api-key <apiKey>', 'Braze API key']],
+      collect,
+      apply,
+    };
+
+    const plugin = await createPlugin(
+      makeContext(),
+      makeOptions({ syncAddons: [syncAddon] }),
+    );
+    plugin.extendCli(cli);
+
+    expect(cli.command).toHaveBeenCalledWith('sync-braze');
+    expect(syncBrazeCommand.description).toHaveBeenCalledWith(
+      'Synchronize Braze Events',
+    );
+    expect(syncBrazeCommand.option).toHaveBeenCalledWith(
+      '--api-key <apiKey>',
+      'Braze API key',
+    );
+
+    await syncBrazeAction({ apiKey: 'secret' });
+
+    expect(collect).toHaveBeenCalledWith({
+      siteDir: '/site',
+      commandOptions: { apiKey: 'secret' },
+      logger: console,
+    });
+    expect(apply).toHaveBeenCalledWith({
+      desiredState,
+      config: {
+        siteDir: '/site',
+        commandOptions: { apiKey: 'secret' },
+      },
+      logger: console,
+    });
+  });
+});
+
 describe('extendCli - version-with-schemas', () => {
   const getAction = async () => {
     let captured = null;
