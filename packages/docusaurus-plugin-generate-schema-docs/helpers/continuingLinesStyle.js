@@ -167,3 +167,46 @@ export const getContinuingLinesStyle = (continuingLevels = [], level = 0) => {
     backgroundRepeat: 'no-repeat',
   };
 };
+
+export const getControlRowStyles = ({
+  level = 0,
+  continuingLevels = [],
+  groupBrackets = [],
+  parentBracketEnds = [],
+}) => {
+  const ownBracket = {
+    level,
+    bracketIndex: groupBrackets.length,
+  };
+  const allBrackets = [...groupBrackets, ownBracket];
+  const ancestorLevels = continuingLevels.filter(
+    (lvl) => lvl < level && continuingLevels.includes(lvl + 1),
+  );
+  if (level > 0 && !ancestorLevels.includes(level - 1)) {
+    ancestorLevels.push(level - 1);
+  }
+
+  const treePassthrough = getContinuingLinesStyle(ancestorLevels, 0);
+  const indent = { paddingLeft: `${level * 1.25 + 0.5}rem` };
+  const buildStyle = (caps, extra = {}) => ({
+    ...mergeBackgroundStyles(
+      treePassthrough,
+      getBracketLinesStyle(allBrackets, caps),
+    ),
+    ...indent,
+    ...extra,
+  });
+
+  return {
+    ownBracket,
+    headerStyle: buildStyle(
+      { starting: [ownBracket] },
+      { paddingTop: '0.5rem' },
+    ),
+    middleStyle: buildStyle(),
+    lastToggleStyle: buildStyle(
+      { ending: [ownBracket, ...parentBracketEnds] },
+      { paddingBottom: '0.5rem' },
+    ),
+  };
+};

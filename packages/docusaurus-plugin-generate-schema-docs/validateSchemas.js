@@ -33,10 +33,42 @@ function validateTrackingTargetHooks({
   });
 }
 
+function formatTargetGenerationError(targetId, error) {
+  const message = error?.message || String(error);
+  return message.startsWith(`[${targetId}]`)
+    ? message
+    : `[${targetId}] ${message}`;
+}
+
+function validateTrackingTargetSnippet({
+  trackingTargets,
+  targetRegistry,
+  schema,
+  example,
+  dataLayerName,
+}) {
+  const errors = [];
+
+  trackingTargets.targets.forEach((targetId) => {
+    try {
+      targetRegistry.generateSnippet({
+        targetId,
+        example,
+        schema,
+        dataLayerName,
+      });
+    } catch (error) {
+      errors.push(formatTargetGenerationError(targetId, error));
+    }
+  });
+
+  return errors;
+}
+
 const validateSingleSchema = async (
   filePath,
   schemaPath,
-  { targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+  { targetRegistry = DEFAULT_TARGET_REGISTRY, dataLayerName } = {},
 ) => {
   const file = path.basename(filePath);
   const errors = [];
@@ -104,6 +136,16 @@ const validateSingleSchema = async (
         const result = validate(example);
         if (result.valid) {
           fileHasValidExample = true;
+          validateTrackingTargetSnippet({
+            trackingTargets,
+            targetRegistry,
+            schema: mergedSchema,
+            example,
+            dataLayerName,
+          }).forEach((error) => {
+            errors.push(`x Schema ${file} (option: ${title}) ${error}`);
+            allValid = false;
+          });
         } else {
           errors.push(
             `x Schema ${file} (option: ${title}) example data failed validation:`,
@@ -130,7 +172,7 @@ const validateSingleSchema = async (
 
 const validateSchemas = async (
   schemaPath,
-  { targetRegistry = DEFAULT_TARGET_REGISTRY } = {},
+  { targetRegistry = DEFAULT_TARGET_REGISTRY, dataLayerName } = {},
 ) => {
   const topLevelSchemaFiles = fs
     .readdirSync(schemaPath)
@@ -139,7 +181,10 @@ const validateSchemas = async (
   const results = await Promise.all(
     topLevelSchemaFiles.map((file) => {
       const filePath = path.join(schemaPath, file);
-      return validateSingleSchema(filePath, schemaPath, { targetRegistry });
+      return validateSingleSchema(filePath, schemaPath, {
+        targetRegistry,
+        dataLayerName,
+      });
     }),
   );
 

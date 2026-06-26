@@ -1040,6 +1040,80 @@ function generatePhpRudderstackSnippet({ example, schema, targetId }) {
   return `Rudder::${message.method}([\n${lines.join(',\n')},\n]);`;
 }
 
+function toPythonValue(value, indent) {
+  if (value === null) return 'None';
+  if (value === true) return 'True';
+  if (value === false) return 'False';
+  if (typeof value === 'number') return String(value);
+  if (typeof value === 'string') return toPythonString(value);
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '[]';
+    const inner = value
+      .map((v) => `${indent}    ${toPythonValue(v, indent + '    ')},`)
+      .join('\n');
+    return `[\n${inner}\n${indent}]`;
+  }
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '{}';
+    const inner = entries
+      .map(
+        ([k, v]) =>
+          `${indent}    ${toPythonString(k)}: ${toPythonValue(
+            v,
+            indent + '    ',
+          )},`,
+      )
+      .join('\n');
+    return `{\n${inner}\n${indent}}`;
+  }
+  return String(value);
+}
+
+function toPythonString(value) {
+  const encoded = JSON.stringify(value).slice(1, -1).replace(/'/g, "\\'");
+  return `'${encoded}'`;
+}
+
+function generatePythonRudderstackSnippet({ example, schema, targetId }) {
+  const message = resolveCdpServerMessage(example, schema, {
+    targetId,
+    label: 'Python',
+  });
+
+  const args = [toPythonValue(message.userId, '')];
+  if (message.method === 'track') {
+    args.push(toPythonValue(message.event, ''));
+  }
+  if (message.method === 'group') {
+    args.push(toPythonValue(message.groupId, ''));
+  }
+  if (message.method === 'page') {
+    const properties = cdpProperties(
+      example,
+      new Set(['userId', 'category', 'name']),
+    );
+    const hasCategory = example.category !== undefined;
+    const hasName = example.name !== undefined;
+    const hasProperties = Object.keys(properties).length > 0;
+    if (hasCategory || hasName || hasProperties) {
+      args.push(hasCategory ? toPythonValue(example.category, '') : 'None');
+    }
+    if (hasName || hasProperties) {
+      args.push(hasName ? toPythonValue(example.name, '') : 'None');
+    }
+    if (hasProperties) {
+      args.push(toPythonValue(properties, ''));
+    }
+    return `rudder_analytics.page(${args.join(', ')})`;
+  }
+  if (Object.keys(message.payload).length > 0) {
+    args.push(toPythonValue(message.payload, ''));
+  }
+
+  return `rudder_analytics.${message.method}(${args.join(', ')})`;
+}
+
 function toJavaValue(value, indent) {
   if (value === null) return 'null';
   if (value === true) return 'true';
@@ -1183,6 +1257,13 @@ export const SNIPPET_TARGETS = [
     language: 'java',
     generateSnippet: generateJavaRudderstackSnippet,
   },
+  {
+    id: 'server-rudderstack-python',
+    group: 'server',
+    label: 'RudderStack (Python)',
+    language: 'python',
+    generateSnippet: generatePythonRudderstackSnippet,
+  },
 ];
 
 function normalizeTrackingTarget(target) {
@@ -1248,17 +1329,6 @@ export function createTrackingTargetRegistry({ customTargets = [] } = {}) {
 }
 
 const DEFAULT_TRACKING_TARGET_REGISTRY = createTrackingTargetRegistry();
-
-export function getSnippetTarget(
-  targetId = DEFAULT_SNIPPET_TARGET_ID,
-  targetRegistry = DEFAULT_TRACKING_TARGET_REGISTRY,
-) {
-  try {
-    return targetRegistry.get(targetId);
-  } catch {
-    throw new Error(`Unknown snippet target: ${targetId}`);
-  }
-}
 
 export function generateSnippetForTarget({
   targetId = DEFAULT_SNIPPET_TARGET_ID,

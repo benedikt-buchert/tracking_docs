@@ -72,7 +72,7 @@ async function syncVersionFromNext({
 
 export default async function (context, options) {
   const { siteDir } = context;
-  const { dataLayerName, trackingTargets = [] } = options || {};
+  const { dataLayerName, trackingTargets = [], editUrlBase } = options || {};
   const { organizationName, projectName, url } = context.siteConfig;
   const targetRegistry = createTrackingTargetRegistry({
     customTargets: trackingTargets,
@@ -85,6 +85,7 @@ export default async function (context, options) {
     url,
     dataLayerName,
     trackingTargets,
+    editUrlBase,
   };
   const versionsJsonPath = path.join(siteDir, 'versions.json');
   const isVersioned = fs.existsSync(versionsJsonPath);
@@ -95,12 +96,15 @@ export default async function (context, options) {
       .description('Validate JSON Schemas with the examples inside the schemas')
       .action(async (version) => {
         console.log('Validating GTM Schemas...');
-        const schemaVersion = version || 'next';
+        const schemaVersion = version || (isVersioned ? 'next' : undefined);
         const { schemaDir } = getPathsForVersion(
           schemaVersion,
           context.siteDir,
         );
-        const success = await validateSchemas(schemaDir, { targetRegistry });
+        const success = await validateSchemas(schemaDir, {
+          targetRegistry,
+          dataLayerName,
+        });
         if (!success) {
           console.error('Validation failed.');
           process.exit(1);

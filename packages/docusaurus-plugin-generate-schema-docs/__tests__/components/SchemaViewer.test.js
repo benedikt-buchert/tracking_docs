@@ -80,4 +80,24 @@ describe('SchemaViewer', () => {
 
     expect(screen.getByText('custom.track("custom_event");')).toBeVisible();
   });
+
+  it('uses generic code example headings for web data layer targets', () => {
+    const schema = {
+      title: 'Web Data Layer Event',
+      type: 'object',
+      'x-tracking-targets': ['web-datalayer-js'],
+      properties: {
+        event: { type: 'string', examples: ['web_event'] },
+      },
+    };
+
+    render(<SchemaViewer schema={schema} />);
+
+    expect(
+      screen.getByRole('heading', { name: 'Code Example' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'DataLayer Example' }),
+    ).not.toBeInTheDocument();
+  });
 });

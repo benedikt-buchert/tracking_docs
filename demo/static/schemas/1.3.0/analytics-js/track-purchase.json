@@ -8,7 +8,8 @@
     "web-rudderstack-js",
     "web-hightouch-js",
     "server-rudderstack-php",
-    "server-rudderstack-java"
+    "server-rudderstack-java",
+    "server-rudderstack-python"
   ],
   "type": "object",
   "properties": {

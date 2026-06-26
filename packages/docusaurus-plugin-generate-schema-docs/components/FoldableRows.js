@@ -2,11 +2,7 @@ import React, { useState, useId } from 'react';
 import SchemaRows from './SchemaRows';
 import Heading from '@theme/Heading';
 import clsx from 'clsx';
-import {
-  getContinuingLinesStyle,
-  getBracketLinesStyle,
-  mergeBackgroundStyles,
-} from '../helpers/continuingLinesStyle';
+import { getControlRowStyles } from '../helpers/continuingLinesStyle';
 
 // A clickable row that acts as a header/summary for a foldable choice
 const ChoiceRow = ({
@@ -79,64 +75,13 @@ export default function FoldableRows({
     selectTitle
   );
 
-  // Compute this group's own bracket and combine with any parent brackets.
-  // bracketIndex = total number of existing brackets, so each group gets a unique position.
-  const ownBracket = {
-    level,
-    bracketIndex: groupBrackets.length,
-  };
-  const allBrackets = [...groupBrackets, ownBracket];
-
-  // colSpan=5 rows need continuing ancestor lines to pass through (for visual
-  // continuity). They don't have ::before/::after connectors, so we draw all
-  // ancestor lines via background gradients. We always include the immediate
-  // parent level (level-1) so the parent-to-child connector passes through.
-  // Only draw ancestor lines where the next level up is also continuing;
-  // this matches PropertyRow's filter to avoid stray lines at a parent's
-  // corner connector when that parent is the last in its group.
-  const ancestorLevels = continuingLevels.filter(
-    (lvl) => lvl < level && continuingLevels.includes(lvl + 1),
-  );
-  // Always include the immediate parent level so the parent-to-child
-  // connector passes through these full-width rows.
-  if (level > 0 && !ancestorLevels.includes(level - 1)) {
-    ancestorLevels.push(level - 1);
-  }
-  const treePassthrough = getContinuingLinesStyle(ancestorLevels, 0);
-  const indent = { paddingLeft: `${level * 1.25 + 0.5}rem` };
-
-  // Header row: top cap on the ownBracket
-  const headerBracketStyle = getBracketLinesStyle(allBrackets, {
-    starting: [ownBracket],
-  });
-  const headerMerged = mergeBackgroundStyles(
-    treePassthrough,
-    headerBracketStyle,
-  );
-  const headerStyle = { ...headerMerged, ...indent, paddingTop: '0.5rem' };
-
-  // Middle rows (option toggles): no caps
-  const middleBracketStyle = getBracketLinesStyle(allBrackets);
-  const middleMerged = mergeBackgroundStyles(
-    treePassthrough,
-    middleBracketStyle,
-  );
-  const middleStyle = { ...middleMerged, ...indent };
-
-  // Last toggle when its content is NOT shown: bottom cap on ownBracket (+ parent ends)
-  const allEndings = [ownBracket, ...(parentBracketEnds || [])];
-  const lastToggleBracketStyle = getBracketLinesStyle(allBrackets, {
-    ending: allEndings,
-  });
-  const lastToggleMerged = mergeBackgroundStyles(
-    treePassthrough,
-    lastToggleBracketStyle,
-  );
-  const lastToggleStyle = {
-    ...lastToggleMerged,
-    ...indent,
-    paddingBottom: '0.5rem',
-  };
+  const { ownBracket, headerStyle, middleStyle, lastToggleStyle } =
+    getControlRowStyles({
+      level,
+      continuingLevels,
+      groupBrackets,
+      parentBracketEnds,
+    });
 
   return (
     <>

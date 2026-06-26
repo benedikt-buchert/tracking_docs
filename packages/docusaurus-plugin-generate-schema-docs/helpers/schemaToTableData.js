@@ -65,29 +65,6 @@ function isEffectivelyEmpty(schemaNode) {
   return Object.values(schemaNode.properties).every(isEffectivelyEmpty);
 }
 
-// --- Step 4: extracted containerType resolution ---
-function resolveContainerType(
-  propSchema,
-  {
-    hasNestedProperties,
-    hasAdditionalProperties,
-    hasArrayItems,
-    isChoiceWrapper,
-    isConditionalWrapper,
-    choiceOptionsAreObjects,
-  },
-) {
-  if (hasNestedProperties || hasAdditionalProperties) return 'object';
-  if (
-    isChoiceWrapper &&
-    (propSchema.type === 'object' || choiceOptionsAreObjects)
-  )
-    return 'object';
-  if (isConditionalWrapper && propSchema.type === 'object') return 'object';
-  if (hasArrayItems) return 'array';
-  return null;
-}
-
 /**
  * Returns whether a property schema has children and what container type it renders as.
  * Also returns flags used for child-building dispatch.
@@ -116,14 +93,19 @@ function getContainerInfo(propSchema) {
     isChoiceWrapper ||
     isConditionalWrapper;
 
-  const containerType = resolveContainerType(propSchema, {
-    hasNestedProperties,
-    hasAdditionalProperties,
-    hasArrayItems,
-    isChoiceWrapper,
-    isConditionalWrapper,
-    choiceOptionsAreObjects,
-  });
+  let containerType = null;
+  if (hasNestedProperties || hasAdditionalProperties) {
+    containerType = 'object';
+  } else if (
+    isChoiceWrapper &&
+    (propSchema.type === 'object' || choiceOptionsAreObjects)
+  ) {
+    containerType = 'object';
+  } else if (isConditionalWrapper && propSchema.type === 'object') {
+    containerType = 'object';
+  } else if (hasArrayItems) {
+    containerType = 'array';
+  }
 
   return {
     hasChildren,
@@ -135,28 +117,15 @@ function getContainerInfo(propSchema) {
   };
 }
 
-// --- Step 1: Row factory functions ---
-function makeBaseRow(overrides) {
+function makeRow(type, fields) {
   return {
     hasChildren: false,
     containerType: null,
-    ...overrides,
+    type,
+    ...fields,
   };
 }
 
-function makePropertyRow(fields) {
-  return makeBaseRow({ type: 'property', ...fields });
-}
-
-function makeChoiceRow(fields) {
-  return makeBaseRow({ type: 'choice', ...fields });
-}
-
-function makeConditionalRow(fields) {
-  return makeBaseRow({ type: 'conditional', ...fields });
-}
-
-// --- Step 2: buildPropEntries helper ---
 function buildPropEntries(subSchema, patternPropertyEntries) {
   const entries = subSchema.properties
     ? Object.entries(subSchema.properties)
@@ -192,7 +161,7 @@ function processOptions(
       const constraints = getConstraints(optionSchema);
       if (isRequired) constraints.unshift('required');
       rows = [
-        makePropertyRow({
+        makeRow('property', {
           name: path.length > 0 ? path[path.length - 1] : optionTitle,
           path: [...path, `(${optionTitle})`],
           level,
@@ -220,8 +189,6 @@ function processOptions(
     return { title: optionTitle, description: optionSchema.description, rows };
   });
 }
-
-// --- Row building (module-level, each function returns its rows) ---
 
 function buildConditionalRow(
   subSchema,
@@ -284,7 +251,7 @@ function buildConditionalRow(
     : continuingLevels;
 
   return [
-    makeConditionalRow({
+    makeRow('conditional', {
       path: [...currentPath, 'if/then/else'],
       level: currentLevel,
       isLastInGroup: conditionalIsLastInGroup,
@@ -383,7 +350,7 @@ function buildPropertyChildren(
     );
     const innerBrackets = [...currentGroupBrackets, ownBracket];
     rows.push(
-      makeChoiceRow({
+      makeRow('choice', {
         choiceType,
         path: [...newPath, choiceType],
         level: currentLevel + 1,
@@ -468,7 +435,7 @@ function buildPropertyRows(
       const choiceType = propSchema.oneOf ? 'oneOf' : 'anyOf';
       const ownBracket = computeOwnBracket(currentLevel, currentGroupBrackets);
       rows.push(
-        makeChoiceRow({
+        makeRow('choice', {
           choiceType,
           name,
           path: newPath,
@@ -497,7 +464,7 @@ function buildPropertyRows(
       if (isRequired) constraints.unshift('required');
 
       rows.push(
-        makePropertyRow({
+        makeRow('property', {
           name,
           path: newPath,
           level: currentLevel,
@@ -605,7 +572,7 @@ function buildRows(
     const choiceIsLastInGroup =
       ctx.isLastOption && !(subSchema.if && (subSchema.then || subSchema.else));
     rows.push(
-      makeChoiceRow({
+      makeRow('choice', {
         choiceType,
         path: currentPath,
         level: currentLevel,
@@ -629,7 +596,7 @@ function buildRows(
   } else if (!subSchema.properties && subSchema.type) {
     // Root-level primitive schema
     rows.push(
-      makePropertyRow({
+      makeRow('property', {
         name: subSchema.title || '<value>',
         path: currentPath,
         level: currentLevel,

@@ -30,6 +30,7 @@ npm install --save docusaurus-plugin-generate-schema-docs
           {
             // Options if any
             dataLayerName: 'customDataLayer',
+            editUrlBase: 'https://gitlab.example/group/project/-/edit/main',
             trackingTargets: [
               {
                 id: 'web-custom-js',
@@ -49,11 +50,16 @@ npm install --save docusaurus-plugin-generate-schema-docs
 
     The `dataLayerName` option allows you to customize the name of the data layer variable in the generated examples. If not provided, it defaults to `dataLayer`.
 
+    The `editUrlBase` option customizes the generated `custom_edit_url` front
+    matter. Use it for GitLab or other repository hosts whose edit URL format
+    differs from GitHub. If omitted, edit URLs default to
+    `https://github.com/<organizationName>/<projectName>/edit/main/<schema-path>`.
+
 2.  Place your JSON schemas in the `schemas` directory at the root of your project.
 
 ## Custom Tracking Targets
 
-Use `trackingTargets` to add snippet targets that schemas can select with `x-tracking-targets`.
+Use `trackingTargets` to add custom tracking targets that schemas can select with `x-tracking-targets`.
 
 ```json
 {
@@ -137,9 +143,9 @@ By default, it resolves schemas from the project root. Use `--path=<siteDir>` to
 
 Only schemas tagged with `x-tracking-targets` including `web-datalayer-js` are used for GTM variable sync. Untagged schemas are ignored.
 
-### Snippet Targets
+### Built-In Tracking Targets
 
-`ExampleDataLayer` supports web snippet targets for:
+The plugin includes web tracking targets for:
 
 - `web-datalayer-js`
 - `web-segment-js`
@@ -155,7 +161,7 @@ Braze Web SDK snippets support:
 
 #### Firebase
 
-`ExampleDataLayer` supports Firebase snippet targets for:
+The plugin includes Firebase tracking targets for:
 
 - `android-firebase-kotlin-sdk`
 - `android-firebase-java-sdk`
