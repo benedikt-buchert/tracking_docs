@@ -179,6 +179,22 @@ describe('extendCli - validate-schemas', () => {
     expect(targetRegistry.has('web-custom-js')).toBe(true);
   });
 
+  it('passes configured dataLayerName to schema validation', async () => {
+    const { cli, action } = makeCli();
+    const plugin = await createPlugin(
+      makeContext(),
+      makeOptions({ dataLayerName: 'customDataLayer' }),
+    );
+    plugin.extendCli(cli);
+
+    await action.fn('next');
+
+    expect(validateSchemas).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      expect.objectContaining({ dataLayerName: 'customDataLayer' }),
+    );
+  });
+
   it('exits with code 1 when validation fails', async () => {
     validateSchemas.mockResolvedValue(false);
     const exitSpy = jest.spyOn(process, 'exit').mockImplementation(() => {});

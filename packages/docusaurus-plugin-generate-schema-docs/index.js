@@ -101,7 +101,10 @@ export default async function (context, options) {
           schemaVersion,
           context.siteDir,
         );
-        const success = await validateSchemas(schemaDir, { targetRegistry });
+        const success = await validateSchemas(schemaDir, {
+          targetRegistry,
+          dataLayerName,
+        });
         if (!success) {
           console.error('Validation failed.');
           process.exit(1);

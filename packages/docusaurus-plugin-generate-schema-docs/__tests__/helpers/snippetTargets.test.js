@@ -1889,7 +1889,9 @@ describe('server-rudderstack-python snippet', () => {
   });
 
   it('has group=server and language=python', () => {
-    const target = getSnippetTarget('server-rudderstack-python');
+    const target = createTrackingTargetRegistry().get(
+      'server-rudderstack-python',
+    );
     expect(target.group).toBe('server');
     expect(target.language).toBe('python');
   });

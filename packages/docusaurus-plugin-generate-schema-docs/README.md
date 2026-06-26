@@ -59,7 +59,7 @@ npm install --save docusaurus-plugin-generate-schema-docs
 
 ## Custom Tracking Targets
 
-Use `trackingTargets` to add snippet targets that schemas can select with `x-tracking-targets`.
+Use `trackingTargets` to add custom tracking targets that schemas can select with `x-tracking-targets`.
 
 ```json
 {
@@ -143,9 +143,9 @@ By default, it resolves schemas from the project root. Use `--path=<siteDir>` to
 
 Only schemas tagged with `x-tracking-targets` including `web-datalayer-js` are used for GTM variable sync. Untagged schemas are ignored.
 
-### Snippet Targets
+### Built-In Tracking Targets
 
-`ExampleDataLayer` supports web snippet targets for:
+The plugin includes web tracking targets for:
 
 - `web-datalayer-js`
 - `web-segment-js`
@@ -161,7 +161,7 @@ Braze Web SDK snippets support:
 
 #### Firebase
 
-`ExampleDataLayer` supports Firebase snippet targets for:
+The plugin includes Firebase tracking targets for:
 
 - `android-firebase-kotlin-sdk`
 - `android-firebase-java-sdk`
