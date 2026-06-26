@@ -1,5 +1,5 @@
 module.exports = {
-  testEnvironment: '@stryker-mutator/jest-runner/jest-env/jsdom',
+  testEnvironment: 'jsdom',
   roots: ['<rootDir>/packages', '<rootDir>/scripts'],
   transformIgnorePatterns: [
     'node_modules/(?!(docusaurus-plugin-generate-schema-docs|@apidevtools/json-schema-ref-parser))',

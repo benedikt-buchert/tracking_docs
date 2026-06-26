@@ -5,10 +5,8 @@ const config = {
     configFile: 'jest.stryker.config.js',
   },
   mutate: [
-    'packages/*/!(*.test|*.spec).js',
     'packages/**/!(*.test|*.spec).js',
     '!packages/**/__tests__/**',
-    '!packages/**/__mocks__/**',
     '!packages/**/test-data/**',
     '!packages/**/scripts/**',
     '!packages/**/components/**',
