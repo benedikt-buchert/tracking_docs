@@ -15,7 +15,7 @@ const config = {
   ],
   incremental: true,
   incrementalFile: 'reports/mutation/stryker-incremental.json',
-  ignorePatterns: ['native-tests', 'demo', '.stryker-tmp'],
+  ignorePatterns: ['native-tests', 'demo/build', '.stryker-tmp'],
   reporters: ['html', 'clear-text', 'progress', 'json'],
   htmlReporter: {
     fileName: 'reports/mutation/index.html',
