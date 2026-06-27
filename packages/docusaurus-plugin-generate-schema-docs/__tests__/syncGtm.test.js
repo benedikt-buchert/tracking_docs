@@ -12,6 +12,45 @@ jest.mock('fs');
 jest.mock('child_process');
 jest.mock('@apidevtools/json-schema-ref-parser');
 
+describe('gtmDataLayerSyncAddon', () => {
+  it('represents GTM sync as an addon for web data layer schemas', async () => {
+    const desiredState = [{ name: 'event', description: 'Event name' }];
+    const summary = { created: ['event'], deleted: [], failedDeletes: [] };
+    const getVariablesFromSchemas = jest.fn().mockResolvedValue(desiredState);
+    const syncGtmVariables = jest.fn().mockResolvedValue(summary);
+
+    expect(gtmScript.gtmDataLayerSyncAddon).toMatchObject({
+      id: 'gtm-datalayer-sync',
+      command: 'sync-gtm',
+      description: 'Synchronize GTM Data Layer Variables from JSON schemas',
+      targetIds: ['web-datalayer-js'],
+    });
+
+    await expect(
+      gtmScript.gtmDataLayerSyncAddon.collect({
+        schemaPath: '/site/static/schemas/next',
+        skipArraySubProperties: true,
+        getVariablesFromSchemas,
+      }),
+    ).resolves.toEqual(desiredState);
+    expect(getVariablesFromSchemas).toHaveBeenCalledWith(
+      '/site/static/schemas/next',
+      { skipArraySubProperties: true },
+    );
+
+    await expect(
+      gtmScript.gtmDataLayerSyncAddon.apply({
+        desiredState,
+        skipArraySubProperties: true,
+        syncGtmVariables,
+      }),
+    ).resolves.toEqual(summary);
+    expect(syncGtmVariables).toHaveBeenCalledWith(desiredState, {
+      skipArraySubProperties: true,
+    });
+  });
+});
+
 describe('parseArgs', () => {
   it('should parse --quiet, --json, and --skip-array-sub-properties flags', () => {
     const argv = [

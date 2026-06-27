@@ -92,6 +92,32 @@ A target must define:
 
 `validateSchema` is optional. Return an array of error messages, a single error string, `{ errors: [...] }`, or a falsy value when the schema is valid.
 
+## Sync Addons
+
+Use `syncAddons` to add CLI sync workflows that project Tracking Schemas into external systems. Sync addons are separate from Tracking Targets; do not add sync methods to tracking target adapters.
+
+A sync addon must define:
+
+```javascript
+{
+  id: 'braze-event-sync',
+  command: 'sync-braze',
+  description: 'Synchronize Braze Events',
+  targetIds: ['web-braze-js'],
+  options: [['--api-key <apiKey>', 'Braze API key']],
+  collect({ siteDir, commandOptions, logger }) {
+    return { events: [] };
+  },
+  apply({ desiredState, config, logger }) {
+    return { updated: desiredState.events };
+  },
+}
+```
+
+`id` must be unique across built-in and custom sync addons. `command` registers the Docusaurus CLI command. `targetIds` declares which tracking targets the addon consumes. `collect` returns the desired external state from schemas or command inputs, and `apply` writes that desired state to the external system.
+
+The built-in GTM Data Layer sync addon registers `docusaurus sync-gtm` and consumes schemas tagged with `web-datalayer-js`.
+
 ## CLI Commands
 
 ### Generate Documentation

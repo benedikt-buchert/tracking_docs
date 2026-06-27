@@ -266,6 +266,27 @@ async function syncGtmVariables(
   };
 }
 
+const gtmDataLayerSyncAddon = {
+  id: 'gtm-datalayer-sync',
+  command: 'sync-gtm',
+  description: 'Synchronize GTM Data Layer Variables from JSON schemas',
+  targetIds: ['web-datalayer-js'],
+  collect({
+    schemaPath,
+    skipArraySubProperties = false,
+    getVariablesFromSchemas: getVars = getVariablesFromSchemas,
+  }) {
+    return getVars(schemaPath, { skipArraySubProperties });
+  },
+  apply({
+    desiredState,
+    skipArraySubProperties = false,
+    syncGtmVariables: sync = syncGtmVariables,
+  }) {
+    return sync(desiredState, { skipArraySubProperties });
+  },
+};
+
 async function setupGtmWorkspace() {
   const branchName =
     process.env.GTM_WORKSPACE_BRANCH ||
@@ -328,6 +349,7 @@ async function main(argv, deps) {
       getLatestSchemaPath: getPath,
       getVariablesFromSchemas: getVars,
       syncGtmVariables: sync,
+      syncAddon = gtmDataLayerSyncAddon,
       assertGtmCliAvailable: assertCli = assertGtmCliAvailable,
       logger: log,
       parseArgs: parse,
@@ -348,8 +370,10 @@ async function main(argv, deps) {
       );
     }
     log.log(`Scanning for schemas in: ${schemaPath}`);
-    const schemaVariables = await getVars(schemaPath, {
+    const schemaVariables = await syncAddon.collect({
+      schemaPath,
       skipArraySubProperties,
+      getVariablesFromSchemas: getVars,
     });
     if (schemaVariables.length === 0) {
       throw new Error(
@@ -358,7 +382,11 @@ async function main(argv, deps) {
     }
     log.log(`Found ${schemaVariables.length} variables defined in schemas.`);
 
-    const summary = await sync(schemaVariables, { skipArraySubProperties });
+    const summary = await syncAddon.apply({
+      desiredState: schemaVariables,
+      skipArraySubProperties,
+      syncGtmVariables: sync,
+    });
 
     if (isJson) {
       console.log(
@@ -425,4 +453,5 @@ module.exports = {
   parseArgs,
   assertGtmCliAvailable,
   setupGtmWorkspace,
+  gtmDataLayerSyncAddon,
 };
