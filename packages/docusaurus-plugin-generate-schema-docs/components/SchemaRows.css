@@ -267,36 +267,9 @@ td[class*='level-']::after {
   pointer-events: none;
 }
 
-/* --- Level-based positioning --- */
-
-td.level-1::before,
-td.level-1::after {
-  left: 0.5rem;
-}
-
-td.level-2::before,
-td.level-2::after {
-  left: 1.75rem;
-}
-
-td.level-3::before,
-td.level-3::after {
-  left: 3rem;
-}
-
-td.level-4::before,
-td.level-4::after {
-  left: 4.25rem;
-}
-
-td.level-5::before,
-td.level-5::after {
-  left: 5.5rem;
-}
-
-td.level-6::before,
-td.level-6::after {
-  left: 6.75rem;
+td[class*='level-']::before,
+td[class*='level-']::after {
+  left: var(--connector-x);
 }
 
 /*
