@@ -48,6 +48,12 @@ const KEYWORD_HELP_TEXT = {
 
 const SCHEMA_KEYWORD_BADGE_TEXT = 'Schema constraint';
 
+const TREE_LINE_GRADIENT =
+  'linear-gradient(var(--ifm-table-border-color), var(--ifm-table-border-color))';
+
+const CHILD_LINE_GRADIENT =
+  'linear-gradient(to bottom, transparent calc(50% + 1em), var(--ifm-table-border-color) calc(50% + 1em))';
+
 function splitKeywordLabel(name) {
   const match = /^patternProperties (\/.+\/)$/.exec(name);
   if (!match) {
@@ -112,69 +118,50 @@ export default function PropertyRow({
   // 1. Parent-to-child line (from 50% down) - for elements with children
   // 2. Continuing ancestor lines (full height) - for ancestors that have more siblings below
   //
-  // Position mapping: level N's line is at position (N * 1.25 + 0.5)rem
-  // This matches the CSS: level-1 at 0.5rem, level-2 at 1.75rem, etc.
+  // Position mapping: visual line N is at position (N * 1.25 + 0.5)rem.
   const getLevelPosition = (lvl) => lvl * 1.25 + 0.5;
+  const toVisualConnectorLevel = (lvl) => lvl - 1;
 
-  const allGradients = [];
-  const allSizes = [];
-  const allPositions = [];
+  const backgroundLayers = [];
+
+  const addBackgroundLine = (image, position) => {
+    backgroundLayers.push({ image, position, size: '1px 100%' });
+  };
 
   // Parent-to-child line: draws from 50% (below symbol) to bottom of cell
   if (hasChildren) {
     const childLevelPos = level * 1.25 + 0.5;
-    allGradients.push(
-      'linear-gradient(to bottom, transparent calc(50% + 1em), var(--ifm-table-border-color) calc(50% + 1em))',
-    );
-    allSizes.push('1px 100%');
-    allPositions.push(`${childLevelPos}rem top`);
+    addBackgroundLine(CHILD_LINE_GRADIENT, `${childLevelPos}rem top`);
   }
 
   // Continuing ancestor lines: full-height vertical lines for ancestors with more siblings.
-  // Only levels strictly below the immediate parent (< level - 1) are drawn here.
-  // The ::before pseudo-element handles the immediate parent connector at level - 1.
-  // We also require lvl+1 to be in continuingLevels: if the next level up is not continuing
-  // (i.e. the parent was the last sibling), drawing lvl's line would create a stray line at
-  // the same x-position as that parent's elbow.
-  continuingLevels
-    .filter((lvl) => lvl < level - 1 && continuingLevels.includes(lvl + 1))
-    .forEach((lvl) => {
-      const pos = getLevelPosition(lvl);
-      allGradients.push(
-        'linear-gradient(var(--ifm-table-border-color), var(--ifm-table-border-color))',
-      );
-      allSizes.push('1px 100%');
-      allPositions.push(`${pos}rem top`);
-    });
+  const visibleContinuingLevels = [
+    ...new Set(
+      continuingLevels
+        .map(toVisualConnectorLevel)
+        .filter((lvl) => lvl >= 0 && lvl < level - 1),
+    ),
+  ];
 
-  // When the immediate parent (level - 1) is not the last sibling at its level,
-  // the existing filter (lvl < level - 1) misses drawing the pass-through line at
-  // getLevelPosition(level - 2) — the x-position of the parent-level siblings connector.
-  // This gap makes visually disconnected siblings (e.g. trial_end_date ↔ is_trial when
-  // $time sits between them). Only add when level - 2 is not already in continuingLevels,
-  // which would mean the existing filter already handles it.
-  if (
-    level >= 2 &&
-    continuingLevels.includes(level - 1) &&
-    !continuingLevels.includes(level - 2)
-  ) {
-    const pos = getLevelPosition(level - 2);
-    allGradients.push(
-      'linear-gradient(var(--ifm-table-border-color), var(--ifm-table-border-color))',
-    );
-    allSizes.push('1px 100%');
-    allPositions.push(`${pos}rem top`);
-  }
+  visibleContinuingLevels.forEach((lvl) => {
+    addBackgroundLine(TREE_LINE_GRADIENT, `${getLevelPosition(lvl)}rem top`);
+  });
 
   const continuingLinesStyle =
-    allGradients.length > 0
+    backgroundLayers.length > 0
       ? {
-          backgroundImage: allGradients.join(', '),
-          backgroundSize: allSizes.join(', '),
-          backgroundPosition: allPositions.join(', '),
+          backgroundImage: backgroundLayers
+            .map(({ image }) => image)
+            .join(', '),
+          backgroundSize: backgroundLayers.map(({ size }) => size).join(', '),
+          backgroundPosition: backgroundLayers
+            .map(({ position }) => position)
+            .join(', '),
           backgroundRepeat: 'no-repeat',
         }
       : {};
+  const connectorPositionStyle =
+    level > 0 ? { '--connector-x': `${getLevelPosition(level - 1)}rem` } : {};
 
   // Bracket lines on the right side (description column)
   const bracketCaps = bracketEnds ? { ending: bracketEnds } : undefined;
@@ -208,7 +195,11 @@ export default function PropertyRow({
       >
         <td
           rowSpan={rowSpan}
-          style={{ ...indentStyle, ...continuingLinesStyle }}
+          style={{
+            ...indentStyle,
+            ...connectorPositionStyle,
+            ...continuingLinesStyle,
+          }}
           className={clsx(
             'property-cell',
             isSchemaKeywordRow && 'property-cell--keyword',

@@ -3,6 +3,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import FoldableRows from '../../components/FoldableRows';
 import ConditionalRows from '../../components/ConditionalRows';
+import SchemaRows from '../../components/SchemaRows';
 import { schemaToTableData } from '../../helpers/schemaToTableData';
 import battleTestSchema from '../__fixtures__/static/schemas/battle-test-event.json';
 
@@ -20,6 +21,11 @@ const getPropertyCellByName = (container, name) => {
   const strong = strongEls.find((el) => el.textContent === name);
   return strong?.closest('td');
 };
+
+const getPropertyCellsByName = (container, name) =>
+  Array.from(container.querySelectorAll('span.property-name > strong'))
+    .filter((el) => el.textContent === name)
+    .map((el) => el.closest('td'));
 
 describe('connector lines visual regressions', () => {
   const rows = schemaToTableData(battleTestSchema);
@@ -89,5 +95,119 @@ describe('connector lines visual regressions', () => {
     expect(cvvCell).toBeInTheDocument();
     expect(cvvCell).not.toHaveClass('is-last');
     expect(cvvCell.outerHTML).toMatchSnapshot();
+  });
+
+  it('keeps ancestor connector open through the last nested object before a root sibling', () => {
+    const schema = {
+      properties: {
+        branch_group: {
+          type: 'object',
+          properties: {
+            first_nested_branch: {
+              type: 'object',
+              properties: {
+                leaf_value: { type: 'string' },
+              },
+            },
+            last_nested_branch: {
+              type: 'object',
+              properties: {
+                leaf_value: { type: 'string' },
+              },
+            },
+          },
+        },
+        sibling_after_group: { type: 'array', items: { type: 'object' } },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+
+    const { container } = renderInTable(<SchemaRows tableData={tableData} />);
+
+    const lastNestedBranchCell = getPropertyCellByName(
+      container,
+      'last_nested_branch',
+    );
+    expect(lastNestedBranchCell).toBeInTheDocument();
+    expect(lastNestedBranchCell).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
+
+    const leafCells = getPropertyCellsByName(container, 'leaf_value');
+    expect(leafCells).toHaveLength(2);
+    expect(leafCells[1]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
+  });
+
+  it('keeps nested sibling connectors open through leaf rows', () => {
+    const nestedLeafSchema = {
+      type: 'object',
+      properties: {
+        nested_leaf_holder: {
+          type: 'object',
+          properties: {
+            leaf_value: { type: 'string' },
+          },
+        },
+      },
+    };
+    const shallowLeafSchema = {
+      type: 'object',
+      properties: {
+        shallow_value: { type: 'string' },
+      },
+    };
+    const schema = {
+      properties: {
+        first_group: {
+          type: 'object',
+          properties: {
+            first_branch: nestedLeafSchema,
+            middle_branch: nestedLeafSchema,
+            last_branch: nestedLeafSchema,
+          },
+        },
+        second_group: {
+          type: 'object',
+          properties: {
+            first_branch: shallowLeafSchema,
+            middle_branch: shallowLeafSchema,
+            penultimate_branch: shallowLeafSchema,
+            last_branch: shallowLeafSchema,
+          },
+        },
+      },
+    };
+    const tableData = schemaToTableData(schema);
+
+    const { container } = renderInTable(<SchemaRows tableData={tableData} />);
+
+    const leafCells = getPropertyCellsByName(container, 'leaf_value');
+    expect(leafCells).toHaveLength(3);
+    expect(leafCells[0]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
+    expect(leafCells[0]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('1.75rem top'),
+    });
+    expect(leafCells[1]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
+    expect(leafCells[1]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('1.75rem top'),
+    });
+
+    const shallowValueCells = getPropertyCellsByName(
+      container,
+      'shallow_value',
+    );
+    expect(shallowValueCells).toHaveLength(4);
+    expect(shallowValueCells[0]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
+    expect(shallowValueCells[1]).toHaveStyle({
+      backgroundPosition: expect.stringContaining('0.5rem top'),
+    });
   });
 });
