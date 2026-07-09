@@ -13,6 +13,8 @@ import {
   registerSyncAddonCommands,
 } from './helpers/syncAddons.js';
 
+export { buildExamplePayloads } from './helpers/examplePayloads.js';
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function readConfiguredVersions(siteDir) {

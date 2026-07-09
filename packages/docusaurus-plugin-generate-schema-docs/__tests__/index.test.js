@@ -2,7 +2,7 @@
  * @jest-environment @stryker-mutator/jest-runner/jest-env/node
  */
 
-import createPlugin from '../index.js';
+import createPlugin, { buildExamplePayloads } from '../index.js';
 
 jest.mock('url', () => ({
   fileURLToPath: jest.fn(
@@ -48,6 +48,12 @@ const makeContext = (overrides = {}) => ({
 const makeOptions = (overrides = {}) => ({
   dataLayerName: 'dataLayer',
   ...overrides,
+});
+
+describe('public exports', () => {
+  it('exports buildExamplePayloads for sync addons', () => {
+    expect(buildExamplePayloads).toEqual(expect.any(Function));
+  });
 });
 
 const makeCustomTarget = () => ({

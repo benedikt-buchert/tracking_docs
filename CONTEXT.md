@@ -21,11 +21,19 @@ A documented collection of **Tracking Schemas** for a coherent usage context.
 **User Alias**:
 A secondary identifier attached to a user profile when the primary user identity is not the right identifier for a use case.
 
+**Profile Attribute**:
+A user profile field documented separately from event payload schemas.
+
+**Example Payload**:
+A sample data instance derived from a **Tracking Schema** for documentation or sync workflows.
+
 ## Relationships
 
 - A **Tracking Schema** supports one or more **Tracking Targets**.
 - A **Tracking Reference** contains one or more **Tracking Schemas**.
 - A **Sync Addon** may consume **Tracking Schemas** for one or more **Tracking Targets**.
+- A **Profile Attribute** may be sent alongside event examples but is not part of event payload.
+- An **Example Payload** may represent a default example or a named schema variant.
 
 ## Example dialogue
 
