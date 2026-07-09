@@ -1,9 +1,6 @@
 const {
   PROPERTY_DEFINITION_SELECTOR,
-  getKeys,
-  isInsideIfBlock,
-  isPureRef,
-  isConstraintOnlyRefinement,
+  getCheckablePropertyDefinition,
 } = require('../helpers/property-definition');
 
 /** @type {import('eslint').Rule.RuleModule} */
@@ -24,14 +21,9 @@ module.exports = {
   create(context) {
     return {
       [PROPERTY_DEFINITION_SELECTOR](node) {
-        if (isInsideIfBlock(node)) return;
-
-        const definitionNode = node.value;
-        if (definitionNode.type !== 'JSONObjectExpression') return;
-
-        const keys = getKeys(definitionNode);
-        if (isPureRef(keys)) return;
-        if (isConstraintOnlyRefinement(keys)) return;
+        const property = getCheckablePropertyDefinition(node);
+        if (!property) return;
+        const { definitionNode, keys, name } = property;
 
         // const and enum already constrain the value — no example needed
         if (keys.has('const') || keys.has('enum')) return;
@@ -50,7 +42,7 @@ module.exports = {
           context.report({
             node,
             messageId: 'missing',
-            data: { name: node.key.value ?? node.key.name },
+            data: { name },
           });
         }
       },

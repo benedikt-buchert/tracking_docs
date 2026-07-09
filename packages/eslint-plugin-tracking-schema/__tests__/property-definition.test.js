@@ -6,6 +6,7 @@ const {
   isInsideIfBlock,
   isPureRef,
   isConstraintOnlyRefinement,
+  getCheckablePropertyDefinition,
 } = require('../helpers/property-definition');
 
 describe('PROPERTY_DEFINITION_SELECTOR', () => {
@@ -152,5 +153,105 @@ describe('getKeys', () => {
     };
     const keys = getKeys(definitionNode);
     expect(keys).toEqual(new Set(['type']));
+  });
+});
+
+describe('getCheckablePropertyDefinition', () => {
+  function makeNode({ key = { value: 'event' }, value, blockKey = 'then' }) {
+    const node = {
+      key,
+      value,
+      parent: {},
+    };
+    node.parent.parent = {
+      parent: {
+        parent: {
+          key: { value: blockKey },
+        },
+      },
+    };
+    return node;
+  }
+
+  it('returns definition node, keys, and property name for checkable property', () => {
+    const definitionNode = {
+      type: 'JSONObjectExpression',
+      properties: [
+        { key: { value: 'type' } },
+        { key: { value: 'description' } },
+      ],
+    };
+
+    expect(
+      getCheckablePropertyDefinition(makeNode({ value: definitionNode })),
+    ).toEqual({
+      definitionNode,
+      keys: new Set(['type', 'description']),
+      name: 'event',
+    });
+  });
+
+  it('falls back to key.name for JSON5 property names', () => {
+    const definitionNode = {
+      type: 'JSONObjectExpression',
+      properties: [{ key: { value: 'type' } }],
+    };
+
+    expect(
+      getCheckablePropertyDefinition(
+        makeNode({
+          key: { name: 'event', value: undefined },
+          value: definitionNode,
+        }),
+      ).name,
+    ).toBe('event');
+  });
+
+  it('returns null inside if blocks', () => {
+    expect(
+      getCheckablePropertyDefinition(
+        makeNode({
+          blockKey: 'if',
+          value: {
+            type: 'JSONObjectExpression',
+            properties: [{ key: { value: 'const' } }],
+          },
+        }),
+      ),
+    ).toBeNull();
+  });
+
+  it('returns null for non-object property definitions', () => {
+    expect(
+      getCheckablePropertyDefinition(
+        makeNode({ value: { type: 'JSONLiteral', value: 'string' } }),
+      ),
+    ).toBeNull();
+  });
+
+  it('returns null for pure refs', () => {
+    expect(
+      getCheckablePropertyDefinition(
+        makeNode({
+          value: {
+            type: 'JSONObjectExpression',
+            properties: [{ key: { value: '$ref' } }],
+          },
+        }),
+      ),
+    ).toBeNull();
+  });
+
+  it('returns null for constraint-only refinements', () => {
+    expect(
+      getCheckablePropertyDefinition(
+        makeNode({
+          value: {
+            type: 'JSONObjectExpression',
+            properties: [{ key: { value: 'maxLength' } }],
+          },
+        }),
+      ),
+    ).toBeNull();
   });
 });
