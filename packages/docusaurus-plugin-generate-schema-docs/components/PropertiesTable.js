@@ -52,12 +52,14 @@ export default function PropertiesTable({ schema, sourceSchema }) {
           isEnabled={isWordWrapOn}
         />
       </div>
-      <table className="schema-table">
-        <TableHeader />
-        <tbody>
-          <SchemaRows tableData={tableData} stripeState={stripeState} />
-        </tbody>
-      </table>
+      <div className={styles.tableScroller}>
+        <table className="schema-table">
+          <TableHeader />
+          <tbody>
+            <SchemaRows tableData={tableData} stripeState={stripeState} />
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
