@@ -118,6 +118,28 @@ A sync addon must define:
 
 The built-in GTM Data Layer sync addon registers `docusaurus sync-gtm` and consumes schemas tagged with `web-datalayer-js`.
 
+## Example Payload API
+
+Use `buildExamplePayloads(schema)` when a custom sync addon needs example data from a parsed JSON schema:
+
+```javascript
+import { buildExamplePayloads } from 'docusaurus-plugin-generate-schema-docs';
+
+const payloads = buildExamplePayloads(schema);
+```
+
+The helper is pure: pass a parsed schema object; handle file loading and `$ref` resolution in your addon. It returns one payload per generated example option and excludes `undefined` or empty object payloads:
+
+```javascript
+[
+  {
+    title: 'Enterprise',
+    variant: { property: 'plan', option: 'Enterprise' },
+    payload: { plan: 'enterprise' },
+  },
+];
+```
+
 ## CLI Commands
 
 ### Generate Documentation
