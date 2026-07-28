@@ -1,9 +1,6 @@
 const {
   PROPERTY_DEFINITION_SELECTOR,
-  getKeys,
-  isInsideIfBlock,
-  isPureRef,
-  isConstraintOnlyRefinement,
+  getCheckablePropertyDefinition,
 } = require('../helpers/property-definition');
 
 const TYPE_ALTERNATIVES = ['$ref', 'const', 'oneOf', 'anyOf', 'allOf'];
@@ -26,20 +23,17 @@ module.exports = {
   create(context) {
     return {
       [PROPERTY_DEFINITION_SELECTOR](node) {
-        if (isInsideIfBlock(node)) return;
+        const property = getCheckablePropertyDefinition(node);
+        if (!property) return;
 
-        const definitionNode = node.value;
-        if (definitionNode.type !== 'JSONObjectExpression') return;
-
-        const keys = getKeys(definitionNode);
-        if (isPureRef(keys)) return;
-        if (isConstraintOnlyRefinement(keys)) return;
-
-        if (!keys.has('type') && !TYPE_ALTERNATIVES.some((k) => keys.has(k))) {
+        if (
+          !property.keys.has('type') &&
+          !TYPE_ALTERNATIVES.some((k) => property.keys.has(k))
+        ) {
           context.report({
             node,
             messageId: 'missing',
-            data: { name: node.key.value ?? node.key.name },
+            data: { name: property.name },
           });
         }
       },

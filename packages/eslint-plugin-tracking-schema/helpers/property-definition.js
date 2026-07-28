@@ -80,10 +80,27 @@ function isConstraintOnlyRefinement(keys) {
   return ![...keys].some((k) => ANNOTATION_OR_STRUCTURAL_KEYS.has(k));
 }
 
+function getCheckablePropertyDefinition(node) {
+  if (isInsideIfBlock(node)) return null;
+
+  const definitionNode = node.value;
+  if (definitionNode.type !== 'JSONObjectExpression') return null;
+
+  const keys = getKeys(definitionNode);
+  if (isPureRef(keys) || isConstraintOnlyRefinement(keys)) return null;
+
+  return {
+    definitionNode,
+    keys,
+    name: node.key.value ?? node.key.name,
+  };
+}
+
 module.exports = {
   PROPERTY_DEFINITION_SELECTOR,
   getKeys,
   isInsideIfBlock,
   isPureRef,
   isConstraintOnlyRefinement,
+  getCheckablePropertyDefinition,
 };
