@@ -169,6 +169,8 @@
   border-collapse: separate;
   border-spacing: 0;
   border: 1px solid var(--ifm-table-border-color);
+  display: table;
+  width: 100%;
 }
 
 .schema-table th,
