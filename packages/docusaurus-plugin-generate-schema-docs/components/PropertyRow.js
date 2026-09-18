@@ -135,13 +135,13 @@ export default function PropertyRow({
   }
 
   // Continuing ancestor lines: full-height vertical lines for ancestors with more siblings.
-  const visibleContinuingLevels = [
-    ...new Set(
+  const visibleContinuingLevels = Array.from(
+    new Set(
       continuingLevels
         .map(toVisualConnectorLevel)
         .filter((lvl) => lvl >= 0 && lvl < level - 1),
     ),
-  ];
+  );
 
   visibleContinuingLevels.forEach((lvl) => {
     addBackgroundLine(TREE_LINE_GRADIENT, `${getLevelPosition(lvl)}rem top`);
