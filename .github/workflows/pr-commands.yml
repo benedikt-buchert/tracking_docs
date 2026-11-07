@@ -4,22 +4,47 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
   release_demo:
-    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/release-demo')
+    # Only maintainers may trigger this: the job runs PR code and pushes.
+    if: >-
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/release-demo') &&
+      contains(fromJSON('["OWNER","MEMBER","COLLABORATOR"]'), github.event.comment.author_association)
     runs-on: ubuntu-latest
     steps:
       - name: Get PR branch name
         id: get_pr_branch
         uses: actions/github-script@v7
         with:
+          result-encoding: string
           script: |
             const pr = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.issue.number
             });
+            if (pr.data.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              core.setFailed('/release-demo only works on PRs from branches in this repository.');
+              return '';
+            }
             return pr.data.head.ref;
+
+      - name: Parse version from comment
+        id: parse
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          VERSION=$(printf '%s\n' "$COMMENT_BODY" | head -n1 | awk '{print $2}')
+          if ! printf '%s' "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Usage: /release-demo <major.minor.patch>"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -41,14 +66,14 @@ jobs:
           git config --global user.email "github-actions@github.com"
 
       - name: Create Docusaurus version and version schemas
-        run: |
-          VERSION=$(echo "${{ github.event.comment.body }}" | cut -d' ' -f2)
-          npm run version -- $VERSION
+        env:
+          VERSION: ${{ steps.parse.outputs.version }}
+        run: npm run version -- "$VERSION"
 
       - name: Commit and push versioned files
+        env:
+          VERSION: ${{ steps.parse.outputs.version }}
         run: |
           git add .
           git commit -m "docs: version docs and schemas for $VERSION [skip ci]"
           git push
-        env:
-          VERSION: $(echo "${{ github.event.comment.body }}" | cut -d' ' -f2)
