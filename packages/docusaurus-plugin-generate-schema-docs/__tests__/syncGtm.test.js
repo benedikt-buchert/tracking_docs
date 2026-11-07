@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const gtmScript = require('../scripts/sync-gtm');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const RefParser = require('@apidevtools/json-schema-ref-parser');
 
 jest.mock('fs');
@@ -566,40 +566,79 @@ describe('GTM Synchronization Logic', () => {
   });
 
   describe('createGtmVariables', () => {
-    it('should call execSync to create variables and return their names', () => {
+    const configFor = (name, notes) =>
+      JSON.stringify({
+        notes,
+        parameter: [
+          { type: 'INTEGER', key: 'dataLayerVersion', value: '2' },
+          { type: 'BOOLEAN', key: 'setDefaultValue', value: 'false' },
+          { type: 'TEMPLATE', key: 'name', value: name },
+        ],
+      });
+
+    it('should call the gtm CLI without a shell and return the names', () => {
       const toCreate = gtmScript.getVariablesToCreate(
         schemaVariables,
         gtmVariables,
       );
       const created = gtmScript.createGtmVariables(toCreate);
-      expect(execSync).toHaveBeenCalledTimes(2);
-
-      const schemaVarConfig = JSON.stringify({
-        notes: "References the '$schema' property. The schema version.",
-        parameter: [
-          { type: 'INTEGER', key: 'dataLayerVersion', value: '2' },
-          { type: 'BOOLEAN', key: 'setDefaultValue', value: 'false' },
-          { type: 'TEMPLATE', key: 'name', value: '$schema' },
+      expect(execSync).not.toHaveBeenCalled();
+      expect(execFileSync).toHaveBeenCalledTimes(2);
+      expect(execFileSync).toHaveBeenCalledWith(
+        'gtm',
+        [
+          'variables',
+          'create',
+          '--name',
+          'DLV - $schema',
+          '--type',
+          'v',
+          '--config',
+          configFor(
+            '$schema',
+            "References the '$schema' property. The schema version.",
+          ),
+          '--quiet',
         ],
-      });
-      expect(execSync).toHaveBeenCalledWith(
-        `gtm variables create --name "DLV - \\$schema" --type v --config '${schemaVarConfig}' --quiet`,
         { stdio: 'inherit' },
       );
-
-      const userIdVarConfig = JSON.stringify({
-        notes: 'The user ID.',
-        parameter: [
-          { type: 'INTEGER', key: 'dataLayerVersion', value: '2' },
-          { type: 'BOOLEAN', key: 'setDefaultValue', value: 'false' },
-          { type: 'TEMPLATE', key: 'name', value: 'user_id' },
+      expect(execFileSync).toHaveBeenCalledWith(
+        'gtm',
+        [
+          'variables',
+          'create',
+          '--name',
+          'DLV - user_id',
+          '--type',
+          'v',
+          '--config',
+          configFor('user_id', 'The user ID.'),
+          '--quiet',
         ],
-      });
-      expect(execSync).toHaveBeenCalledWith(
-        `gtm variables create --name "DLV - user_id" --type v --config '${userIdVarConfig}' --quiet`,
         { stdio: 'inherit' },
       );
       expect(created).toEqual(['$schema', 'user_id']);
+    });
+
+    it('should pass quotes and backticks in names and notes through unchanged', () => {
+      const name = "user's_`id`_$(id)";
+      const description = 'It\'s "quoted"';
+      gtmScript.createGtmVariables([{ name, description }]);
+      expect(execFileSync).toHaveBeenCalledWith(
+        'gtm',
+        [
+          'variables',
+          'create',
+          '--name',
+          `DLV - ${name}`,
+          '--type',
+          'v',
+          '--config',
+          configFor(name, description),
+          '--quiet',
+        ],
+        { stdio: 'inherit' },
+      );
     });
   });
 

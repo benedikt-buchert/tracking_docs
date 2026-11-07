@@ -14,7 +14,10 @@ jest.mock('url', () => ({
 jest.mock('../generateEventDocs.js', () => jest.fn().mockResolvedValue());
 jest.mock('../validateSchemas.js', () => jest.fn().mockResolvedValue(true));
 jest.mock('../helpers/update-schema-ids.js', () => jest.fn());
-jest.mock('child_process', () => ({ execSync: jest.fn() }));
+jest.mock('child_process', () => ({
+  execSync: jest.fn(),
+  execFileSync: jest.fn(),
+}));
 jest.mock('../helpers/path-helpers.js', () => ({
   getPathsForVersion: jest
     .fn()
@@ -33,7 +36,7 @@ import validateSchemas from '../validateSchemas.js';
 import updateSchemaIds from '../helpers/update-schema-ids.js';
 import { getPathsForVersion } from '../helpers/path-helpers.js';
 import fs from 'fs';
-import { execSync } from 'child_process';
+import { execSync, execFileSync } from 'child_process';
 
 const makeContext = (overrides = {}) => ({
   siteDir: '/site',
@@ -69,6 +72,7 @@ beforeEach(() => {
   fs.cpSync.mockImplementation(() => {});
   fs.rmSync.mockImplementation(() => {});
   execSync.mockImplementation(() => {});
+  execFileSync.mockImplementation(() => {});
   getPathsForVersion.mockImplementation((version) => ({
     schemaDir: version
       ? `/site/static/schemas/${version}`
@@ -386,59 +390,45 @@ describe('extendCli - sync-gtm', () => {
     return captured;
   };
 
-  it('runs the sync-gtm script with the default path', async () => {
+  const runArgs = () => execFileSync.mock.calls[0][1];
+
+  it('runs the sync-gtm script with node and the default path', async () => {
     const action = await getAction();
     action({ path: '/site' });
-    const cmd = execSync.mock.calls[0][0];
-    expect(cmd).toContain('scripts/sync-gtm.js');
-    expect(cmd).toContain('--path=/site');
-    expect(execSync).toHaveBeenCalledWith(cmd, {
-      cwd: '/site',
-      stdio: 'inherit',
+    expect(execFileSync).toHaveBeenCalledWith(
+      process.execPath,
+      [expect.stringContaining('scripts/sync-gtm.js'), '--path=/site'],
+      { cwd: '/site', stdio: 'inherit' },
+    );
+    expect(execSync).not.toHaveBeenCalled();
+  });
+
+  it('passes a path with spaces and shell characters as one argument', async () => {
+    const action = await getAction();
+    action({ path: '/Users/me/My Site $(id)' });
+    expect(runArgs()).toContain('--path=/Users/me/My Site $(id)');
+  });
+
+  it('appends optional flags in order when options are set', async () => {
+    const action = await getAction();
+    action({
+      path: '/site',
+      json: true,
+      quiet: true,
+      skipArraySubProperties: true,
     });
-  });
-
-  it('joins multiple args with spaces', async () => {
-    const action = await getAction();
-    action({ path: '/site', json: true, quiet: true });
-    const cmd = execSync.mock.calls[0][0];
-    expect(cmd).toContain('--path=/site --json --quiet');
-  });
-
-  it('appends --json flag when json option is set', async () => {
-    const action = await getAction();
-    action({ path: '/site', json: true });
-    expect(execSync).toHaveBeenCalledWith(
-      expect.stringContaining('--json'),
-      expect.any(Object),
-    );
-  });
-
-  it('appends --quiet flag when quiet option is set', async () => {
-    const action = await getAction();
-    action({ path: '/site', quiet: true });
-    expect(execSync).toHaveBeenCalledWith(
-      expect.stringContaining('--quiet'),
-      expect.any(Object),
-    );
-  });
-
-  it('appends --skip-array-sub-properties flag when option is set', async () => {
-    const action = await getAction();
-    action({ path: '/site', skipArraySubProperties: true });
-    expect(execSync).toHaveBeenCalledWith(
-      expect.stringContaining('--skip-array-sub-properties'),
-      expect.any(Object),
-    );
+    expect(runArgs().slice(1)).toEqual([
+      '--path=/site',
+      '--json',
+      '--quiet',
+      '--skip-array-sub-properties',
+    ]);
   });
 
   it('does not append optional flags when options are falsy', async () => {
     const action = await getAction();
     action({ path: '/site' });
-    const cmd = execSync.mock.calls[0][0];
-    expect(cmd).not.toContain('--json');
-    expect(cmd).not.toContain('--quiet');
-    expect(cmd).not.toContain('--skip-array-sub-properties');
+    expect(runArgs().slice(1)).toEqual(['--path=/site']);
   });
 });
 

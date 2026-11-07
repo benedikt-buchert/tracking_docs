@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, execFileSync } = require('child_process');
 const RefParser = require('@apidevtools/json-schema-ref-parser');
 const mergeAllOf = require('json-schema-merge-allof');
 const {
@@ -189,14 +189,12 @@ function getVariablesToDelete(schemaVariables, gtmVariables) {
 function createGtmVariables(variablesToCreate) {
   logger.log(`Found ${variablesToCreate.length} variables to create.`);
   for (const v of variablesToCreate) {
-    const isSchemaVar = v.name === '$schema';
-    const name = `DLV - ${v.name.replace(/\$/g, '\\$')}`;
-    const notes = isSchemaVar
-      ? `References the '$schema' property. ${(v.description || '').replace(
-          /'/g,
-          '`',
-        )}`
-      : (v.description || '').replace(/'/g, '`');
+    const name = `DLV - ${v.name}`;
+    const description = v.description || '';
+    const notes =
+      v.name === '$schema'
+        ? `References the '$schema' property. ${description}`
+        : description;
 
     const config = {
       notes,
@@ -206,11 +204,20 @@ function createGtmVariables(variablesToCreate) {
         { type: 'TEMPLATE', key: 'name', value: v.name },
       ],
     };
-    const command = `gtm variables create --name "${name}" --type v --config '${JSON.stringify(
-      config,
-    )}' --quiet`;
-    logger.log(`Executing: ${command}`);
-    execSync(command, { stdio: 'inherit' });
+    // No shell: schema property names must never be parsed as shell syntax.
+    const args = [
+      'variables',
+      'create',
+      '--name',
+      name,
+      '--type',
+      'v',
+      '--config',
+      JSON.stringify(config),
+      '--quiet',
+    ];
+    logger.log(`Executing: gtm ${args.join(' ')}`);
+    execFileSync('gtm', args, { stdio: 'inherit' });
   }
   return variablesToCreate.map((v) => v.name);
 }
