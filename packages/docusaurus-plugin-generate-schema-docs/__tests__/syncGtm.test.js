@@ -649,10 +649,9 @@ describe('GTM Synchronization Logic', () => {
         gtmVariables,
       );
       const { deleted, failedDeletes } = gtmScript.deleteGtmVariables(toDelete);
-      expect(execFileSync).toHaveBeenCalledTimes(1);
-      expect(execFileSync).toHaveBeenCalledWith(
-        'gtm',
-        ['variables', 'delete', '--variable-id', '123', '--force', '--quiet'],
+      expect(execSync).toHaveBeenCalledTimes(1);
+      expect(execSync).toHaveBeenCalledWith(
+        'gtm variables delete --variable-id 123 --force --quiet',
         { stdio: 'inherit' },
       );
       expect(deleted).toEqual(['old_variable']);
@@ -660,7 +659,7 @@ describe('GTM Synchronization Logic', () => {
     });
 
     it('should capture failed deletes when GTM rejects the deletion', () => {
-      execFileSync.mockImplementation(() => {
+      execSync.mockImplementation(() => {
         throw new Error('Returned an error response for your request.');
       });
 
@@ -687,13 +686,10 @@ describe('GTM Synchronization Logic', () => {
         if (command === 'gtm variables list -o json --quiet') {
           return Buffer.from(JSON.stringify(gtmVariables));
         }
-        throw new Error(`Unexpected command: ${command}`);
-      });
-      execFileSync.mockImplementation((file, args) => {
-        if (file === 'gtm' && args[1] === 'delete') {
+        if (command.startsWith('gtm variables delete')) {
           throw new Error('Returned an error response for your request.');
         }
-        throw new Error(`Unexpected command: ${file} ${args.join(' ')}`);
+        throw new Error(`Unexpected command: ${command}`);
       });
 
       const summary = await gtmScript.syncGtmVariables(syncedSchemaVariables);

@@ -227,17 +227,10 @@ function deleteGtmVariables(variablesToDelete) {
   const deleted = [];
   const failedDeletes = [];
   for (const v of variablesToDelete) {
-    const args = [
-      'variables',
-      'delete',
-      '--variable-id',
-      String(v.variableId),
-      '--force',
-      '--quiet',
-    ];
-    logger.log(`Executing: gtm ${args.join(' ')}`);
+    const command = `gtm variables delete --variable-id ${v.variableId} --force --quiet`;
+    logger.log(`Executing: ${command}`);
     try {
-      execFileSync('gtm', args, { stdio: 'inherit' });
+      execSync(command, { stdio: 'inherit' });
       deleted.push(v.parameter.find((p) => p.key === 'name').value);
     } catch {
       failedDeletes.push({
