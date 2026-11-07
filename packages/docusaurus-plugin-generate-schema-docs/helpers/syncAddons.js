@@ -1,5 +1,5 @@
 import path from 'path';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 function normalizeSyncAddon(addon) {
   if (!addon?.id || typeof addon.id !== 'string') {
@@ -70,7 +70,7 @@ export function createGtmDataLayerSyncAddon({ addon, pluginDir, siteDir }) {
         args.push('--skip-array-sub-properties');
       }
 
-      execSync(`node "${scriptPath}" ${args.join(' ')}`, {
+      execFileSync(process.execPath, [scriptPath, ...args], {
         cwd: siteDir,
         stdio: 'inherit',
       });
