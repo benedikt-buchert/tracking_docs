@@ -153,16 +153,27 @@ function processOptions(
   return choices.map((optionSchema, index) => {
     const optionTitle = optionSchema.title || 'Option';
     const isLast = index === choices.length - 1 && choiceIsLastInGroup;
+    const name = path.length > 0 ? path[path.length - 1] : optionTitle;
 
     let rows;
-    if (optionSchema.type && !optionSchema.properties) {
+    if (getContainerInfo(optionSchema).hasArrayItems) {
+      // Wrap as a single property so the regular array path renders the items.
+      rows = schemaToTableData(
+        { properties: { [name]: optionSchema }, required: requiredArray },
+        level,
+        path.slice(0, -1),
+        continuingLevels,
+        isLast,
+        groupBrackets,
+      );
+    } else if (optionSchema.type && !optionSchema.properties) {
       // Primitive type within a choice
       const isRequired = requiredArray.includes(path[path.length - 1]);
       const constraints = getConstraints(optionSchema);
       if (isRequired) constraints.unshift('required');
       rows = [
         makeRow('property', {
-          name: path.length > 0 ? path[path.length - 1] : optionTitle,
+          name,
           path: [...path, `(${optionTitle})`],
           level,
           required: isRequired,
