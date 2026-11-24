@@ -153,6 +153,42 @@ describe('schemaToTableData', () => {
     expect(firstOptionRows[0].propertyType).toBe('string');
   });
 
+  it('renders item rows of an array option inside "oneOf" (#173)', () => {
+    const schema = {
+      title: 'Basket',
+      type: 'object',
+      properties: {
+        products: {
+          oneOf: [
+            {
+              title: 'list',
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  sku: { type: 'string' },
+                  price: { type: 'number' },
+                },
+              },
+            },
+            { title: 'count', type: 'number' },
+          ],
+        },
+      },
+    };
+
+    const [choiceRow] = schemaToTableData(schema);
+    const listRows = choiceRow.options[0].rows;
+
+    expect(listRows.map((row) => [row.name, row.level])).toEqual([
+      ['products', 0],
+      ['sku', 1],
+      ['price', 1],
+    ]);
+    expect(listRows[0].propertyType).toBe('array');
+    expect(listRows[0].containerType).toBe('array');
+  });
+
   it('handles "anyOf" at the root level correctly', () => {
     const tableData = schemaToTableData(rootAnyOfEventSchema);
 
